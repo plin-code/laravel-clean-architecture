@@ -1,0 +1,96 @@
+<?php
+
+namespace App\Infrastructure\UI\Web\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
+
+class {{ControllerName}} extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(): View
+    {
+        // Get {{domainVariable}} list logic here
+        ${{domainVariable}}s = collect(); // Replace with actual data
+        
+        return view('{{domainVariable}}.index', compact('{{domainVariable}}s'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(): View
+    {
+        return view('{{domainVariable}}.create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        // Validation logic here
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        // Create {{domainVariable}} logic here
+        
+        return redirect()->route('{{domainVariable}}.index')
+            ->with('success', '{{DomainName}} created successfully.');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id): View
+    {
+        // Get specific {{domainVariable}} logic here
+        ${{domainVariable}} = null; // Replace with actual data
+        
+        return view('{{domainVariable}}.show', compact('{{domainVariable}}'));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id): View
+    {
+        // Get specific {{domainVariable}} logic here
+        ${{domainVariable}} = null; // Replace with actual data
+        
+        return view('{{domainVariable}}.edit', compact('{{domainVariable}}'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id): RedirectResponse
+    {
+        // Validation logic here
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        // Update {{domainVariable}} logic here
+        
+        return redirect()->route('{{domainVariable}}.index')
+            ->with('success', '{{DomainName}} updated successfully.');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id): RedirectResponse
+    {
+        // Delete {{domainVariable}} logic here
+        
+        return redirect()->route('{{domainVariable}}.index')
+            ->with('success', '{{DomainName}} deleted successfully.');
+    }
+} 
