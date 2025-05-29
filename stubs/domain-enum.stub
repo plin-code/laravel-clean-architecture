@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Domain\{{PluralDomainName}}\Enums;
+
+enum {{DomainName}}Status: string
+{
+    case ACTIVE = 'active';
+    case INACTIVE = 'inactive';
+    case PENDING = 'pending';
+    case PROCESSING = 'processing';
+    case COMPLETED = 'completed';
+    case CANCELLED = 'cancelled';
+    
+    public function label(): string
+    {
+        return match($this) {
+            self::ACTIVE => 'Active',
+            self::INACTIVE => 'Inactive',
+            self::PENDING => 'Pending',
+            self::PROCESSING => 'Processing',
+            self::COMPLETED => 'Completed',
+            self::CANCELLED => 'Cancelled',
+        };
+    }
+    
+    public function color(): string
+    {
+        return match($this) {
+            self::ACTIVE => 'success',
+            self::INACTIVE => 'gray',
+            self::PENDING => 'warning',
+            self::PROCESSING => 'primary',
+            self::COMPLETED => 'success',
+            self::CANCELLED => 'danger',
+        };
+    }
+} 

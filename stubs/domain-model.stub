@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Domain\{{PluralDomainName}};
+
+use App\Domain\Shared\BaseModel;
+use App\Domain\{{PluralDomainName}}\Enums\{{DomainName}}Status;
+use App\Domain\{{PluralDomainName}}\Events\{{DomainName}}Created;
+use App\Domain\{{PluralDomainName}}\Events\{{DomainName}}Updated;
+use App\Domain\{{PluralDomainName}}\Events\{{DomainName}}Deleted;
+
+class {{DomainName}} extends BaseModel
+{
+    protected $table = '{{domain-table}}';
+    
+    protected $fillable = [
+        'name',
+        'description',
+        'status',
+    ];
+    
+    protected $casts = [
+        'status' => {{DomainName}}Status::class,
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+    
+    protected $dispatchesEvents = [
+        'created' => {{DomainName}}Created::class,
+        'updated' => {{DomainName}}Updated::class,
+        'deleted' => {{DomainName}}Deleted::class,
+    ];
+    
+    // Business Logic Methods
+    public function isActive(): bool
+    {
+        return $this->status === {{DomainName}}Status::ACTIVE;
+    }
+    
+    public function canBeDeleted(): bool
+    {
+        return $this->status !== {{DomainName}}Status::PROCESSING;
+    }
+} 
