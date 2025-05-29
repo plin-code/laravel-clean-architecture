@@ -10,19 +10,18 @@ jobs:
   tests:
     uses: ./.github/workflows/tests.yml
 
-  code-style:
-    uses: ./.github/workflows/code-style.yml
+  # code-style:
+  #   uses: ./.github/workflows/code-style.yml
   
-  # code-style-fix:
-  #   uses: ./.github/workflows/code-style-fix.yml
+  code-style-fix:
+    uses: ./.github/workflows/code-style-fix.yml
 
   static-analysis:
     uses: ./.github/workflows/static-analysis.yml
 
   quality-gate:
     runs-on: ubuntu-latest
-    needs: [tests, code-style, static-analysis]
-    # needs: [tests, code-style-fix, static-analysis]  # Use this if using auto-fix
+    needs: [tests, code-style-fix, static-analysis]
     if: always()
     
     steps:
