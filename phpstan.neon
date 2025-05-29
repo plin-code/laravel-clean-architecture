@@ -1,0 +1,22 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - src
+    
+    level: 6
+    
+    ignoreErrors:
+        - '#PHPDoc tag @param references unknown parameter#'
+        - '#Part .* of encapsed string cannot be cast to string#'
+        - '#Parameter .* expects string, array\|bool\|string\|null given#'
+        - '#Parameter .* expects string, string\|false given#'
+        - identifier: missingType.iterableValue
+        - identifier: missingType.generics
+    
+    excludePaths:
+        - vendor
+        - bootstrap/cache
+    
+    reportUnmatchedIgnoredErrors: false 

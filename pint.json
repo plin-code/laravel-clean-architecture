@@ -1,0 +1,30 @@
+{
+    "preset": "laravel",
+    "rules": {
+        "simplified_null_return": true,
+        "not_operator_with_successor_space": true,
+        "ordered_imports": {
+            "sort_algorithm": "alpha"
+        },
+        "no_unused_imports": true,
+        "binary_operator_spaces": {
+            "operators": {
+                "=>": "align_single_space_minimal",
+                "=": "align_single_space_minimal"
+            }
+        },
+        "array_syntax": {
+            "syntax": "short"
+        },
+        "concat_space": {
+            "spacing": "one"
+        }
+    },
+    "exclude": [
+        "vendor",
+        "storage",
+        "node_modules",
+        "bootstrap/cache",
+        "generated"
+    ]
+} 

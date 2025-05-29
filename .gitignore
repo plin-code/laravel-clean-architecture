@@ -1,1 +1,40 @@
 /vendor/
+composer.lock
+.env
+.env.local
+.env.*.local
+
+# Generated files
+generated/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+coverage/
+.phpunit.cache/
+phpunit.xml.bak
+.pest/
+
+# Laravel Pint
+.php_cs.cache
+.php-cs-fixer.cache
+
+# PHPStan
+phpstan.json
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
