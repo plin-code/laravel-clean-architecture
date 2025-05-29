@@ -4,16 +4,16 @@
     "type": "library",
     "require": {
         "php": "^8.3",
-        "illuminate/console": "^11.0|^12.0",
-        "illuminate/support": "^11.0|^12.0",
-        "illuminate/filesystem": "^11.0|^12.0"
+        "illuminate/console": "^12.0",
+        "illuminate/support": "^12.0",
+        "illuminate/filesystem": "^12.0"
     },
     "require-dev": {
         "laravel/pint": "^1.13",
-        "orchestra/testbench": "^9.0",
+        "orchestra/testbench": "^10.0",
         "pestphp/pest": "^3.0",
         "pestphp/pest-plugin-laravel": "^3.0",
-        "larastan/larastan": "^2.9",
+        "larastan/larastan": "^3.4.0",
         "mockery/mockery": "^1.6"
     },
     "license": "MIT",
