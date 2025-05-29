@@ -1,0 +1,22 @@
+{
+    "name": "plin-code/laravel-clean-architecture",
+    "description": "Laravel package for generating Clean Architecture structure",
+    "type": "library",
+    "require": {
+        "laravel/framework": "^12.0",
+        "illuminate/console": "*"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "PlinCode\\LaravelCleanArchitecture\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Daniele Barbaro",
+            "email": "barbaro.daniele@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}
