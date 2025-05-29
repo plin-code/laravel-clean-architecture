@@ -1,19 +1,36 @@
-# Laravel Clean Architecture Package
+# 🏗️ Laravel Clean Architecture Package
 
-A Laravel package to easily implement Clean Architecture in your projects.
+A Laravel package to easily implement Clean Architecture in your projects. 🚀
 
-## Requirements
+[![🧪 Tests](https://github.com/plin-code/laravel-clean-architecture/workflows/Tests/badge.svg)](https://github.com/plin-code/laravel-clean-architecture/actions)
+[![🎨 Code Style](https://github.com/plin-code/laravel-clean-architecture/workflows/Code%20Style/badge.svg)](https://github.com/plin-code/laravel-clean-architecture/actions)
+[![🔍 Static Analysis](https://github.com/plin-code/laravel-clean-architecture/workflows/Static%20Analysis/badge.svg)](https://github.com/plin-code/laravel-clean-architecture/actions)
+[![📦 Latest Stable Version](https://poser.pugx.org/plin-code/laravel-clean-architecture/v/stable)](https://packagist.org/packages/plin-code/laravel-clean-architecture)
+[![📄 License](https://poser.pugx.org/plin-code/laravel-clean-architecture/license)](https://packagist.org/packages/plin-code/laravel-clean-architecture)
 
-- PHP 8.3+
-- Laravel 11.x or 12.x
+## ✨ Features
 
-## Installation
+- 🎯 **Domain-Driven Design** - Organize your code with DDD principles
+- ⚡ **Quick Setup** - Get started with Clean Architecture in minutes
+- 🧩 **Auto-Generation** - Generate complete domains with one command
+- 🏛️ **Layer Separation** - Clear separation between Domain, Application, and Infrastructure
+- 🔧 **Customizable** - Flexible configuration to fit your project needs
+- 🧪 **Test-Ready** - Pre-built test templates for immediate testing
+- 📚 **Well-Documented** - Comprehensive documentation and examples
+- 🎨 **Modern PHP** - Built for PHP 8.3+ with latest Laravel features
+
+## 📋 Requirements
+
+- 🐘 PHP 8.3+
+- ⚡ Laravel 11.x or 12.x
+
+## 📦 Installation
 
 ```bash
 composer require plin-code/laravel-clean-architecture
 ```
 
-## Configuration
+## ⚙️ Configuration
 
 Publish the configuration files and stubs:
 
@@ -21,47 +38,47 @@ Publish the configuration files and stubs:
 php artisan vendor:publish --provider="PlinCode\LaravelCleanArchitecture\CleanArchitectureServiceProvider"
 ```
 
-## Usage
+## 🎯 Usage
 
-### Installing Clean Architecture structure
+### 🏗️ Installing Clean Architecture structure
 
 ```bash
 php artisan clean-arch:install
 ```
 
 This command will create:
-- Folder structure for Domain, Application and Infrastructure layers
-- Base classes (BaseModel, BaseAction, BaseService, etc.)
-- Configuration file
-- Documentation
+- 📁 Folder structure for Domain, Application and Infrastructure layers
+- 🧩 Base classes (BaseModel, BaseAction, BaseService, etc.)
+- ⚙️ Configuration file
+- 📖 Documentation
 
-### Creating a new domain
+### 🆕 Creating a new domain
 
 ```bash
 php artisan clean-arch:make-domain User
 ```
 
 This command will generate:
-- Domain model with events
-- Status enums
-- Domain events (Created, Updated, Deleted)
-- Actions (Create, Update, Delete, GetById)
-- Service
-- API Controller
-- Form Requests (Create, Update)
-- API Resource
-- Feature tests
+- 🏛️ Domain model with events
+- 📊 Status enums
+- 🔔 Domain events (Created, Updated, Deleted)
+- ⚡ Actions (Create, Update, Delete, GetById)
+- 🔧 Service
+- 🌐 API Controller
+- 📝 Form Requests (Create, Update)
+- 📤 API Resource
+- 🧪 Feature tests
 
-### Available commands
+### 🛠️ Available commands
 
-- `clean-arch:install` - Install Clean Architecture structure
-- `clean-arch:make-domain {name}` - Create a complete new domain
-- `clean-arch:make-action {name} {domain}` - Create a new action
-- `clean-arch:make-service {name}` - Create a new service
-- `clean-arch:make-controller {name}` - Create a new controller
-- `clean-arch:generate-package {name} {vendor}` - Generate a new package
+- `clean-arch:install` - 🏗️ Install Clean Architecture structure
+- `clean-arch:make-domain {name}` - 🆕 Create a complete new domain
+- `clean-arch:make-action {name} {domain}` - ⚡ Create a new action
+- `clean-arch:make-service {name}` - 🔧 Create a new service
+- `clean-arch:make-controller {name}` - 🌐 Create a new controller
+- `clean-arch:generate-package {name} {vendor}` - 📦 Generate a new package
 
-### Generated structure
+### 📂 Generated structure
 
 ```
 app/
@@ -94,29 +111,29 @@ app/
             └── UserResource.php
 ```
 
-## Clean Architecture Principles
+## 🏛️ Clean Architecture Principles
 
 This package implements Clean Architecture principles:
 
-1. **Domain Layer**: Contains business logic and entities
-2. **Application Layer**: Contains use cases and application logic
-3. **Infrastructure Layer**: Contains implementation details (controllers, database, etc.)
+1. **🎯 Domain Layer**: Contains business logic and entities
+2. **⚡ Application Layer**: Contains use cases and application logic
+3. **🏗️ Infrastructure Layer**: Contains implementation details (controllers, database, etc.)
 
-### Dependencies
+### 🔗 Dependencies
 
-- Domain Layer: Does not depend on any other layer
-- Application Layer: Depends only on Domain Layer
-- Infrastructure Layer: Depends on Application and Domain Layers
+- **🎯 Domain Layer**: Does not depend on any other layer
+- **⚡ Application Layer**: Depends only on Domain Layer
+- **🏗️ Infrastructure Layer**: Depends on Application and Domain Layers
 
-## Examples
+## 💡 Examples
 
-### Creating a Product domain
+### 🛍️ Creating a Product domain
 
 ```bash
 php artisan clean-arch:make-domain Product
 ```
 
-### Using in controller
+### 🎮 Using in controller
 
 ```php
 class ProductsController extends Controller
@@ -138,60 +155,60 @@ class ProductsController extends Controller
 }
 ```
 
-## Configuration
+## ⚙️ Configuration
 
 The configuration file `config/clean-architecture.php` allows you to customize:
 
-- Default namespace
-- Directory paths
-- Validation options
-- Logging settings
+- 🏷️ Default namespace
+- 📁 Directory paths
+- ✅ Validation options
+- 📊 Logging settings
 
-## Development
+## 🛠️ Development
 
 This package uses several tools to maintain code quality:
 
-### Code Quality Tools
+### 🔧 Code Quality Tools
 
-- **Laravel Pint** - Code formatting and style fixing
-- **PHPStan** - Static analysis for finding bugs
-- **PEST** - Modern testing framework built on PHPUnit
-- **Orchestra Testbench** - Laravel package testing
+- **🎨 Laravel Pint** - Code formatting and style fixing
+- **🔍 PHPStan** - Static analysis for finding bugs
+- **🧪 PEST** - Modern testing framework built on PHPUnit
+- **🎭 Orchestra Testbench** - Laravel package testing
 
-### Available Scripts
+### 📜 Available Scripts
 
 ```bash
-# Run tests
+# 🧪 Run tests
 composer test
 
-# Run tests with coverage
+# 📊 Run tests with coverage
 composer test-coverage
 
-# Fix code style
+# 🎨 Fix code style
 composer format
 
-# Check code style without fixing
+# 👀 Check code style without fixing
 composer format-test
 
-# Run static analysis
+# 🔍 Run static analysis
 composer analyse
 
-# Run all quality checks
+# ✨ Run all quality checks
 composer quality
 ```
 
-### Development Setup
+### 🚀 Development Setup
 
-1. Clone the repository
-2. Install dependencies: `composer install`
-3. Run quality checks: `composer quality`
+1. 📥 Clone the repository
+2. 📦 Install dependencies: `composer install`
+3. ✨ Run quality checks: `composer quality`
 
-## Contributing
+## 🤝 Contributing
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Pull requests are welcome! 🎉 For major changes, please open an issue first to discuss what you would like to change.
 
-Please make sure to update tests as appropriate and follow our [Contributing Guidelines](CONTRIBUTING.md).
+Please make sure to update tests as appropriate and follow our [Contributing Guidelines](CONTRIBUTING.md). 📝
 
-## License
+## 📄 License
 
-[MIT](https://choosealicense.com/licenses/mit/) 
+[MIT](https://choosealicense.com/licenses/mit/) 📜 
