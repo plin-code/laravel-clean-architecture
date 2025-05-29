@@ -24,7 +24,7 @@ All notable changes to `laravel-clean-architecture` will be documented in this f
 ### Features
 - Clean Architecture implementation following DDD principles
 - Automatic generation of Domain, Application, and Infrastructure layers
-- Support for Laravel 11.x and 12.x
+- Support for Laravel 12.x
 - PHP 8.3+ compatibility
 - English validation messages and documentation
 - Comprehensive test coverage templates
