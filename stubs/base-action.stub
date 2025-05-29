@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Application\Actions;
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+abstract class BaseAction
+{
+    /**
+     * Execute the action with transaction support.
+     */
+    protected function executeInTransaction(callable $callback)
+    {
+        return DB::transaction($callback);
+    }
+
+    /**
+     * Log action execution.
+     */
+    protected function log(string $message, array $context = []): void
+    {
+        Log::info($message, array_merge([
+            'action' => static::class,
+        ], $context));
+    }
+
+    /**
+     * Log error during action execution.
+     */
+    protected function logError(string $message, \Throwable $exception, array $context = []): void
+    {
+        Log::error($message, array_merge([
+            'action' => static::class,
+            'exception' => $exception->getMessage(),
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine(),
+        ], $context));
+    }
+} 

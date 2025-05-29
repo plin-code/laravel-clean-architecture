@@ -1,0 +1,32 @@
+<?php
+
+namespace {{Namespace}};
+
+class {{StudlyName}}Service
+{
+    public function getAll(): array
+    {
+        return {{StudlyName}}::all()->toArray();
+    }
+
+    public function findById(int $id): ?{{StudlyName}}
+    {
+        return {{StudlyName}}::find($id);
+    }
+
+    public function create(array $data): {{StudlyName}}
+    {
+        return {{StudlyName}}::create($data);
+    }
+
+    public function update({{StudlyName}} ${{StudlyName}}, array $data): {{StudlyName}}
+    {
+        ${{StudlyName}}->update($data);
+        return ${{StudlyName}};
+    }
+
+    public function delete({{StudlyName}} ${{StudlyName}}): bool
+    {
+        return ${{StudlyName}}->delete();
+    }
+} 

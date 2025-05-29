@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Infrastructure\Exceptions;
+
+use Exception;
+
+class ValidationException extends Exception
+{
+    protected array $errors;
+
+    public function __construct(string $message = "Validation failed", array $errors = [], int $code = 422, ?\Throwable $previous = null)
+    {
+        parent::__construct($message, $code, $previous);
+        $this->errors = $errors;
+    }
+
+    public function getErrors(): array
+    {
+        return $this->errors;
+    }
+
+    /**
+     * Render the exception into an HTTP response.
+     */
+    public function render($request)
+    {
+        return response()->json([
+            'success' => false,
+            'message' => $this->getMessage(),
+            'errors' => $this->errors,
+            'error_type' => 'validation_exception'
+        ], $this->getCode());
+    }
+} 

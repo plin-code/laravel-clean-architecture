@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Infrastructure\Exceptions;
+
+use Exception;
+
+class BusinessLogicException extends Exception
+{
+    public function __construct(string $message = "Business logic violation", int $code = 409, ?\Throwable $previous = null)
+    {
+        parent::__construct($message, $code, $previous);
+    }
+
+    /**
+     * Render the exception into an HTTP response.
+     */
+    public function render($request)
+    {
+        return response()->json([
+            'success' => false,
+            'message' => $this->getMessage(),
+            'error_type' => 'business_logic_exception'
+        ], $this->getCode());
+    }
+} 

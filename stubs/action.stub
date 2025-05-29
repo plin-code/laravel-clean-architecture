@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Application\Actions\{{PluralDomainName}};
+
+use App\Application\Actions\BaseAction;
+use App\Domain\{{PluralDomainName}}\{{DomainName}};
+use App\Infrastructure\API\Requests\{{RequestName}};
+use Illuminate\Support\Facades\DB;
+
+class {{ActionName}} extends BaseAction
+{
+    public function execute({{RequestName}} $request): {{DomainName}}
+    {
+        return DB::transaction(function () use ($request) {
+            ${{domainVariable}} = {{DomainName}}::create($request->validated());
+            
+            // Additional business logic here
+            
+            return ${{domainVariable}};
+        });
+    }
+} 

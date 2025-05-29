@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Application\Services;
+
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+
+abstract class BaseService
+{
+    /**
+     * Default cache TTL in seconds (1 hour).
+     */
+    protected int $cacheTtl = 3600;
+
+    /**
+     * Cache a result with the given key.
+     */
+    protected function cache(string $key, callable $callback, ?int $ttl = null)
+    {
+        return Cache::remember($key, $ttl ?? $this->cacheTtl, $callback);
+    }
+
+    /**
+     * Forget cached result by key.
+     */
+    protected function forgetCache(string $key): bool
+    {
+        return Cache::forget($key);
+    }
+
+    /**
+     * Log service operation.
+     */
+    protected function log(string $message, array $context = []): void
+    {
+        Log::info($message, array_merge([
+            'service' => static::class,
+        ], $context));
+    }
+
+    /**
+     * Log error during service operation.
+     */
+    protected function logError(string $message, \Throwable $exception, array $context = []): void
+    {
+        Log::error($message, array_merge([
+            'service' => static::class,
+            'exception' => $exception->getMessage(),
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine(),
+        ], $context));
+    }
+} 

@@ -1,0 +1,24 @@
+<?php
+
+namespace {{Namespace}};
+
+use Illuminate\Support\ServiceProvider;
+
+class {{StudlyName}}ServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        $this->mergeConfigFrom(
+            __DIR__.'/../config/{{StudlyName}}.php', '{{StudlyName}}'
+        );
+    }
+
+    public function boot(): void
+    {
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__.'/../config/{{StudlyName}}.php' => config_path('{{StudlyName}}.php'),
+            ], '{{StudlyName}}-config');
+        }
+    }
+} 

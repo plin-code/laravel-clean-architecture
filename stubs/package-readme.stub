@@ -1,0 +1,36 @@
+# {{StudlyName}} Package
+
+A Laravel package for {{StudlyName}}.
+
+## Installation
+
+```bash
+composer require {{VendorName}}/{{PackageName}}
+```
+
+## Configuration
+
+Publish the configuration file:
+
+```bash
+php artisan vendor:publish --tag={{StudlyName}}-config
+```
+
+## Usage
+
+### Basic example
+
+```php
+use {{VendorName}}\{{StudlyName}}\{{StudlyName}}Service;
+
+$service = new {{StudlyName}}Service();
+$items = $service->getAll();
+```
+
+### Configuration
+
+The configuration file is located at `config/{{StudlyName}}.php`.
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/) 

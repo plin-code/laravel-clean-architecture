@@ -1,0 +1,131 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Domain\{{PluralDomainName}}\{{DomainName}};
+use App\Domain\{{PluralDomainName}}\Enums\{{DomainName}}Status;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class {{PluralDomainName}}Test extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_can_create_{{domainVariable}}(): void
+    {
+        $data = [
+            'name' => 'Test {{DomainName}}',
+            'description' => 'Test description',
+            'status' => {{DomainName}}Status::ACTIVE->value,
+        ];
+
+        $response = $this->postJson('/api/{{domain-table}}', $data);
+
+        $response->assertStatus(201)
+                ->assertJsonStructure([
+                    'data' => [
+                        'id',
+                        'name',
+                        'description',
+                        'status',
+                        'created_at',
+                        'updated_at',
+                    ],
+                    'message'
+                ]);
+
+        $this->assertDatabaseHas('{{domain-table}}', [
+            'name' => 'Test {{DomainName}}',
+            'description' => 'Test description',
+        ]);
+    }
+
+    public function test_can_get_{{domainVariable}}_list(): void
+    {
+        {{DomainName}}::factory()->count(3)->create();
+
+        $response = $this->getJson('/api/{{domain-table}}');
+
+        $response->assertStatus(200)
+                ->assertJsonStructure([
+                    'data' => [
+                        '*' => [
+                            'id',
+                            'name',
+                            'description',
+                            'status',
+                            'created_at',
+                            'updated_at',
+                        ]
+                    ],
+                    'message'
+                ]);
+    }
+
+    public function test_can_get_single_{{domainVariable}}(): void
+    {
+        ${{domainVariable}} = {{DomainName}}::factory()->create();
+
+        $response = $this->getJson("/api/{{domain-table}}/{${{domainVariable}}->id}");
+
+        $response->assertStatus(200)
+                ->assertJsonStructure([
+                    'data' => [
+                        'id',
+                        'name',
+                        'description',
+                        'status',
+                        'created_at',
+                        'updated_at',
+                    ],
+                    'message'
+                ]);
+    }
+
+    public function test_can_update_{{domainVariable}}(): void
+    {
+        ${{domainVariable}} = {{DomainName}}::factory()->create();
+
+        $data = [
+            'name' => 'Updated {{DomainName}}',
+            'description' => 'Updated description',
+            'status' => {{DomainName}}Status::INACTIVE->value,
+        ];
+
+        $response = $this->putJson("/api/{{domain-table}}/{${{domainVariable}}->id}", $data);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('{{domain-table}}', [
+            'id' => ${{domainVariable}}->id,
+            'name' => 'Updated {{DomainName}}',
+            'description' => 'Updated description',
+        ]);
+    }
+
+    public function test_can_delete_{{domainVariable}}(): void
+    {
+        ${{domainVariable}} = {{DomainName}}::factory()->create();
+
+        $response = $this->deleteJson("/api/{{domain-table}}/{${{domainVariable}}->id}");
+
+        $response->assertStatus(200);
+
+        $this->assertSoftDeleted('{{domain-table}}', [
+            'id' => ${{domainVariable}}->id,
+        ]);
+    }
+
+    public function test_validation_fails_with_invalid_data(): void
+    {
+        $data = [
+            'name' => '', // Required field
+            'status' => 'invalid_status', // Invalid enum value
+        ];
+
+        $response = $this->postJson('/api/{{domain-table}}', $data);
+
+        $response->assertStatus(422)
+                ->assertJsonValidationErrors(['name', 'status']);
+    }
+} 

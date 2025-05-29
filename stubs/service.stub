@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Application\Services;
+
+use App\Application\Services\BaseService;
+use App\Domain\{{PluralDomainName}}\{{DomainName}};
+use App\Domain\{{PluralDomainName}}\Enums\{{DomainName}}Status;
+use Illuminate\Database\Eloquent\Collection;
+
+class {{DomainName}}Service extends BaseService
+{
+    public function getActive{{PluralDomainName}}(): Collection
+    {
+        return {{DomainName}}::where('status', {{DomainName}}Status::ACTIVE)->get();
+    }
+    
+    public function find{{DomainName}}ById(int $id): ?{{DomainName}}
+    {
+        return {{DomainName}}::find($id);
+    }
+    
+    public function find{{DomainName}}ByName(string $name): ?{{DomainName}}
+    {
+        return {{DomainName}}::where('name', $name)->first();
+    }
+    
+    public function activate{{DomainName}}({{DomainName}} ${{domainVariable}}): {{DomainName}}
+    {
+        ${{domainVariable}}->update(['status' => {{DomainName}}Status::ACTIVE]);
+        
+        return ${{domainVariable}};
+    }
+    
+    public function deactivate{{DomainName}}({{DomainName}} ${{domainVariable}}): {{DomainName}}
+    {
+        ${{domainVariable}}->update(['status' => {{DomainName}}Status::INACTIVE]);
+        
+        return ${{domainVariable}};
+    }
+} 

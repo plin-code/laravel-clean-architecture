@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Domain\Shared;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+abstract class BaseModel extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    /**
+     * Indicates if the model should be timestamped.
+     */
+    public $timestamps = true;
+
+    /**
+     * The attributes that should be cast.
+     */
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
+    ];
+
+    /**
+     * The attributes that aren't mass assignable.
+     */
+    protected $guarded = ['id'];
+
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'id';
+    }
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        // Add global scopes or model events here
+    }
+} 
