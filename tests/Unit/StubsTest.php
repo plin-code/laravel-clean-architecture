@@ -29,7 +29,7 @@ describe('Stub Files', function () {
     it('PHP stub files contain valid PHP opening tags', function () {
         $phpStubs = [
             'action.stub',
-            'base-action.stub', 
+            'base-action.stub',
             'base-controller.stub',
             'base-model.stub',
             'controller.stub',
@@ -41,7 +41,7 @@ describe('Stub Files', function () {
 
         foreach ($phpStubs as $stubFile) {
             $content = file_get_contents($this->stubsPath . '/' . $stubFile);
-            
+
             expect($content)->toContain('<?php')
                 ->and("Stub {$stubFile} should contain valid PHP opening tag");
         }
@@ -49,7 +49,7 @@ describe('Stub Files', function () {
 
     it('action stub contains required content', function () {
         $content = file_get_contents($this->stubsPath . '/action.stub');
-        
+
         expect($content)
             ->toContain('namespace App\Application\Actions\{{PluralDomainName}};')
             ->toContain('class {{ActionName}} extends BaseAction')
@@ -58,7 +58,7 @@ describe('Stub Files', function () {
 
     it('controller stub contains required structure', function () {
         $content = file_get_contents($this->stubsPath . '/controller.stub');
-        
+
         expect($content)
             ->toContain('namespace App\Infrastructure\API\Controllers;')
             ->toContain('class {{PluralDomainName}}Controller extends Controller');
@@ -66,7 +66,7 @@ describe('Stub Files', function () {
 
     it('service stub contains required structure', function () {
         $content = file_get_contents($this->stubsPath . '/service.stub');
-        
+
         expect($content)
             ->toContain('namespace App\Application\Services;')
             ->toContain('class {{DomainName}}Service extends BaseService');
@@ -74,7 +74,7 @@ describe('Stub Files', function () {
 
     it('domain model stub contains required content', function () {
         $content = file_get_contents($this->stubsPath . '/domain-model.stub');
-        
+
         expect($content)
             ->toContain('namespace App\Domain\{{PluralDomainName}};')
             ->toContain('class {{DomainName}} extends BaseModel')
@@ -86,7 +86,7 @@ describe('Stub Files', function () {
 
     it('request stub contains validation rules', function () {
         $content = file_get_contents($this->stubsPath . '/request.stub');
-        
+
         expect($content)
             ->toContain('namespace App\Infrastructure\API\Requests;')
             ->toContain('class {{RequestName}} extends BaseRequest')
@@ -96,7 +96,7 @@ describe('Stub Files', function () {
 
     it('web controller stub contains required structure', function () {
         $content = file_get_contents($this->stubsPath . '/web-controller.stub');
-        
+
         expect($content)
             ->toContain('namespace App\Infrastructure\UI\Web\Controllers;')
             ->toContain('class {{ControllerName}} extends Controller')
@@ -106,4 +106,4 @@ describe('Stub Files', function () {
             ->toContain('public function update(')
             ->toContain('public function destroy(');
     });
-}); 
+});

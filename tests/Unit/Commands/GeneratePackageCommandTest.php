@@ -1,21 +1,21 @@
 <?php
 
-use PlinCode\LaravelCleanArchitecture\Commands\GeneratePackageCommand;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\File;
+use PlinCode\LaravelCleanArchitecture\Commands\GeneratePackageCommand;
 
 describe('GeneratePackageCommand', function () {
     beforeEach(function () {
-        $this->filesystem = new Filesystem();
-        $this->command = new GeneratePackageCommand($this->filesystem);
-        $this->tempPath = sys_get_temp_dir() . '/test-package-' . uniqid();
-        
+        $this->filesystem = new Filesystem;
+        $this->command    = new GeneratePackageCommand($this->filesystem);
+        $this->tempPath   = sys_get_temp_dir() . '/test-package-' . uniqid();
+
         // Mock the output to avoid writeln errors
         $mockOutput = mock('Symfony\Component\Console\Output\OutputInterface');
         $mockOutput->shouldReceive('writeln')->andReturn();
         $mockOutput->shouldReceive('write')->andReturn();
-        
-        $reflection = new ReflectionClass($this->command);
+
+        $reflection     = new ReflectionClass($this->command);
         $outputProperty = $reflection->getProperty('output');
         $outputProperty->setAccessible(true);
         $outputProperty->setValue($this->command, $mockOutput);
@@ -34,7 +34,7 @@ describe('GeneratePackageCommand', function () {
 
     it('has required arguments', function () {
         $definition = $this->command->getDefinition();
-        
+
         expect($definition->hasArgument('name'))->toBeTrue();
         expect($definition->hasArgument('vendor'))->toBeTrue();
         expect($definition->getArgument('name')->getDescription())->toBe('The name of the package');
@@ -43,7 +43,7 @@ describe('GeneratePackageCommand', function () {
 
     it('has correct options', function () {
         $definition = $this->command->getDefinition();
-        
+
         expect($definition->hasOption('path'))->toBeTrue();
         expect($definition->hasOption('force'))->toBeTrue();
         expect($definition->getOption('path')->getDescription())->toBe('Custom path for the package');
@@ -52,13 +52,13 @@ describe('GeneratePackageCommand', function () {
 
     it('can create package structure', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createPackageStructure');
+        $method     = $reflection->getMethod('createPackageStructure');
         $method->setAccessible(true);
 
         $packageName = 'test-package';
-        $studlyName = 'TestPackage';
-        $namespace = 'TestVendor\\TestPackage';
-        $vendor = 'test-vendor';
+        $studlyName  = 'TestPackage';
+        $namespace   = 'TestVendor\\TestPackage';
+        $vendor      = 'test-vendor';
 
         // Mock the filesystem to avoid actual file creation
         $mockFilesystem = mock(Filesystem::class);
@@ -76,13 +76,13 @@ describe('GeneratePackageCommand', function () {
 
     it('can create package composer.json', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createPackageComposer');
+        $method     = $reflection->getMethod('createPackageComposer');
         $method->setAccessible(true);
 
         $packageName = 'test-package';
-        $studlyName = 'TestPackage';
-        $namespace = 'TestVendor\\TestPackage';
-        $vendor = 'test-vendor';
+        $studlyName  = 'TestPackage';
+        $namespace   = 'TestVendor\\TestPackage';
+        $vendor      = 'test-vendor';
 
         // Create temp directory
         $this->filesystem->makeDirectory($this->tempPath, 0755, true);
@@ -90,7 +90,7 @@ describe('GeneratePackageCommand', function () {
         $method->invoke($this->command, $this->tempPath, $packageName, $studlyName, $namespace, $vendor);
 
         expect(file_exists($this->tempPath . '/composer.json'))->toBeTrue();
-        
+
         $composerContent = json_decode(file_get_contents($this->tempPath . '/composer.json'), true);
         expect($composerContent['name'])->toBe('test-vendor/test-package');
         expect($composerContent['description'])->toBe('Laravel package for TestPackage');
@@ -99,15 +99,15 @@ describe('GeneratePackageCommand', function () {
 
     it('can create service provider', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createPackageServiceProvider');
+        $method     = $reflection->getMethod('createPackageServiceProvider');
         $method->setAccessible(true);
 
         $studlyName = 'TestPackage';
-        $namespace = 'TestVendor\\TestPackage';
+        $namespace  = 'TestVendor\\TestPackage';
 
         // Create a mock stub content
         $stubContent = '<?php namespace {{Namespace}}; class {{StudlyName}}ServiceProvider {}';
-        
+
         // Mock filesystem to return stub content
         $mockFilesystem = mock(Filesystem::class);
         $mockFilesystem->shouldReceive('exists')->andReturn(true);
@@ -122,11 +122,11 @@ describe('GeneratePackageCommand', function () {
 
     it('can create package model', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createPackageModel');
+        $method     = $reflection->getMethod('createPackageModel');
         $method->setAccessible(true);
 
         $studlyName = 'TestPackage';
-        $namespace = 'TestVendor\\TestPackage';
+        $namespace  = 'TestVendor\\TestPackage';
 
         // Mock filesystem and stub
         $mockFilesystem = mock(Filesystem::class);
@@ -142,11 +142,11 @@ describe('GeneratePackageCommand', function () {
 
     it('can create package service', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createPackageService');
+        $method     = $reflection->getMethod('createPackageService');
         $method->setAccessible(true);
 
         $studlyName = 'TestPackage';
-        $namespace = 'TestVendor\\TestPackage';
+        $namespace  = 'TestVendor\\TestPackage';
 
         // Mock filesystem and stub
         $mockFilesystem = mock(Filesystem::class);
@@ -162,12 +162,12 @@ describe('GeneratePackageCommand', function () {
 
     it('can create package readme', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createPackageReadme');
+        $method     = $reflection->getMethod('createPackageReadme');
         $method->setAccessible(true);
 
         $packageName = 'test-package';
-        $studlyName = 'TestPackage';
-        $vendor = 'test-vendor';
+        $studlyName  = 'TestPackage';
+        $vendor      = 'test-vendor';
 
         // Mock filesystem and stub
         $mockFilesystem = mock(Filesystem::class);
@@ -183,7 +183,7 @@ describe('GeneratePackageCommand', function () {
 
     it('throws exception when stub file not found', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('getStub');
+        $method     = $reflection->getMethod('getStub');
         $method->setAccessible(true);
 
         // Mock filesystem to return false for exists
@@ -199,7 +199,7 @@ describe('GeneratePackageCommand', function () {
 
     it('can get stub content when file exists', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('getStub');
+        $method     = $reflection->getMethod('getStub');
         $method->setAccessible(true);
 
         $stubContent = '<?php // Test stub content';
@@ -214,4 +214,4 @@ describe('GeneratePackageCommand', function () {
         $result = $method->invoke($this->command, 'test-stub');
         expect($result)->toBe($stubContent);
     });
-}); 
+});

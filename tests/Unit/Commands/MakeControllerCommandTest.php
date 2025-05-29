@@ -6,7 +6,7 @@ use PlinCode\LaravelCleanArchitecture\Commands\MakeControllerCommand;
 describe('MakeControllerCommand', function () {
     beforeEach(function () {
         $this->filesystem = new Filesystem;
-        $this->command = new MakeControllerCommand($this->filesystem);
+        $this->command    = new MakeControllerCommand($this->filesystem);
     });
 
     it('has correct command signature and description', function () {
@@ -28,12 +28,12 @@ describe('MakeControllerCommand', function () {
 
     it('can replace placeholders correctly', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('replacePlaceholders');
+        $method     = $reflection->getMethod('replacePlaceholders');
         $method->setAccessible(true);
-        
+
         $content = 'class {{ControllerName}} for {{DomainName}} and {{PluralDomainName}} with {{domainVariable}}';
-        $result = $method->invoke($this->command, $content, 'User');
-        
+        $result  = $method->invoke($this->command, $content, 'User');
+
         expect($result)
             ->toContain('class UserController')
             ->toContain('User')
@@ -45,9 +45,9 @@ describe('MakeControllerCommand', function () {
 
     it('handles getStub method for API controller', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('getStub');
+        $method     = $reflection->getMethod('getStub');
         $method->setAccessible(true);
-        
+
         // Test with existing stub
         $result = $method->invoke($this->command, 'controller');
         expect($result)->toBeString();
@@ -56,12 +56,12 @@ describe('MakeControllerCommand', function () {
 
     it('handles getStub method for Web controller', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('getStub');
+        $method     = $reflection->getMethod('getStub');
         $method->setAccessible(true);
-        
+
         // Test with existing stub
         $result = $method->invoke($this->command, 'web-controller');
         expect($result)->toBeString();
         expect($result)->toContain('<?php');
     });
-}); 
+});

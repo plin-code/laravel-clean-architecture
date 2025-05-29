@@ -6,7 +6,7 @@ use PlinCode\LaravelCleanArchitecture\Commands\MakeActionCommand;
 describe('MakeActionCommand', function () {
     beforeEach(function () {
         $this->filesystem = new Filesystem;
-        $this->command = new MakeActionCommand($this->filesystem);
+        $this->command    = new MakeActionCommand($this->filesystem);
     });
 
     it('has correct command signature and description', function () {
@@ -27,12 +27,12 @@ describe('MakeActionCommand', function () {
 
     it('can replace placeholders correctly', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('replacePlaceholders');
+        $method     = $reflection->getMethod('replacePlaceholders');
         $method->setAccessible(true);
-        
+
         $content = '{{ActionName}} in {{DomainName}} for {{PluralDomainName}}';
-        $result = $method->invoke($this->command, $content, 'CreateUser', 'User');
-        
+        $result  = $method->invoke($this->command, $content, 'CreateUser', 'User');
+
         expect($result)
             ->toContain('CreateUserAction')
             ->toContain('User')
@@ -50,12 +50,12 @@ describe('MakeActionCommand', function () {
 
     it('handles getStub method', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('getStub');
+        $method     = $reflection->getMethod('getStub');
         $method->setAccessible(true);
-        
+
         // Test with existing stub
         $result = $method->invoke($this->command, 'action');
         expect($result)->toBeString();
         expect($result)->toContain('<?php');
     });
-}); 
+});

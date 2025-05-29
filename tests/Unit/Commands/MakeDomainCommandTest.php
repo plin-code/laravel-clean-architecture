@@ -1,19 +1,19 @@
 <?php
 
-use PlinCode\LaravelCleanArchitecture\Commands\MakeDomainCommand;
 use Illuminate\Filesystem\Filesystem;
+use PlinCode\LaravelCleanArchitecture\Commands\MakeDomainCommand;
 
 describe('MakeDomainCommand', function () {
     beforeEach(function () {
-        $this->filesystem = new Filesystem();
-        $this->command = new MakeDomainCommand($this->filesystem);
-        
+        $this->filesystem = new Filesystem;
+        $this->command    = new MakeDomainCommand($this->filesystem);
+
         // Mock the output to avoid writeln errors
         $mockOutput = mock('Symfony\Component\Console\Output\OutputInterface');
         $mockOutput->shouldReceive('writeln')->andReturn();
         $mockOutput->shouldReceive('write')->andReturn();
-        
-        $reflection = new ReflectionClass($this->command);
+
+        $reflection     = new ReflectionClass($this->command);
         $outputProperty = $reflection->getProperty('output');
         $outputProperty->setAccessible(true);
         $outputProperty->setValue($this->command, $mockOutput);
@@ -26,7 +26,7 @@ describe('MakeDomainCommand', function () {
 
     it('has required arguments and options', function () {
         $definition = $this->command->getDefinition();
-        
+
         expect($definition->hasArgument('name'))->toBeTrue();
         expect($definition->hasOption('force'))->toBeTrue();
         expect($definition->getArgument('name')->getDescription())->toBe('The name of the domain');
@@ -35,7 +35,7 @@ describe('MakeDomainCommand', function () {
 
     it('can create domain model', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createDomainModel');
+        $method     = $reflection->getMethod('createDomainModel');
         $method->setAccessible(true);
 
         // Mock filesystem and stub
@@ -54,7 +54,7 @@ describe('MakeDomainCommand', function () {
 
     it('can create domain enums', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createDomainEnums');
+        $method     = $reflection->getMethod('createDomainEnums');
         $method->setAccessible(true);
 
         // Mock filesystem and stub
@@ -73,7 +73,7 @@ describe('MakeDomainCommand', function () {
 
     it('can create domain events', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createDomainEvents');
+        $method     = $reflection->getMethod('createDomainEvents');
         $method->setAccessible(true);
 
         // Mock filesystem and stub
@@ -92,7 +92,7 @@ describe('MakeDomainCommand', function () {
 
     it('can create actions', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createActions');
+        $method     = $reflection->getMethod('createActions');
         $method->setAccessible(true);
 
         // Mock filesystem and stub
@@ -111,7 +111,7 @@ describe('MakeDomainCommand', function () {
 
     it('can create service', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createService');
+        $method     = $reflection->getMethod('createService');
         $method->setAccessible(true);
 
         // Mock filesystem and stub
@@ -130,7 +130,7 @@ describe('MakeDomainCommand', function () {
 
     it('can create controller', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createController');
+        $method     = $reflection->getMethod('createController');
         $method->setAccessible(true);
 
         // Mock filesystem and stub
@@ -147,7 +147,7 @@ describe('MakeDomainCommand', function () {
 
     it('can create requests', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createRequests');
+        $method     = $reflection->getMethod('createRequests');
         $method->setAccessible(true);
 
         // Mock filesystem and stub
@@ -164,7 +164,7 @@ describe('MakeDomainCommand', function () {
 
     it('can create resource', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createResource');
+        $method     = $reflection->getMethod('createResource');
         $method->setAccessible(true);
 
         // Mock filesystem and stub
@@ -183,7 +183,7 @@ describe('MakeDomainCommand', function () {
 
     it('can create tests', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createTests');
+        $method     = $reflection->getMethod('createTests');
         $method->setAccessible(true);
 
         // Mock filesystem and stub
@@ -202,13 +202,13 @@ describe('MakeDomainCommand', function () {
 
     it('can replace placeholders correctly', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('replacePlaceholders');
+        $method     = $reflection->getMethod('replacePlaceholders');
         $method->setAccessible(true);
 
         // Use the actual placeholders that the method expects
         $content = 'class {{DomainName}} extends {{BaseClass}} { protected $table = "{{domain-table}}"; var {{domainVariable}}; plural {{PluralDomainName}}; }';
-        $name = 'User';
-        $extra = ['BaseClass' => 'Model'];
+        $name    = 'User';
+        $extra   = ['BaseClass' => 'Model'];
 
         $result = $method->invoke($this->command, $content, $name, $extra);
 
@@ -217,13 +217,13 @@ describe('MakeDomainCommand', function () {
         expect($result)->toContain('protected $table = "users"');
         expect($result)->toContain('var user;');
         expect($result)->toContain('plural Users;');
-        
+
         // Verify that the main domain placeholders are replaced
         expect($result)->not->toContain('{{DomainName}}');
         expect($result)->not->toContain('{{PluralDomainName}}');
         expect($result)->not->toContain('{{domainVariable}}');
         expect($result)->not->toContain('{{domain-table}}');
-        
+
         // BaseClass should be replaced with the value from $extra
         expect($result)->not->toContain('{{BaseClass}}');
         expect($result)->toContain('Model'); // The value should be present somewhere
@@ -231,7 +231,7 @@ describe('MakeDomainCommand', function () {
 
     it('can get table name correctly', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('getTableName');
+        $method     = $reflection->getMethod('getTableName');
         $method->setAccessible(true);
 
         expect($method->invoke($this->command, 'User'))->toBe('users');
@@ -241,7 +241,7 @@ describe('MakeDomainCommand', function () {
 
     it('can get stub content', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('getStub');
+        $method     = $reflection->getMethod('getStub');
         $method->setAccessible(true);
 
         $stubContent = '<?php // Test stub content';
@@ -259,7 +259,7 @@ describe('MakeDomainCommand', function () {
 
     it('throws exception when stub file not found', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('getStub');
+        $method     = $reflection->getMethod('getStub');
         $method->setAccessible(true);
 
         // Mock filesystem to return false for exists
@@ -272,4 +272,4 @@ describe('MakeDomainCommand', function () {
             $method->invoke($this->command, 'non-existent-stub');
         })->toThrow(Exception::class, 'Stub file not found');
     });
-}); 
+});

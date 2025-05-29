@@ -1,20 +1,19 @@
 <?php
 
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Facades\File;
 use PlinCode\LaravelCleanArchitecture\Commands\InstallCleanArchitectureCommand;
 
 describe('InstallCleanArchitectureCommand', function () {
     beforeEach(function () {
-        $this->filesystem = new Filesystem();
-        $this->command = new InstallCleanArchitectureCommand($this->filesystem);
-        
+        $this->filesystem = new Filesystem;
+        $this->command    = new InstallCleanArchitectureCommand($this->filesystem);
+
         // Mock the output to avoid writeln errors
         $mockOutput = mock('Symfony\Component\Console\Output\OutputInterface');
         $mockOutput->shouldReceive('writeln')->andReturn();
         $mockOutput->shouldReceive('write')->andReturn();
-        
-        $reflection = new ReflectionClass($this->command);
+
+        $reflection     = new ReflectionClass($this->command);
         $outputProperty = $reflection->getProperty('output');
         $outputProperty->setAccessible(true);
         $outputProperty->setValue($this->command, $mockOutput);
@@ -33,7 +32,7 @@ describe('InstallCleanArchitectureCommand', function () {
 
     it('handles missing stub files gracefully', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('getStub');
+        $method     = $reflection->getMethod('getStub');
         $method->setAccessible(true);
 
         // Mock filesystem to return false for exists
@@ -49,7 +48,7 @@ describe('InstallCleanArchitectureCommand', function () {
 
     it('can get stub content when file exists', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('getStub');
+        $method     = $reflection->getMethod('getStub');
         $method->setAccessible(true);
 
         $stubContent = '<?php // Test stub content';
@@ -67,7 +66,7 @@ describe('InstallCleanArchitectureCommand', function () {
 
     it('can create directory structure', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createDirectoryStructure');
+        $method     = $reflection->getMethod('createDirectoryStructure');
         $method->setAccessible(true);
 
         // Mock filesystem
@@ -84,7 +83,7 @@ describe('InstallCleanArchitectureCommand', function () {
 
     it('can generate base classes', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createBaseClasses');
+        $method     = $reflection->getMethod('createBaseClasses');
         $method->setAccessible(true);
 
         // Mock filesystem and stub
@@ -103,7 +102,7 @@ describe('InstallCleanArchitectureCommand', function () {
 
     it('handles composer.json updates', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('updateComposerAutoload');
+        $method     = $reflection->getMethod('updateComposerAutoload');
         $method->setAccessible(true);
 
         // Mock filesystem
@@ -120,7 +119,7 @@ describe('InstallCleanArchitectureCommand', function () {
 
     it('can create configuration file', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createConfigFile');
+        $method     = $reflection->getMethod('createConfigFile');
         $method->setAccessible(true);
 
         // Mock filesystem and stub
@@ -139,7 +138,7 @@ describe('InstallCleanArchitectureCommand', function () {
 
     it('can create readme file', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createReadme');
+        $method     = $reflection->getMethod('createReadme');
         $method->setAccessible(true);
 
         // Mock filesystem and stub
@@ -156,7 +155,7 @@ describe('InstallCleanArchitectureCommand', function () {
 
     it('can create base model', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createBaseModel');
+        $method     = $reflection->getMethod('createBaseModel');
         $method->setAccessible(true);
 
         // Mock filesystem and stub
@@ -175,7 +174,7 @@ describe('InstallCleanArchitectureCommand', function () {
 
     it('can create exception classes', function () {
         $reflection = new ReflectionClass($this->command);
-        $method = $reflection->getMethod('createExceptionClasses');
+        $method     = $reflection->getMethod('createExceptionClasses');
         $method->setAccessible(true);
 
         // Mock filesystem and stub

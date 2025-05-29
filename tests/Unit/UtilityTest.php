@@ -1,13 +1,13 @@
 <?php
 
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeDomainCommand;
-use Illuminate\Filesystem\Filesystem;
 
 describe('Utility Methods', function () {
     beforeEach(function () {
         $this->filesystem = new Filesystem;
-        $this->command = new MakeDomainCommand($this->filesystem);
+        $this->command    = new MakeDomainCommand($this->filesystem);
     });
 
     describe('String Helper Methods', function () {
@@ -42,12 +42,12 @@ describe('Utility Methods', function () {
 
         it('handles plural snake_case table names', function () {
             $testCases = [
-                'User' => 'users',
+                'User'            => 'users',
                 'ProductCategory' => 'product_categories',
-                'OrderItem' => 'order_items',
-                'Person' => 'people',
-                'Child' => 'children',
-                'Company' => 'companies',
+                'OrderItem'       => 'order_items',
+                'Person'          => 'people',
+                'Child'           => 'children',
+                'Company'         => 'companies',
             ];
 
             foreach ($testCases as $input => $expected) {
@@ -61,9 +61,9 @@ describe('Utility Methods', function () {
     describe('File Path Helpers', function () {
         it('creates correct domain paths', function () {
             $domainPaths = [
-                'User' => 'app/Domain/Users',
+                'User'            => 'app/Domain/Users',
                 'ProductCategory' => 'app/Domain/ProductCategories',
-                'OrderItem' => 'app/Domain/OrderItems',
+                'OrderItem'       => 'app/Domain/OrderItems',
             ];
 
             foreach ($domainPaths as $domain => $expectedPath) {
@@ -74,9 +74,9 @@ describe('Utility Methods', function () {
 
         it('creates correct action paths', function () {
             $actionPaths = [
-                'User' => 'app/Application/Actions/Users',
+                'User'            => 'app/Application/Actions/Users',
                 'ProductCategory' => 'app/Application/Actions/ProductCategories',
-                'Post' => 'app/Application/Actions/Posts',
+                'Post'            => 'app/Application/Actions/Posts',
             ];
 
             foreach ($actionPaths as $domain => $expectedPath) {
@@ -87,9 +87,9 @@ describe('Utility Methods', function () {
 
         it('creates correct controller paths', function () {
             $controllerPaths = [
-                'User' => 'app/Infrastructure/API/Controllers/UsersController.php',
+                'User'            => 'app/Infrastructure/API/Controllers/UsersController.php',
                 'ProductCategory' => 'app/Infrastructure/API/Controllers/ProductCategoriesController.php',
-                'Article' => 'app/Infrastructure/API/Controllers/ArticlesController.php',
+                'Article'         => 'app/Infrastructure/API/Controllers/ArticlesController.php',
             ];
 
             foreach ($controllerPaths as $domain => $expectedPath) {
@@ -102,9 +102,9 @@ describe('Utility Methods', function () {
     describe('Namespace Generation', function () {
         it('creates correct domain namespaces', function () {
             $namespaces = [
-                'User' => 'App\\Domain\\Users',
+                'User'            => 'App\\Domain\\Users',
                 'ProductCategory' => 'App\\Domain\\ProductCategories',
-                'OrderItem' => 'App\\Domain\\OrderItems',
+                'OrderItem'       => 'App\\Domain\\OrderItems',
             ];
 
             foreach ($namespaces as $domain => $expectedNamespace) {
@@ -115,9 +115,9 @@ describe('Utility Methods', function () {
 
         it('creates correct action namespaces', function () {
             $namespaces = [
-                'User' => 'App\\Application\\Actions\\Users',
+                'User'            => 'App\\Application\\Actions\\Users',
                 'ProductCategory' => 'App\\Application\\Actions\\ProductCategories',
-                'Post' => 'App\\Application\\Actions\\Posts',
+                'Post'            => 'App\\Application\\Actions\\Posts',
             ];
 
             foreach ($namespaces as $domain => $expectedNamespace) {
@@ -128,9 +128,9 @@ describe('Utility Methods', function () {
 
         it('creates correct service namespaces', function () {
             $namespaces = [
-                'User' => 'App\\Application\\Services',
+                'User'            => 'App\\Application\\Services',
                 'ProductCategory' => 'App\\Application\\Services',
-                'Article' => 'App\\Application\\Services',
+                'Article'         => 'App\\Application\\Services',
             ];
 
             foreach ($namespaces as $domain => $expectedNamespace) {
@@ -143,10 +143,10 @@ describe('Utility Methods', function () {
     describe('Class Name Generation', function () {
         it('creates correct model class names', function () {
             $classNames = [
-                'user' => 'User',
+                'user'             => 'User',
                 'product_category' => 'ProductCategory',
-                'order-item' => 'OrderItem',
-                'UserProfile' => 'UserProfile',
+                'order-item'       => 'OrderItem',
+                'UserProfile'      => 'UserProfile',
             ];
 
             foreach ($classNames as $input => $expected) {
@@ -157,25 +157,25 @@ describe('Utility Methods', function () {
 
         it('creates correct action class names', function () {
             $actions = [
-                'CreateUser' => ['Create', 'User'],
+                'CreateUser'            => ['Create', 'User'],
                 'UpdateProductCategory' => ['Update', 'ProductCategory'],
-                'DeleteOrderItem' => ['Delete', 'OrderItem'],
-                'ArchivePost' => ['Archive', 'Post'],
+                'DeleteOrderItem'       => ['Delete', 'OrderItem'],
+                'ArchivePost'           => ['Archive', 'Post'],
             ];
 
             foreach ($actions as $expected => $parts) {
                 [$action, $domain] = $parts;
-                $actual = $action . $domain . 'Action';
+                $actual            = $action . $domain . 'Action';
                 expect($actual)->toBe($expected . 'Action');
             }
         });
 
         it('creates correct service class names', function () {
             $services = [
-                'User' => 'UserService',
+                'User'            => 'UserService',
                 'ProductCategory' => 'ProductCategoryService',
-                'OrderItem' => 'OrderItemService',
-                'Post' => 'PostService',
+                'OrderItem'       => 'OrderItemService',
+                'Post'            => 'PostService',
             ];
 
             foreach ($services as $domain => $expected) {
@@ -186,10 +186,10 @@ describe('Utility Methods', function () {
 
         it('creates correct controller class names', function () {
             $controllers = [
-                'User' => 'UsersController',
+                'User'            => 'UsersController',
                 'ProductCategory' => 'ProductCategoriesController',
-                'Article' => 'ArticlesController',
-                'Post' => 'PostsController',
+                'Article'         => 'ArticlesController',
+                'Post'            => 'PostsController',
             ];
 
             foreach ($controllers as $domain => $expected) {
@@ -201,12 +201,12 @@ describe('Utility Methods', function () {
 
     describe('Template Variable Generation', function () {
         it('creates correct template variables for domain User', function () {
-            $domain = 'User';
+            $domain    = 'User';
             $variables = [
-                'DomainName' => $domain,
+                'DomainName'       => $domain,
                 'PluralDomainName' => Str::plural($domain),
-                'domainVariable' => Str::camel($domain),
-                'domain-table' => Str::snake(Str::plural($domain)),
+                'domainVariable'   => Str::camel($domain),
+                'domain-table'     => Str::snake(Str::plural($domain)),
             ];
 
             expect($variables['DomainName'])->toBe('User');
@@ -216,12 +216,12 @@ describe('Utility Methods', function () {
         });
 
         it('creates correct template variables for complex domain ProductCategory', function () {
-            $domain = 'ProductCategory';
+            $domain    = 'ProductCategory';
             $variables = [
-                'DomainName' => $domain,
+                'DomainName'       => $domain,
                 'PluralDomainName' => Str::plural($domain),
-                'domainVariable' => Str::camel($domain),
-                'domain-table' => Str::snake(Str::plural($domain)),
+                'domainVariable'   => Str::camel($domain),
+                'domain-table'     => Str::snake(Str::plural($domain)),
             ];
 
             expect($variables['DomainName'])->toBe('ProductCategory');
@@ -235,34 +235,34 @@ describe('Utility Methods', function () {
         it('handles package name conversion correctly', function () {
             $packages = [
                 'blog-engine_acme' => [
-                    'packageName' => 'blog-engine',
-                    'vendor' => 'acme',
-                    'studlyName' => 'BlogEngine',
-                    'namespace' => 'Acme\\BlogEngine',
+                    'packageName'  => 'blog-engine',
+                    'vendor'       => 'acme',
+                    'studlyName'   => 'BlogEngine',
+                    'namespace'    => 'Acme\\BlogEngine',
                     'composerName' => 'acme/blog-engine',
                 ],
                 'user-management_mycompany' => [
-                    'packageName' => 'user-management',
-                    'vendor' => 'mycompany',
-                    'studlyName' => 'UserManagement',
-                    'namespace' => 'Mycompany\\UserManagement',
+                    'packageName'  => 'user-management',
+                    'vendor'       => 'mycompany',
+                    'studlyName'   => 'UserManagement',
+                    'namespace'    => 'Mycompany\\UserManagement',
                     'composerName' => 'mycompany/user-management',
                 ],
                 'payment-gateway_fintech' => [
-                    'packageName' => 'payment-gateway',
-                    'vendor' => 'fintech',
-                    'studlyName' => 'PaymentGateway',
-                    'namespace' => 'Fintech\\PaymentGateway',
+                    'packageName'  => 'payment-gateway',
+                    'vendor'       => 'fintech',
+                    'studlyName'   => 'PaymentGateway',
+                    'namespace'    => 'Fintech\\PaymentGateway',
                     'composerName' => 'fintech/payment-gateway',
                 ],
             ];
 
             foreach ($packages as $key => $expected) {
                 $packageName = $expected['packageName'];
-                $vendor = $expected['vendor'];
-                
-                $studlyName = Str::studly($packageName);
-                $namespace = Str::studly($vendor) . '\\' . $studlyName;
+                $vendor      = $expected['vendor'];
+
+                $studlyName   = Str::studly($packageName);
+                $namespace    = Str::studly($vendor) . '\\' . $studlyName;
                 $composerName = $vendor . '/' . $packageName;
 
                 expect($studlyName)->toBe($expected['studlyName']);
@@ -271,4 +271,4 @@ describe('Utility Methods', function () {
             }
         });
     });
-}); 
+});
