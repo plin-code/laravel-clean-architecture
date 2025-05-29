@@ -1,5 +1,12 @@
 <?php
 
-use PlinCode\LaravelCleanArchitecture\Tests\TestCase;
+uses(
+    PlinCode\LaravelCleanArchitecture\Tests\TestCase::class,
+)->in('Feature', 'Unit');
 
-uses(TestCase::class)->in('Unit', 'Feature');
+// Global imports for all tests
+uses()->beforeEach(function () {
+    if (class_exists('Mockery')) {
+        Mockery::globalHelpers();
+    }
+})->in('Unit');
