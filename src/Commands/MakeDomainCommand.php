@@ -39,12 +39,17 @@ class MakeDomainCommand extends Command
         $this->createResource($name);
         $this->createTests($name);
 
+        // Create migration
+        $this->createMigration($name);
+
+        // Add .gitkeep to empty directories
+        $this->addGitKeepFiles($name);
+
         $this->info("✅ Domain {$name} created successfully!");
         $this->newLine();
         $this->info('Next steps:');
-        $this->info("1. Create migration: php artisan make:migration create_{$this->getTableName($name)}_table");
-        $this->info('2. Add routes to routes/api.php');
-        $this->info('3. Run tests: php artisan test');
+        $this->info('1. Add routes to routes/api.php');
+        $this->info('2. Run tests: php artisan test');
 
         return self::SUCCESS;
     }
@@ -199,6 +204,36 @@ class MakeDomainCommand extends Command
         $pluralName = Str::plural($name);
         $this->files->put("{$testsPath}/{$pluralName}Test.php", $content);
         $this->info("Created: tests/Feature/{$pluralName}Test.php");
+    }
+
+    protected function createMigration(string $name): void
+    {
+        $tableName = $this->getTableName($name);
+        $this->call('make:migration', [
+            'name'     => "create_{$tableName}_table",
+            '--create' => $tableName,
+        ]);
+        $this->info("Created migration for table: {$tableName}");
+    }
+
+    protected function addGitKeepFiles(string $name): void
+    {
+        $pluralName  = Str::plural($name);
+        $directories = [
+            app_path("Domain/{$pluralName}"),
+            app_path("Domain/{$pluralName}/Enums"),
+            app_path("Domain/{$pluralName}/Events"),
+            app_path("Application/Actions/{$pluralName}"),
+            app_path('Infrastructure/API/Requests'),
+            app_path('Infrastructure/API/Resources'),
+        ];
+
+        foreach ($directories as $directory) {
+            if ($this->files->isDirectory($directory) && count($this->files->files($directory)) === 0) {
+                $this->files->put("{$directory}/.gitkeep", '');
+                $this->info("Added .gitkeep to: {$directory}");
+            }
+        }
     }
 
     protected function replacePlaceholders(string $content, string $name, array $extra = []): string
