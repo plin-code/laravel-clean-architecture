@@ -7,12 +7,18 @@ composer.lock
 # Generated files
 generated/
 
+# Internal Notes
+/private/*
+
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+
+# Worktrees
+.worktrees/
 
 # Testing
 coverage/

@@ -1,7 +1,9 @@
 <?php
 
+use PlinCode\LaravelCleanArchitecture\Tests\TestCase;
+
 uses(
-    PlinCode\LaravelCleanArchitecture\Tests\TestCase::class,
+    TestCase::class,
 )->in('Feature', 'Unit');
 
 // Global imports for all tests

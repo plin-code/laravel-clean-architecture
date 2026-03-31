@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Str;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeActionCommand;
 
 describe('MakeActionCommand', function () {
@@ -43,9 +44,9 @@ describe('MakeActionCommand', function () {
 
     it('generates correct action paths', function () {
         // Test pluralization logic for action paths
-        expect(\Illuminate\Support\Str::plural('User'))->toBe('Users');
-        expect(\Illuminate\Support\Str::plural('Category'))->toBe('Categories');
-        expect(\Illuminate\Support\Str::plural('ProductCategory'))->toBe('ProductCategories');
+        expect(Str::plural('User'))->toBe('Users');
+        expect(Str::plural('Category'))->toBe('Categories');
+        expect(Str::plural('ProductCategory'))->toBe('ProductCategories');
     });
 
     it('handles getStub method', function () {

@@ -15,8 +15,9 @@ app/
 ├── Domain/              # Business logic
 │   └── Shared/          # Shared classes between domains
 └── Infrastructure/      # Implementation details
-    ├── API/
-    │   ├── Controllers/ # API controllers
+    ├── Http/
+    │   ├── Controllers/
+    │   │   └── Api/    # API controllers
     │   ├── Requests/    # Form requests
     │   └── Resources/   # API resources
     ├── UI/
@@ -51,6 +52,13 @@ app/
 - `php artisan clean-arch:make-action {name} {domain}` - Create a new action
 - `php artisan clean-arch:make-service {name}` - Create a new service
 - `php artisan clean-arch:make-controller {name}` - Create a new controller
+- `php artisan clean-arch:make-observer {name}` - Create a new observer
+- `php artisan clean-arch:make-listener {name}` - Create a new listener
+- `php artisan clean-arch:make-job {name}` - Create a new job
+- `php artisan clean-arch:make-mail {name}` - Create a new mail
+- `php artisan clean-arch:make-notification {name}` - Create a new notification
+- `php artisan clean-arch:make-export {name}` - Create a new export
+- `php artisan clean-arch:validate` - Validate architecture structure
 
 ## Best Practices
 

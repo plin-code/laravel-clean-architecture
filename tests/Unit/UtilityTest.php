@@ -87,13 +87,13 @@ describe('Utility Methods', function () {
 
         it('creates correct controller paths', function () {
             $controllerPaths = [
-                'User'            => 'app/Infrastructure/API/Controllers/UsersController.php',
-                'ProductCategory' => 'app/Infrastructure/API/Controllers/ProductCategoriesController.php',
-                'Article'         => 'app/Infrastructure/API/Controllers/ArticlesController.php',
+                'User'            => 'app/Infrastructure/Http/Controllers/Api/UsersController.php',
+                'ProductCategory' => 'app/Infrastructure/Http/Controllers/Api/ProductCategoriesController.php',
+                'Article'         => 'app/Infrastructure/Http/Controllers/Api/ArticlesController.php',
             ];
 
             foreach ($controllerPaths as $domain => $expectedPath) {
-                $actualPath = 'app/Infrastructure/API/Controllers/' . Str::plural($domain) . 'Controller.php';
+                $actualPath = 'app/Infrastructure/Http/Controllers/Api/' . Str::plural($domain) . 'Controller.php';
                 expect($actualPath)->toBe($expectedPath);
             }
         });

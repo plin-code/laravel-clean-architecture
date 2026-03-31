@@ -39,6 +39,48 @@ describe('Commands', function () {
 
         expect($exitCode)->toBe(0);
     });
+
+    it('shows help for make observer command', function () {
+        $exitCode = Artisan::call('clean-arch:make-observer', ['--help' => true]);
+
+        expect($exitCode)->toBe(0);
+    });
+
+    it('shows help for make listener command', function () {
+        $exitCode = Artisan::call('clean-arch:make-listener', ['--help' => true]);
+
+        expect($exitCode)->toBe(0);
+    });
+
+    it('shows help for make job command', function () {
+        $exitCode = Artisan::call('clean-arch:make-job', ['--help' => true]);
+
+        expect($exitCode)->toBe(0);
+    });
+
+    it('shows help for make mail command', function () {
+        $exitCode = Artisan::call('clean-arch:make-mail', ['--help' => true]);
+
+        expect($exitCode)->toBe(0);
+    });
+
+    it('shows help for make notification command', function () {
+        $exitCode = Artisan::call('clean-arch:make-notification', ['--help' => true]);
+
+        expect($exitCode)->toBe(0);
+    });
+
+    it('shows help for make export command', function () {
+        $exitCode = Artisan::call('clean-arch:make-export', ['--help' => true]);
+
+        expect($exitCode)->toBe(0);
+    });
+
+    it('shows help for validate command', function () {
+        $exitCode = Artisan::call('clean-arch:validate', ['--help' => true]);
+
+        expect($exitCode)->toBe(0);
+    });
 });
 
 describe('Command Registration', function () {
@@ -51,7 +93,14 @@ describe('Command Registration', function () {
             ->toHaveKey('clean-arch:make-action')
             ->toHaveKey('clean-arch:make-service')
             ->toHaveKey('clean-arch:make-controller')
-            ->toHaveKey('clean-arch:generate-package');
+            ->toHaveKey('clean-arch:generate-package')
+            ->toHaveKey('clean-arch:make-observer')
+            ->toHaveKey('clean-arch:make-listener')
+            ->toHaveKey('clean-arch:make-job')
+            ->toHaveKey('clean-arch:make-mail')
+            ->toHaveKey('clean-arch:make-notification')
+            ->toHaveKey('clean-arch:make-export')
+            ->toHaveKey('clean-arch:validate');
     });
 
     it('has command instances that extend laravel command class', function () {

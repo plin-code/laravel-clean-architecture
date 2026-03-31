@@ -54,6 +54,10 @@ class GeneratePackageCommand extends Command
         $directories = [
             'src',
             'src/Commands',
+            'src/Domain',
+            'src/Application/Actions',
+            'src/Application/Services',
+            'src/Infrastructure/Http/Controllers',
             'stubs',
             'config',
             'tests',
@@ -92,9 +96,9 @@ class GeneratePackageCommand extends Command
             ],
             'require' => [
                 'php'                   => '^8.3',
-                'illuminate/support'    => '^11.0|^12.0',
-                'illuminate/console'    => '^11.0|^12.0',
-                'illuminate/filesystem' => '^11.0|^12.0',
+                'illuminate/support'    => '^12.0|^13.0',
+                'illuminate/console'    => '^12.0|^13.0',
+                'illuminate/filesystem' => '^12.0|^13.0',
             ],
             'autoload' => [
                 'psr-4' => [

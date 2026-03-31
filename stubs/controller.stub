@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Infrastructure\API\Controllers;
+namespace App\Infrastructure\Http\Controllers\Api;
 
 use App\Application\Actions\{{PluralDomainName}}\Create{{DomainName}}Action;
 use App\Application\Actions\{{PluralDomainName}}\Update{{DomainName}}Action;
 use App\Application\Actions\{{PluralDomainName}}\Delete{{DomainName}}Action;
 use App\Application\Actions\{{PluralDomainName}}\GetById{{DomainName}}Action;
 use App\Application\Services\{{DomainName}}Service;
-use App\Domain\{{PluralDomainName}}\{{DomainName}};
-use App\Infrastructure\API\Requests\Create{{DomainName}}Request;
-use App\Infrastructure\API\Requests\Update{{DomainName}}Request;
-use App\Infrastructure\API\Resources\{{DomainName}}Resource;
+use App\Domain\{{PluralDomainName}}\Models\{{DomainName}};
+use App\Infrastructure\Http\Requests\Create{{DomainName}}Request;
+use App\Infrastructure\Http\Requests\Update{{DomainName}}Request;
+use App\Infrastructure\Http\Resources\{{DomainName}}Resource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

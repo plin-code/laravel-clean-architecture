@@ -54,13 +54,13 @@ class MakeControllerCommand extends Command
         $stub    = $this->getStub('controller');
         $content = $this->replacePlaceholders($stub, $name);
 
-        $controllersPath = app_path('Infrastructure/API/Controllers');
+        $controllersPath = app_path('Infrastructure/Http/Controllers/Api');
         if (! $this->files->isDirectory($controllersPath)) {
             $this->files->makeDirectory($controllersPath, 0755, true);
         }
 
         $this->files->put("{$controllersPath}/{$name}Controller.php", $content);
-        $this->info("Created: Infrastructure/API/Controllers/{$name}Controller.php");
+        $this->info("Created: Infrastructure/Http/Controllers/Api/{$name}Controller.php");
     }
 
     protected function createWebController(string $name): void

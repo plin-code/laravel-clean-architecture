@@ -1,0 +1,23 @@
+<?php
+
+namespace App\Infrastructure\Observers\{{PluralDomainName}};
+
+use App\Domain\{{PluralDomainName}}\Models\{{DomainName}};
+
+class {{DomainName}}Observer
+{
+    public function created({{DomainName}} ${{domainVariable}}): void
+    {
+        //
+    }
+
+    public function updated({{DomainName}} ${{domainVariable}}): void
+    {
+        //
+    }
+
+    public function deleted({{DomainName}} ${{domainVariable}}): void
+    {
+        //
+    }
+}

@@ -17,12 +17,12 @@ A Laravel package to easily implement Clean Architecture in your projects. 🚀
 - 🔧 **Customizable** - Flexible configuration to fit your project needs
 - 🧪 **Test-Ready** - Pre-built test templates for immediate testing
 - 📚 **Well-Documented** - Comprehensive documentation and examples
-- 🎨 **Modern PHP** - Built for PHP 8.3+ with latest Laravel features
+- 🎨 **Modern PHP** - Built for PHP 8.4+ with latest Laravel features
 
 ## 📋 Requirements
 
 - 🐘 PHP 8.3+
-- ⚡ Laravel 12.x
+- ⚡ Laravel 12.x / 13.x
 
 ## 📦 Installation
 
@@ -69,6 +69,16 @@ This command will generate:
 - 📤 API Resource
 - 🧪 Feature tests
 
+After generating the core files, `make-domain` prompts interactively for optional components. You can choose to also generate an Observer, Listener, Job, Mail, Notification, and Export for the domain. Each prompt can be answered independently, so you only generate what your domain needs.
+
+### ✅ Architecture validation
+
+```bash
+php artisan clean-arch:validate
+```
+
+This command checks your codebase for layer dependency violations (for example, Domain code importing from Infrastructure). It returns exit code 1 when violations are found, making it suitable for use in CI pipelines.
+
 ### 🛠️ Available commands
 
 - `clean-arch:install` - 🏗️ Install Clean Architecture structure
@@ -76,6 +86,13 @@ This command will generate:
 - `clean-arch:make-action {name} {domain}` - ⚡ Create a new action
 - `clean-arch:make-service {name}` - 🔧 Create a new service
 - `clean-arch:make-controller {name}` - 🌐 Create a new controller
+- `clean-arch:make-observer {name} {domain}` - 👁️ Create a new observer
+- `clean-arch:make-listener {name}` - 👂 Create a new listener
+- `clean-arch:make-job {name}` - ⏳ Create a new job
+- `clean-arch:make-mail {name}` - 📧 Create a new mailable
+- `clean-arch:make-notification {name}` - 🔔 Create a new notification
+- `clean-arch:make-export {name}` - 📤 Create a new export
+- `clean-arch:validate` - ✅ Validate architecture dependency rules
 - `clean-arch:generate-package {name} {vendor}` - 📦 Generate a new package
 
 ### 📂 Generated structure
@@ -93,17 +110,19 @@ app/
 │       └── UserService.php
 ├── Domain/
 │   └── Users/
-│       ├── User.php
+│       ├── Models/
+│       │   └── User.php
 │       ├── Enums/
-│   │   └── UserStatus.php
-│   └── Events/
-│       ├── UserCreated.php
-│       ├── UserUpdated.php
-│       └── UserDeleted.php
+│       │   └── UserStatus.php
+│       └── Events/
+│           ├── UserCreated.php
+│           ├── UserUpdated.php
+│           └── UserDeleted.php
 └── Infrastructure/
-    └── API/
+    └── Http/
         ├── Controllers/
-        │   └── UsersController.php
+        │   └── Api/
+        │       └── UsersController.php
         ├── Requests/
         │   ├── CreateUserRequest.php
         │   └── UpdateUserRequest.php

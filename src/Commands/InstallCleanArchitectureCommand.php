@@ -52,22 +52,23 @@ class InstallCleanArchitectureCommand extends Command
     protected function createDirectoryStructure(): void
     {
         $directories = [
+            'app/Domain',
             'app/Application/Actions',
             'app/Application/Services',
             'app/Application/Jobs',
-            'app/Application/Console/Commands',
             'app/Application/Listeners',
-            'app/Domain',
-            'app/Infrastructure/API/Controllers',
-            'app/Infrastructure/API/Requests',
-            'app/Infrastructure/API/Resources',
-            'app/Infrastructure/UI/Web/Controllers',
-            'app/Infrastructure/UI/Web/Views',
+            'app/Application/Console/Commands',
+            'app/Infrastructure/Http/Controllers/Api',
+            'app/Infrastructure/Http/Middleware',
+            'app/Infrastructure/Http/Requests',
+            'app/Infrastructure/Http/Resources',
+            'app/Infrastructure/UI',
             'app/Infrastructure/Mail',
             'app/Infrastructure/Notifications',
             'app/Infrastructure/Observers',
+            'app/Infrastructure/Exports',
+            'app/Infrastructure/Validation',
             'app/Infrastructure/Exceptions',
-            'app/Infrastructure/Middleware',
         ];
 
         foreach ($directories as $directory) {
@@ -104,11 +105,14 @@ class InstallCleanArchitectureCommand extends Command
     protected function createBaseController(): void
     {
         $stub = $this->getStub('base-controller');
+        if (! $this->files->isDirectory(app_path('Infrastructure/Http/Controllers'))) {
+            $this->files->makeDirectory(app_path('Infrastructure/Http/Controllers'), 0755, true);
+        }
         $this->files->put(
-            app_path('Infrastructure/API/Controllers/Controller.php'),
+            app_path('Infrastructure/Http/Controllers/Controller.php'),
             $stub
         );
-        $this->info('Created: Infrastructure/API/Controllers/Controller.php');
+        $this->info('Created: Infrastructure/Http/Controllers/Controller.php');
     }
 
     protected function createBaseAction(): void
@@ -137,11 +141,14 @@ class InstallCleanArchitectureCommand extends Command
     protected function createBaseRequest(): void
     {
         $stub = $this->getStub('base-request');
+        if (! $this->files->isDirectory(app_path('Infrastructure/Http/Requests'))) {
+            $this->files->makeDirectory(app_path('Infrastructure/Http/Requests'), 0755, true);
+        }
         $this->files->put(
-            app_path('Infrastructure/API/Requests/BaseRequest.php'),
+            app_path('Infrastructure/Http/Requests/BaseRequest.php'),
             $stub
         );
-        $this->info('Created: Infrastructure/API/Requests/BaseRequest.php');
+        $this->info('Created: Infrastructure/Http/Requests/BaseRequest.php');
     }
 
     protected function createExceptionClasses(): void

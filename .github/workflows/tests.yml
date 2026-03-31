@@ -18,6 +18,22 @@ jobs:
         include:
           - laravel: 12.*
             testbench: 10.*
+            pest: 3
+          - php: 8.3
+            laravel: 13.*
+            testbench: 11.*
+            pest: 4
+            stability: prefer-stable
+          - php: 8.4
+            laravel: 13.*
+            testbench: 11.*
+            pest: 4
+            stability: prefer-stable
+          - php: 8.5
+            laravel: 13.*
+            testbench: 11.*
+            pest: 4
+            stability: prefer-stable
 
     name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
 
@@ -38,7 +54,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --dev --no-interaction --no-update
+          if [ "${{ matrix.pest }}" = "4" ]; then
+            composer require "pestphp/pest:^4.0" "pestphp/pest-plugin-laravel:^4.0" --dev --no-interaction --no-update
+          fi
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
       - name: Execute tests (PEST)
