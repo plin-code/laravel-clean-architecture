@@ -66,6 +66,7 @@ This command will generate:
 - 🌐 API Controller
 - 📝 Form Requests (Create, Update)
 - 📤 API Resource
+- 🗃️ Database migration
 - 🧪 Feature tests
 
 After generating the core files, `make-domain` prompts interactively for optional components. You can choose to also generate an Observer, Listener, Job, Mail, Notification, and Export for the domain. Each prompt can be answered independently, so you only generate what your domain needs.
@@ -77,6 +78,21 @@ php artisan clean-arch:validate
 ```
 
 This command checks your codebase for layer dependency violations (for example, Domain code importing from Infrastructure). It returns exit code 1 when violations are found, making it suitable for use in CI pipelines.
+
+```
+Clean Architecture Validation
+=============================
+
+  ✓ Domain has no Application imports
+  ✓ Domain has no Infrastructure imports
+  ✓ Application has no Infrastructure imports
+  ✓ No Observers in Domain
+  ✓ No Jobs in Infrastructure
+  ✓ No Commands in Infrastructure
+  ✓ No duplicate Services directory
+
+No violations found.
+```
 
 ### 🛠️ Available commands
 
@@ -94,19 +110,36 @@ This command checks your codebase for layer dependency violations (for example, 
 - `clean-arch:validate` - ✅ Validate architecture dependency rules
 - `clean-arch:generate-package {name} {vendor}` - 📦 Generate a new package
 
-### 📂 Generated structure
+### 📂 Project structure after `clean-arch:install`
 
 ```
 app/
-├── Application/
+├── Domain/                          # Pure business logic
+├── Application/                     # Use cases and orchestration
 │   ├── Actions/
-│   │   └── Users/
-│   │       ├── CreateUserAction.php
-│   │       ├── UpdateUserAction.php
-│   │       ├── DeleteUserAction.php
-│   │       └── GetByIdUserAction.php
-│   └── Services/
-│       └── UserService.php
+│   ├── Services/
+│   ├── Jobs/
+│   ├── Listeners/
+│   └── Console/Commands/
+└── Infrastructure/                  # Framework adapters
+    ├── Http/
+    │   ├── Controllers/Api/
+    │   ├── Middleware/
+    │   ├── Requests/
+    │   └── Resources/
+    ├── UI/
+    ├── Mail/
+    ├── Notifications/
+    ├── Observers/
+    ├── Exports/
+    ├── Validation/
+    └── Exceptions/
+```
+
+### 📂 Generated structure after `clean-arch:make-domain User`
+
+```
+app/
 ├── Domain/
 │   └── Users/
 │       ├── Models/
@@ -117,6 +150,15 @@ app/
 │           ├── UserCreated.php
 │           ├── UserUpdated.php
 │           └── UserDeleted.php
+├── Application/
+│   ├── Actions/
+│   │   └── Users/
+│   │       ├── CreateUserAction.php
+│   │       ├── UpdateUserAction.php
+│   │       ├── DeleteUserAction.php
+│   │       └── GetByIdUserAction.php
+│   └── Services/
+│       └── UserService.php
 └── Infrastructure/
     └── Http/
         ├── Controllers/
