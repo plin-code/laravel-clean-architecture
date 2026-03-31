@@ -3,8 +3,8 @@
 namespace App\Application\Actions\{{PluralDomainName}};
 
 use App\Application\Actions\BaseAction;
-use App\Domain\{{PluralDomainName}}\{{DomainName}};
-use App\Infrastructure\API\Requests\{{RequestName}};
+use App\Domain\{{PluralDomainName}}\Models\{{DomainName}};
+use App\Infrastructure\Http\Requests\{{RequestName}};
 use Illuminate\Support\Facades\DB;
 
 class {{ActionName}} extends BaseAction
