@@ -7,6 +7,9 @@ composer.lock
 # Generated files
 generated/
 
+# Internal Notes
+/private/*
+
 # IDE
 .vscode/
 .idea/
