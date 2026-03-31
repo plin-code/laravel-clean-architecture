@@ -2,11 +2,10 @@
 
 A Laravel package to easily implement Clean Architecture in your projects. 🚀
 
-[![🧪 Tests](https://github.com/plin-code/laravel-clean-architecture/workflows/Tests/badge.svg)](https://github.com/plin-code/laravel-clean-architecture/actions)
-[![🎨 Code Style](https://github.com/plin-code/laravel-clean-architecture/workflows/Code%20Style/badge.svg)](https://github.com/plin-code/laravel-clean-architecture/actions)
-[![🔍 Static Analysis](https://github.com/plin-code/laravel-clean-architecture/workflows/Static%20Analysis/badge.svg)](https://github.com/plin-code/laravel-clean-architecture/actions)
-[![📦 Latest Stable Version](https://poser.pugx.org/plin-code/laravel-clean-architecture/v/stable)](https://packagist.org/packages/plin-code/laravel-clean-architecture)
-[![📄 License](https://poser.pugx.org/plin-code/laravel-clean-architecture/license)](https://packagist.org/packages/plin-code/laravel-clean-architecture)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/plin-code/laravel-clean-architecture.svg?style=flat-square)](https://packagist.org/packages/plin-code/laravel-clean-architecture)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/plin-code/laravel-clean-architecture/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/plin-code/laravel-clean-architecture/actions?query=workflow%3ATests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/plin-code/laravel-clean-architecture/code-style-fix.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/plin-code/laravel-clean-architecture/actions?query=workflow%3A%22Code+Style+%28Auto-fix%29%22+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/plin-code/laravel-clean-architecture.svg?style=flat-square)](https://packagist.org/packages/plin-code/laravel-clean-architecture)
 
 ## ✨ Features
 
