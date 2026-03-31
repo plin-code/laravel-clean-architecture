@@ -17,6 +17,9 @@ generated/
 *.swo
 *~
 
+# Worktrees
+.worktrees/
+
 # Testing
 coverage/
 .phpunit.cache/
