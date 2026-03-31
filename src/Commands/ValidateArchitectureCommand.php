@@ -40,10 +40,12 @@ class ValidateArchitectureCommand extends Command
 
         if ($this->violationCount > 0) {
             $this->error("Found {$this->violationCount} violation(s).");
+
             return self::FAILURE;
         }
 
         $this->info('No violations found.');
+
         return self::SUCCESS;
     }
 
@@ -52,6 +54,7 @@ class ValidateArchitectureCommand extends Command
         $path = base_path($directory);
         if (! $this->files->isDirectory($path)) {
             $this->line("  ✓ {$label} (directory not found, skipped)");
+
             return;
         }
 
@@ -88,7 +91,7 @@ class ValidateArchitectureCommand extends Command
             foreach ($lines as $lineNumber => $line) {
                 if (str_contains($line, "use {$importPattern}")) {
                     $relativePath = str_replace(base_path() . '/', '', $file->getRealPath());
-                    $violations[] = "{$relativePath}:" . ($lineNumber + 1) . " → " . trim($line);
+                    $violations[] = "{$relativePath}:" . ($lineNumber + 1) . ' → ' . trim($line);
                 }
             }
         }

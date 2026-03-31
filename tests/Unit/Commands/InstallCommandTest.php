@@ -177,11 +177,12 @@ describe('InstallCleanArchitectureCommand', function () {
         $method     = $reflection->getMethod('createDirectoryStructure');
         $method->setAccessible(true);
 
-        $createdDirs = [];
+        $createdDirs    = [];
         $mockFilesystem = mock(Filesystem::class);
         $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
         $mockFilesystem->shouldReceive('makeDirectory')->andReturnUsing(function ($dir) use (&$createdDirs) {
             $createdDirs[] = $dir;
+
             return true;
         });
 

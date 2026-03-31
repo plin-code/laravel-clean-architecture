@@ -1,7 +1,10 @@
 <?php
 
+use Illuminate\Console\OutputStyle;
 use Illuminate\Filesystem\Filesystem;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeJobCommand;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\NullOutput;
 
 describe('MakeJobCommand', function () {
     beforeEach(function () {
@@ -31,9 +34,9 @@ describe('MakeJobCommand', function () {
 
         $command = new MakeJobCommand($filesystem);
         $command->setLaravel(app());
-        $command->setOutput(new \Illuminate\Console\OutputStyle(
-            new \Symfony\Component\Console\Input\ArrayInput([]),
-            new \Symfony\Component\Console\Output\NullOutput
+        $command->setOutput(new OutputStyle(
+            new ArrayInput([]),
+            new NullOutput
         ));
 
         $reflection = new ReflectionClass($command);

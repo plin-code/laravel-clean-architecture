@@ -88,6 +88,7 @@ describe('MakeControllerCommand', function () {
         $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
         $mockFilesystem->shouldReceive('put')->andReturnUsing(function ($path) use (&$writtenPath) {
             $writtenPath = $path;
+
             return true;
         });
 

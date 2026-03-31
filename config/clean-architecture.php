@@ -28,6 +28,8 @@ return [
         'paths'   => [
             'app/Application/Actions',
             'app/Application/Services',
+            'app/Application/Jobs',
+            'app/Application/Listeners',
             'app/Domain',
         ],
     ],

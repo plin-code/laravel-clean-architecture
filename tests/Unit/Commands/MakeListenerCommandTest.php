@@ -1,7 +1,10 @@
 <?php
 
+use Illuminate\Console\OutputStyle;
 use Illuminate\Filesystem\Filesystem;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeListenerCommand;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\NullOutput;
 
 describe('MakeListenerCommand', function () {
     beforeEach(function () {
@@ -31,9 +34,9 @@ describe('MakeListenerCommand', function () {
 
         $command = new MakeListenerCommand($filesystem);
         $command->setLaravel(app());
-        $command->setOutput(new \Illuminate\Console\OutputStyle(
-            new \Symfony\Component\Console\Input\ArrayInput([]),
-            new \Symfony\Component\Console\Output\NullOutput
+        $command->setOutput(new OutputStyle(
+            new ArrayInput([]),
+            new NullOutput
         ));
 
         $reflection = new ReflectionClass($command);
