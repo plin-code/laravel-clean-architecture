@@ -172,6 +172,42 @@ describe('InstallCleanArchitectureCommand', function () {
         expect($result)->toBeNull();
     });
 
+    it('creates the correct v2 directory structure', function () {
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('createDirectoryStructure');
+        $method->setAccessible(true);
+
+        $createdDirs = [];
+        $mockFilesystem = mock(Filesystem::class);
+        $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
+        $mockFilesystem->shouldReceive('makeDirectory')->andReturnUsing(function ($dir) use (&$createdDirs) {
+            $createdDirs[] = $dir;
+            return true;
+        });
+
+        $reflection->getProperty('files')->setValue($this->command, $mockFilesystem);
+        $method->invoke($this->command);
+
+        $basePath = base_path();
+        expect($createdDirs)->toContain("{$basePath}/app/Domain");
+        expect($createdDirs)->toContain("{$basePath}/app/Application/Actions");
+        expect($createdDirs)->toContain("{$basePath}/app/Application/Services");
+        expect($createdDirs)->toContain("{$basePath}/app/Application/Jobs");
+        expect($createdDirs)->toContain("{$basePath}/app/Application/Listeners");
+        expect($createdDirs)->toContain("{$basePath}/app/Application/Console/Commands");
+        expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Http/Controllers/Api");
+        expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Http/Middleware");
+        expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Http/Requests");
+        expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Http/Resources");
+        expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/UI");
+        expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Mail");
+        expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Notifications");
+        expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Observers");
+        expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Exports");
+        expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Validation");
+        expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Exceptions");
+    });
+
     it('can create exception classes', function () {
         $reflection = new ReflectionClass($this->command);
         $method     = $reflection->getMethod('createExceptionClasses');
