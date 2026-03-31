@@ -9,11 +9,12 @@ All notable changes to `laravel-clean-architecture` will be documented in this f
 - Domain models now live under `Domain/{Name}/Models/` instead of directly under `Domain/{Name}/`
 - Domain enums now live under `Domain/{Name}/Enums/` and domain events under `Domain/{Name}/Events/` (nested subdirectory structure is now enforced)
 - Infrastructure HTTP files are now consolidated under `Infrastructure/Http/` (previously `Infrastructure/API/`)
-- PHP 8.4+ is now required (previously 8.3+)
+- PHP 8.3+ is now the minimum (previously 8.3 only)
 
 ### Added
 
 - Laravel 13 support alongside Laravel 12
+
 - Interactive prompts in `make-domain` for optional components (Observer, Listener, Job, Mail, Notification, Export)
 - `clean-arch:make-observer {name} {domain}` command to generate domain observers
 - `clean-arch:make-listener {name}` command to generate event listeners

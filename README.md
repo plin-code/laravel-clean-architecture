@@ -21,8 +21,8 @@ A Laravel package to easily implement Clean Architecture in your projects. 🚀
 
 ## 📋 Requirements
 
-- 🐘 PHP 8.4+
-- ⚡ Laravel 12.x or 13.x
+- 🐘 PHP 8.3+
+- ⚡ Laravel 12.x / 13.x
 
 ## 📦 Installation
 

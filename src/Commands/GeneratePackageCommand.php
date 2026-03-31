@@ -95,7 +95,7 @@ class GeneratePackageCommand extends Command
                 ],
             ],
             'require' => [
-                'php'                   => '^8.4',
+                'php'                   => '^8.3',
                 'illuminate/support'    => '^12.0|^13.0',
                 'illuminate/console'    => '^12.0|^13.0',
                 'illuminate/filesystem' => '^12.0|^13.0',
