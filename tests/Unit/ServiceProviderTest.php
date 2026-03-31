@@ -7,7 +7,14 @@ use PlinCode\LaravelCleanArchitecture\Commands\InstallCleanArchitectureCommand;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeActionCommand;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeControllerCommand;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeDomainCommand;
+use PlinCode\LaravelCleanArchitecture\Commands\MakeExportCommand;
+use PlinCode\LaravelCleanArchitecture\Commands\MakeJobCommand;
+use PlinCode\LaravelCleanArchitecture\Commands\MakeListenerCommand;
+use PlinCode\LaravelCleanArchitecture\Commands\MakeMailCommand;
+use PlinCode\LaravelCleanArchitecture\Commands\MakeNotificationCommand;
+use PlinCode\LaravelCleanArchitecture\Commands\MakeObserverCommand;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeServiceCommand;
+use PlinCode\LaravelCleanArchitecture\Commands\ValidateArchitectureCommand;
 
 describe('CleanArchitectureServiceProvider', function () {
     it('does not register commands when not running in console', function () {
@@ -27,6 +34,13 @@ describe('CleanArchitectureServiceProvider', function () {
             'clean-arch:make-action'      => MakeActionCommand::class,
             'clean-arch:make-service'     => MakeServiceCommand::class,
             'clean-arch:make-controller'  => MakeControllerCommand::class,
+            'clean-arch:make-observer'    => MakeObserverCommand::class,
+            'clean-arch:make-listener'    => MakeListenerCommand::class,
+            'clean-arch:make-job'         => MakeJobCommand::class,
+            'clean-arch:make-mail'        => MakeMailCommand::class,
+            'clean-arch:make-notification' => MakeNotificationCommand::class,
+            'clean-arch:make-export'      => MakeExportCommand::class,
+            'clean-arch:validate'         => ValidateArchitectureCommand::class,
             'clean-arch:generate-package' => GeneratePackageCommand::class,
         ];
 
