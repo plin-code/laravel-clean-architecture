@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Infrastructure\Exports;
+
+use App\Domain\{{PluralDomainName}}\Models\{{DomainName}};
+use Illuminate\Support\Collection;
+
+class {{DomainName}}Export
+{
+    public function collection(): Collection
+    {
+        return {{DomainName}}::all();
+    }
+
+    public function headings(): array
+    {
+        return [
+            'ID',
+            'Name',
+            'Status',
+            'Created At',
+        ];
+    }
+}

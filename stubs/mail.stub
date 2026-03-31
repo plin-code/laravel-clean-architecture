@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Infrastructure\Mail;
+
+use App\Domain\{{PluralDomainName}}\Models\{{DomainName}};
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\SerializesModels;
+
+class {{DomainName}}Mail extends Mailable
+{
+    use Queueable, SerializesModels;
+
+    public function __construct(
+        public {{DomainName}} ${{domainVariable}}
+    ) {}
+
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: '{{DomainName}} Notification',
+        );
+    }
+
+    public function content(): Content
+    {
+        return new Content(
+            markdown: 'emails.{{domainVariable}}',
+        );
+    }
+}

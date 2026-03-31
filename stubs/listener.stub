@@ -1,0 +1,13 @@
+<?php
+
+namespace App\Application\Listeners;
+
+use App\Domain\{{PluralDomainName}}\Events\{{DomainName}}Created;
+
+class {{DomainName}}EventListener
+{
+    public function handle({{DomainName}}Created $event): void
+    {
+        //
+    }
+}

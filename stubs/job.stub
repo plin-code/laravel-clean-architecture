@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Application\Jobs;
+
+use App\Domain\{{PluralDomainName}}\Models\{{DomainName}};
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+
+class Process{{DomainName}}Job implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public function __construct(
+        public {{DomainName}} ${{domainVariable}}
+    ) {}
+
+    public function handle(): void
+    {
+        //
+    }
+}
