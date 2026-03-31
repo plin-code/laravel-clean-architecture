@@ -3,14 +3,14 @@
     "description": "Laravel package for generating Clean Architecture structure",
     "type": "library",
     "require": {
-        "php": "^8.3",
-        "illuminate/console": "^12.0",
-        "illuminate/support": "^12.0",
-        "illuminate/filesystem": "^12.0"
+        "php": "^8.4",
+        "illuminate/console": "^12.0 || ^13.0",
+        "illuminate/support": "^12.0 || ^13.0",
+        "illuminate/filesystem": "^12.0 || ^13.0"
     },
     "require-dev": {
         "laravel/pint": "^1.13",
-        "orchestra/testbench": "^10.0",
+        "orchestra/testbench": "^10.0 || ^11.0",
         "pestphp/pest": "^3.0",
         "pestphp/pest-plugin-laravel": "^3.0",
         "larastan/larastan": "^3.4.0",
