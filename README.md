@@ -16,7 +16,7 @@ A Laravel package to easily implement Clean Architecture in your projects. 🚀
 - 🔧 **Customizable** - Flexible configuration to fit your project needs
 - 🧪 **Test-Ready** - Pre-built test templates for immediate testing
 - 📚 **Well-Documented** - Comprehensive documentation and examples
-- 🎨 **Modern PHP** - Built for PHP 8.4+ with latest Laravel features
+- 🎨 **Modern PHP** - Built for PHP 8.3+ with latest Laravel features
 
 ## 📋 Requirements
 
