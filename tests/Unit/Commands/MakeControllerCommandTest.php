@@ -7,6 +7,16 @@ describe('MakeControllerCommand', function () {
     beforeEach(function () {
         $this->filesystem = new Filesystem;
         $this->command    = new MakeControllerCommand($this->filesystem);
+
+        // Mock the output to avoid writeln errors
+        $mockOutput = mock('Symfony\Component\Console\Output\OutputInterface');
+        $mockOutput->shouldReceive('writeln')->andReturn();
+        $mockOutput->shouldReceive('write')->andReturn();
+
+        $reflection     = new ReflectionClass($this->command);
+        $outputProperty = $reflection->getProperty('output');
+        $outputProperty->setAccessible(true);
+        $outputProperty->setValue($this->command, $mockOutput);
     });
 
     it('has correct command signature and description', function () {
@@ -63,5 +73,27 @@ describe('MakeControllerCommand', function () {
         $result = $method->invoke($this->command, 'web-controller');
         expect($result)->toBeString();
         expect($result)->toContain('<?php');
+    });
+
+    it('creates api controller in Http/Controllers/Api directory', function () {
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('createApiController');
+        $method->setAccessible(true);
+
+        $writtenPath    = null;
+        $mockFilesystem = mock(Filesystem::class);
+        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('get')->andReturn('<?php // controller stub');
+        $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
+        $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
+        $mockFilesystem->shouldReceive('put')->andReturnUsing(function ($path) use (&$writtenPath) {
+            $writtenPath = $path;
+            return true;
+        });
+
+        $reflection->getProperty('files')->setValue($this->command, $mockFilesystem);
+        $method->invoke($this->command, 'Users');
+
+        expect($writtenPath)->toContain('Infrastructure/Http/Controllers/Api/UsersController.php');
     });
 });
