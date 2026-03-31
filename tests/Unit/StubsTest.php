@@ -18,6 +18,12 @@ describe('Stub Files', function () {
             'request.stub',
             'service.stub',
             'web-controller.stub',
+            'observer.stub',
+            'listener.stub',
+            'job.stub',
+            'mail.stub',
+            'notification.stub',
+            'export.stub',
         ];
 
         foreach ($coreStubs as $stub) {
@@ -60,7 +66,7 @@ describe('Stub Files', function () {
         $content = file_get_contents($this->stubsPath . '/controller.stub');
 
         expect($content)
-            ->toContain('namespace App\Infrastructure\API\Controllers;')
+            ->toContain('namespace App\Infrastructure\Http\Controllers\Api;')
             ->toContain('class {{PluralDomainName}}Controller extends Controller');
     });
 
@@ -76,7 +82,7 @@ describe('Stub Files', function () {
         $content = file_get_contents($this->stubsPath . '/domain-model.stub');
 
         expect($content)
-            ->toContain('namespace App\Domain\{{PluralDomainName}};')
+            ->toContain('namespace App\Domain\{{PluralDomainName}}\Models;')
             ->toContain('class {{DomainName}} extends BaseModel')
             ->toContain('protected $table = \'{{domain-table}}\';')
             ->toContain('protected $fillable')
@@ -88,7 +94,7 @@ describe('Stub Files', function () {
         $content = file_get_contents($this->stubsPath . '/request.stub');
 
         expect($content)
-            ->toContain('namespace App\Infrastructure\API\Requests;')
+            ->toContain('namespace App\Infrastructure\Http\Requests;')
             ->toContain('class {{RequestName}} extends BaseRequest')
             ->toContain('public function rules(): array')
             ->toContain('public function messages(): array');
