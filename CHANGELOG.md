@@ -2,6 +2,16 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
+## [2.0.1] - 2026-03-31
+
+### Fixed
+
+- README badges updated to flat-square style consistent with other plin-code packages
+- Fixed PHP version in features section (8.3+, not 8.4+)
+- Added missing database migration to `make-domain` generated files documentation
+- Added full `install` directory structure to README
+- Added `clean-arch:validate` output example to README
+
 ## [2.0.0] - 2026-03-31
 
 ### Breaking Changes
