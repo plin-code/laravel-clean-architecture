@@ -52,8 +52,8 @@ class {{PluralDomainName}}Controller extends Controller
 
     public function store(Create{{DomainName}}Request $request): JsonResponse
     {
-        ${{domainVariable}} = $this->create{{DomainName}}Action->execute($request);
-        
+        ${{domainVariable}} = $this->create{{DomainName}}Action->execute($request->validated());
+
         return response()->json([
             'data' => new {{DomainName}}Resource(${{domainVariable}}),
             'message' => '{{DomainName}} created successfully'
@@ -62,7 +62,7 @@ class {{PluralDomainName}}Controller extends Controller
 
     public function update(Update{{DomainName}}Request $request, int $id): JsonResponse
     {
-        ${{domainVariable}} = $this->update{{DomainName}}Action->execute($request, $id);
+        ${{domainVariable}} = $this->update{{DomainName}}Action->execute($request->validated(), $id);
         
         return response()->json([
             'data' => new {{DomainName}}Resource(${{domainVariable}}),

@@ -2,19 +2,10 @@
 
 namespace App\Application\Actions;
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 abstract class BaseAction
 {
-    /**
-     * Execute the action with transaction support.
-     */
-    protected function executeInTransaction(callable $callback)
-    {
-        return DB::transaction($callback);
-    }
-
     /**
      * Log action execution.
      */
