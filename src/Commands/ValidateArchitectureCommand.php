@@ -47,13 +47,13 @@ class ValidateArchitectureCommand extends Command
         $application    = $this->layerDirectory('application');
         $infrastructure = $this->layerDirectory('infrastructure');
 
-        $this->runImportCheck('Domain has no Application imports', $domain, $this->layerNamespace('application'));
-        $this->runImportCheck('Domain has no Infrastructure imports', $domain, $this->layerNamespace('infrastructure'));
-        $this->runImportCheck('Application has no Infrastructure imports', $application, $this->layerNamespace('infrastructure'));
-        $this->runFilePatternCheck('No Observers in Domain', $domain, '*Observer.php');
-        $this->reportViolations('No Jobs in Infrastructure', $this->checkQueuedJobViolations($infrastructure));
-        $this->reportViolations('No Commands in Infrastructure', $this->checkConsoleCommandViolations($infrastructure));
-        $this->runDirectoryCheck('No duplicate Services directory', "{$infrastructure}/Services");
+        $this->runImportCheck('domain_no_application_imports', 'Domain has no Application imports', $domain, $this->layerNamespace('application'));
+        $this->runImportCheck('domain_no_infrastructure_imports', 'Domain has no Infrastructure imports', $domain, $this->layerNamespace('infrastructure'));
+        $this->runImportCheck('application_no_infrastructure_imports', 'Application has no Infrastructure imports', $application, $this->layerNamespace('infrastructure'));
+        $this->runFilePatternCheck('no_observers_in_domain', 'No Observers in Domain', $domain, '*Observer.php');
+        $this->runClassCheck('no_jobs_in_infrastructure', 'No Jobs in Infrastructure', fn (): array => $this->checkQueuedJobViolations($infrastructure));
+        $this->runClassCheck('no_commands_in_infrastructure', 'No Commands in Infrastructure', fn (): array => $this->checkConsoleCommandViolations($infrastructure));
+        $this->runDirectoryCheck('no_duplicate_services_directory', 'No duplicate Services directory', "{$infrastructure}/Services");
 
         $this->newLine();
 
@@ -68,8 +68,12 @@ class ValidateArchitectureCommand extends Command
         return self::SUCCESS;
     }
 
-    protected function runImportCheck(string $label, string $directory, string $pattern): void
+    protected function runImportCheck(string $rule, string $label, string $directory, string $pattern): void
     {
+        if ($this->skipsRule($rule, $label)) {
+            return;
+        }
+
         $path = base_path($directory);
         if (! $this->files->isDirectory($path)) {
             $this->line("  ✓ {$label} (directory not found, skipped)");
@@ -78,6 +82,40 @@ class ValidateArchitectureCommand extends Command
         }
 
         $this->reportViolations($label, $this->checkImportViolations($directory, $pattern));
+    }
+
+    /**
+     * @param  callable(): list<string>  $violations
+     */
+    protected function runClassCheck(string $rule, string $label, callable $violations): void
+    {
+        if ($this->skipsRule($rule, $label)) {
+            return;
+        }
+
+        $this->reportViolations($label, $violations());
+    }
+
+    /**
+     * Whether a rule is turned off in config/clean-architecture.php.
+     *
+     * Rules are enabled unless explicitly disabled, so a project without a
+     * published config file keeps running all of them.
+     */
+    protected function isRuleEnabled(string $rule): bool
+    {
+        return config("clean-architecture.validation.rules.{$rule}", true) !== false;
+    }
+
+    protected function skipsRule(string $rule, string $label): bool
+    {
+        if ($this->isRuleEnabled($rule)) {
+            return false;
+        }
+
+        $this->line("  - {$label} (disabled)");
+
+        return true;
     }
 
     /**
@@ -136,8 +174,12 @@ class ValidateArchitectureCommand extends Command
         return $violations;
     }
 
-    protected function runFilePatternCheck(string $label, string $directory, string $pattern): void
+    protected function runFilePatternCheck(string $rule, string $label, string $directory, string $pattern): void
     {
+        if ($this->skipsRule($rule, $label)) {
+            return;
+        }
+
         $this->reportViolations($label, $this->checkFilePatternViolations($directory, $pattern));
     }
 
@@ -217,8 +259,12 @@ class ValidateArchitectureCommand extends Command
         return $violations;
     }
 
-    protected function runDirectoryCheck(string $label, string $directory): void
+    protected function runDirectoryCheck(string $rule, string $label, string $directory): void
     {
+        if ($this->skipsRule($rule, $label)) {
+            return;
+        }
+
         if ($this->checkDirectoryNotExists($directory)) {
             $this->violationCount++;
             $this->line("  ✗ {$label}");

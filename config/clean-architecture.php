@@ -30,5 +30,21 @@ return [
     'validation' => [
         'strict_mode'     => false,
         'custom_messages' => true,
+
+        /*
+        | Rules run by clean-arch:validate. Every rule is enabled by default,
+        | set one to false to skip it. For example, teams that treat a console
+        | command as an input adapter and keep it next to the HTTP controllers
+        | can turn off 'no_commands_in_infrastructure'.
+        */
+        'rules' => [
+            'domain_no_application_imports'         => true,
+            'domain_no_infrastructure_imports'      => true,
+            'application_no_infrastructure_imports' => true,
+            'no_observers_in_domain'                => true,
+            'no_jobs_in_infrastructure'             => true,
+            'no_commands_in_infrastructure'         => true,
+            'no_duplicate_services_directory'       => true,
+        ],
     ],
 ];
