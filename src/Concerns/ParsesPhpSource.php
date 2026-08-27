@@ -47,7 +47,15 @@ trait ParsesPhpSource
      */
     protected function extractUseStatements(string $contents): array
     {
-        $tokens     = token_get_all($contents);
+        return $this->extractUseStatementsFromTokens(token_get_all($contents));
+    }
+
+    /**
+     * @param  array<int, array{0: int, 1: string, 2: int}|string>  $tokens
+     * @return list<array{name: string, alias: string, line: int}>
+     */
+    protected function extractUseStatementsFromTokens(array $tokens): array
+    {
         $statements = [];
         $depth      = 0;
         $previous   = null;
@@ -93,82 +101,142 @@ trait ParsesPhpSource
     }
 
     /**
-     * Resolve the parent class and the interfaces of the types declared in a file.
+     * List the types declared in a file with their resolved parents.
      *
-     * @return array{extends: list<string>, implements: list<string>}
+     * Anonymous classes are skipped: they cannot be referenced, so they never
+     * take part in an inheritance chain we can follow.
+     *
+     * @return list<array{fqcn: string, kind: string, extends: list<string>, implements: list<string>}>
      */
-    protected function parseClassSignature(string $contents): array
+    protected function parseClassDeclarations(string $contents): array
     {
+        $kinds = [
+            T_CLASS     => 'class',
+            T_INTERFACE => 'interface',
+            T_TRAIT     => 'trait',
+            T_ENUM      => 'enum',
+        ];
+
+        $tokens  = token_get_all($contents);
         $imports = [];
 
-        foreach ($this->extractUseStatements($contents) as $statement) {
+        foreach ($this->extractUseStatementsFromTokens($tokens) as $statement) {
             $imports[strtolower($statement['alias'])] = $statement['name'];
         }
 
-        $tokens     = token_get_all($contents);
-        $namespace  = '';
-        $extends    = [];
-        $implements = [];
+        $namespace    = '';
+        $declarations = [];
+        $previous     = null;
 
         for ($i = 0, $count = count($tokens); $i < $count; $i++) {
             $token = $tokens[$i];
 
             if (! is_array($token)) {
+                $previous = $token;
+
+                continue;
+            }
+
+            if (in_array($token[0], $this->insignificantTokens, true)) {
                 continue;
             }
 
             if ($token[0] === T_NAMESPACE) {
                 [$declared, $i] = $this->readName($tokens, $i + 1);
                 $namespace      = trim($declared, '\\');
+                $previous       = null;
 
                 continue;
             }
 
-            if ($token[0] !== T_EXTENDS && $token[0] !== T_IMPLEMENTS) {
+            // `Foo::class` also yields a T_CLASS token, and `new class {}` has no name.
+            if (! isset($kinds[$token[0]]) || (is_array($previous) && $previous[0] === T_DOUBLE_COLON)) {
+                $previous = $token;
+
                 continue;
             }
 
-            $target = $token[0] === T_EXTENDS ? 'extends' : 'implements';
+            $kind       = $kinds[$token[0]];
+            [$name, $i] = $this->readName($tokens, $i + 1);
 
-            for ($j = $i + 1; $j < $count; $j++) {
-                $next = $tokens[$j];
+            if ($name === '') {
+                $previous = $token;
 
-                if (is_string($next)) {
-                    if ($next === ',') {
-                        continue;
-                    }
-
-                    break;
-                }
-
-                if (in_array($next[0], $this->insignificantTokens, true)) {
-                    continue;
-                }
-
-                if ($next[0] === T_IMPLEMENTS) {
-                    $target = 'implements';
-
-                    continue;
-                }
-
-                if (! in_array($next[0], $this->nameTokens, true)) {
-                    break;
-                }
-
-                [$name, $j] = $this->readName($tokens, $j);
-                $resolved   = $this->resolveName($name, $namespace, $imports);
-
-                if ($target === 'extends') {
-                    $extends[] = $resolved;
-                } else {
-                    $implements[] = $resolved;
-                }
+                continue;
             }
 
-            $i = $j;
+            $declarations[] = $this->readTypeParents($tokens, $i + 1, $namespace, $imports, $name, $kind);
+            $previous       = null;
         }
 
-        return ['extends' => $extends, 'implements' => $implements];
+        return $declarations;
+    }
+
+    /**
+     * Read the `extends` and `implements` clauses following a type name.
+     *
+     * @param  array<int, array{0: int, 1: string, 2: int}|string>  $tokens
+     * @param  array<string, string>  $imports
+     * @return array{fqcn: string, kind: string, extends: list<string>, implements: list<string>}
+     */
+    protected function readTypeParents(array $tokens, int $index, string $namespace, array $imports, string $name, string $kind): array
+    {
+        $extends    = [];
+        $implements = [];
+        $target     = null;
+
+        for ($i = $index, $count = count($tokens); $i < $count; $i++) {
+            $token = $tokens[$i];
+
+            if (is_string($token)) {
+                if ($token === '{') {
+                    break;
+                }
+
+                continue;
+            }
+
+            if (in_array($token[0], $this->insignificantTokens, true)) {
+                continue;
+            }
+
+            if ($token[0] === T_EXTENDS) {
+                $target = 'extends';
+
+                continue;
+            }
+
+            if ($token[0] === T_IMPLEMENTS) {
+                $target = 'implements';
+
+                continue;
+            }
+
+            // Anything before the first clause, such as an enum backing type.
+            if ($target === null) {
+                continue;
+            }
+
+            if (! in_array($token[0], $this->nameTokens, true)) {
+                break;
+            }
+
+            [$parent, $i] = $this->readName($tokens, $i);
+            $resolved     = $this->resolveName($parent, $namespace, $imports);
+
+            if ($target === 'extends') {
+                $extends[] = $resolved;
+            } else {
+                $implements[] = $resolved;
+            }
+        }
+
+        return [
+            'fqcn'       => $namespace !== '' ? $namespace . '\\' . $name : $name,
+            'kind'       => $kind,
+            'extends'    => $extends,
+            'implements' => $implements,
+        ];
     }
 
     /**

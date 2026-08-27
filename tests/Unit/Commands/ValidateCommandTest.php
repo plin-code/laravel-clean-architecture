@@ -34,6 +34,7 @@ describe('ValidateArchitectureCommand', function () {
     afterEach(function () {
         $this->filesystem->deleteDirectory(base_path('app/Infrastructure'));
         $this->filesystem->deleteDirectory(base_path('app/Domain'));
+        $this->filesystem->deleteDirectory(base_path('app/Console/Commands'));
     });
 
     it('has correct command signature', function () {
@@ -147,6 +148,163 @@ describe('ValidateArchitectureCommand', function () {
         );
 
         expect($this->command->checkConsoleCommandViolations('app/Infrastructure'))->toBe([$path]);
+    });
+
+    it('reports a command extending a project base class', function () {
+        $base = writeAppFile(
+            'app/Infrastructure/Console/Commands/BaseCommand.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Infrastructure\Console\Commands;
+
+            use Illuminate\Console\Command;
+
+            abstract class BaseCommand extends Command {}
+            PHP
+        );
+
+        $child = writeAppFile(
+            'app/Infrastructure/Console/Commands/SyncPractices.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Infrastructure\Console\Commands;
+
+            class SyncPractices extends BaseCommand {}
+            PHP
+        );
+
+        expect($this->command->checkConsoleCommandViolations('app/Infrastructure'))
+            ->toBe(collect([$base, $child])->sort()->values()->all());
+    });
+
+    it('follows a base class living outside the three layers', function () {
+        writeAppFile(
+            'app/Console/Commands/BaseCommand.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Console\Commands;
+
+            use Illuminate\Console\Command;
+
+            abstract class BaseCommand extends Command {}
+            PHP
+        );
+
+        $child = writeAppFile(
+            'app/Infrastructure/Console/Commands/SyncPractices.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Infrastructure\Console\Commands;
+
+            use App\Console\Commands\BaseCommand;
+
+            class SyncPractices extends BaseCommand {}
+            PHP
+        );
+
+        expect($this->command->checkConsoleCommandViolations('app/Infrastructure'))->toBe([$child]);
+    });
+
+    it('does not report a command whose parent lives in vendor', function () {
+        writeAppFile(
+            'app/Infrastructure/Console/Commands/PublishAssets.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Infrastructure\Console\Commands;
+
+            class PublishAssets extends \Vendor\Package\Console\AssetCommand {}
+            PHP
+        );
+
+        expect($this->command->checkConsoleCommandViolations('app/Infrastructure'))->toBeEmpty();
+    });
+
+    it('does not loop on a circular inheritance chain', function () {
+        writeAppFile(
+            'app/Infrastructure/Console/Commands/Ping.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Infrastructure\Console\Commands;
+
+            class Ping extends Pong {}
+            PHP
+        );
+
+        writeAppFile(
+            'app/Infrastructure/Console/Commands/Pong.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Infrastructure\Console\Commands;
+
+            class Pong extends Ping {}
+            PHP
+        );
+
+        expect($this->command->checkConsoleCommandViolations('app/Infrastructure'))->toBeEmpty();
+    });
+
+    it('reports a job extending an abstract base job', function () {
+        $base = writeAppFile(
+            'app/Infrastructure/Jobs/BaseJob.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Infrastructure\Jobs;
+
+            use Illuminate\Contracts\Queue\ShouldQueue;
+
+            abstract class BaseJob implements ShouldQueue {}
+            PHP
+        );
+
+        $child = writeAppFile(
+            'app/Infrastructure/Jobs/SendReport.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Infrastructure\Jobs;
+
+            class SendReport extends BaseJob {}
+            PHP
+        );
+
+        expect($this->command->checkQueuedJobViolations('app/Infrastructure'))
+            ->toBe(collect([$base, $child])->sort()->values()->all());
+    });
+
+    it('reports a class implementing an interface that extends ShouldQueue', function () {
+        writeAppFile(
+            'app/Infrastructure/Jobs/Queueable.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Infrastructure\Jobs;
+
+            use Illuminate\Contracts\Queue\ShouldQueue;
+
+            interface Queueable extends ShouldQueue {}
+            PHP
+        );
+
+        $path = writeAppFile(
+            'app/Infrastructure/Jobs/SendInvoice.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Infrastructure\Jobs;
+
+            class SendInvoice implements Queueable {}
+            PHP
+        );
+
+        expect($this->command->checkQueuedJobViolations('app/Infrastructure'))->toBe([$path]);
     });
 
     it('does not report a business class whose name merely contains Job', function () {

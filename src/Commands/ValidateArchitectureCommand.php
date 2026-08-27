@@ -4,13 +4,13 @@ namespace PlinCode\LaravelCleanArchitecture\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use PlinCode\LaravelCleanArchitecture\Concerns\ParsesPhpSource;
+use PlinCode\LaravelCleanArchitecture\Concerns\BuildsClassMap;
 use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
 use Symfony\Component\Finder\Finder;
 
 class ValidateArchitectureCommand extends Command
 {
-    use ParsesPhpSource;
+    use BuildsClassMap;
     use ResolvesArchitectureDirectories;
 
     /**
@@ -207,54 +207,62 @@ class ValidateArchitectureCommand extends Command
     }
 
     /**
-     * Find console commands, recognised by their parent class rather than by
-     * their file name, so that a `CommandPaletteController` is not reported.
+     * Find console commands, recognised by their ancestors rather than by their
+     * file name, so that a `CommandPaletteController` is not reported and a
+     * command extending a project specific base class still is.
      *
      * @return list<string>
      */
     public function checkConsoleCommandViolations(string $directory): array
     {
-        return $this->checkClassViolations(
-            $directory,
-            fn (array $signature): bool => in_array(self::CONSOLE_COMMAND_CLASS, $signature['extends'], true)
-        );
+        return $this->checkClassViolations($directory, self::CONSOLE_COMMAND_CLASS);
     }
 
     /**
-     * Find queued jobs, recognised by the ShouldQueue contract rather than by
-     * their file name, so that a `JobApplicationResource` is not reported.
+     * Find queued jobs, recognised by the ShouldQueue contract reached anywhere
+     * in their inheritance chain, so that a `JobApplicationResource` is not
+     * reported and a job extending an abstract base job still is.
      *
      * @return list<string>
      */
     public function checkQueuedJobViolations(string $directory): array
     {
-        return $this->checkClassViolations(
-            $directory,
-            fn (array $signature): bool => in_array(self::SHOULD_QUEUE_INTERFACE, $signature['implements'], true)
-        );
+        return $this->checkClassViolations($directory, self::SHOULD_QUEUE_INTERFACE);
     }
 
     /**
-     * @param  callable(array{extends: list<string>, implements: list<string>}): bool  $matches
+     * Files under a directory declaring a class that descends from an ancestor.
+     *
+     * Only classes count. An interface extending `ShouldQueue` is a contract,
+     * not a job, and reporting it would be noise.
+     *
      * @return list<string>
      */
-    protected function checkClassViolations(string $directory, callable $matches): array
+    protected function checkClassViolations(string $directory, string $ancestor): array
     {
-        $violations = [];
-        $path       = base_path($directory);
+        $path = base_path($directory);
 
         if (! $this->files->isDirectory($path)) {
-            return $violations;
+            return [];
         }
 
-        $finder = new Finder;
-        $finder->files()->in($path)->name('*.php');
+        $prefix     = rtrim($path, '/') . '/';
+        $violations = [];
 
-        foreach ($finder as $file) {
-            if ($matches($this->parseClassSignature($file->getContents()))) {
-                $violations[] = str_replace(base_path() . '/', '', $file->getRealPath());
+        foreach ($this->classMap() as $fqcn => $entry) {
+            if ($entry['kind'] !== 'class' || ! str_starts_with($entry['path'], $prefix)) {
+                continue;
             }
+
+            if (! in_array($ancestor, $this->ancestorsOf($fqcn), true)) {
+                continue;
+            }
+
+            $violations[$entry['path']] = str_replace(base_path() . '/', '', $entry['path']);
         }
+
+        $violations = array_values($violations);
+        sort($violations);
 
         return $violations;
     }
