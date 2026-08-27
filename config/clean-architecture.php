@@ -11,36 +11,24 @@ return [
     |
     */
 
+    /*
+    | Root namespace of the generated code.
+    */
     'default_namespace' => 'App',
 
+    /*
+    | Paths of the three layers, relative to the base path. They are used by
+    | clean-arch:install to create the structure and by clean-arch:validate to
+    | decide what to scan.
+    */
     'directories' => [
         'domain'         => 'app/Domain',
         'application'    => 'app/Application',
         'infrastructure' => 'app/Infrastructure',
     ],
 
-    'stubs' => [
-        'path' => base_path('stubs/clean-architecture'),
-    ],
-
-    'auto_discovery' => [
-        'enabled' => true,
-        'paths'   => [
-            'app/Application/Actions',
-            'app/Application/Services',
-            'app/Application/Jobs',
-            'app/Application/Listeners',
-            'app/Domain',
-        ],
-    ],
-
     'validation' => [
         'strict_mode'     => false,
         'custom_messages' => true,
-    ],
-
-    'logging' => [
-        'enabled' => true,
-        'channel' => 'daily',
     ],
 ];
