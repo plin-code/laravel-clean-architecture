@@ -205,6 +205,55 @@ describe('ValidateArchitectureCommand', function () {
         expect($this->command->checkQueuedJobViolations('app/Infrastructure'))->toBe([$path]);
     });
 
+    it('falls back to the default directories when the config is not published', function () {
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('layerDirectory');
+        $method->setAccessible(true);
+
+        expect($method->invoke($this->command, 'domain'))->toBe('app/Domain');
+        expect($method->invoke($this->command, 'application'))->toBe('app/Application');
+        expect($method->invoke($this->command, 'infrastructure'))->toBe('app/Infrastructure');
+    });
+
+    it('reads the configured directories and derives their namespaces', function () {
+        config()->set('clean-architecture.directories.domain', 'app/Core/Domain/');
+        config()->set('clean-architecture.default_namespace', 'Acme');
+
+        $reflection = new ReflectionClass($this->command);
+
+        $directory = $reflection->getMethod('layerDirectory');
+        $directory->setAccessible(true);
+        expect($directory->invoke($this->command, 'domain'))->toBe('app/Core/Domain');
+
+        $namespace = $reflection->getMethod('layerNamespace');
+        $namespace->setAccessible(true);
+        expect($namespace->invoke($this->command, 'domain'))->toBe('Acme\\Core\\Domain\\');
+    });
+
+    it('scans the configured domain directory', function () {
+        config()->set('clean-architecture.directories.domain', 'app/Core');
+
+        $path = writeAppFile(
+            'app/Core/Practices/PracticeObserver.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Core\Practices;
+
+            class PracticeObserver {}
+            PHP
+        );
+
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('layerDirectory');
+        $method->setAccessible(true);
+
+        expect($this->command->checkFilePatternViolations($method->invoke($this->command, 'domain'), '*Observer.php'))
+            ->toBe([$path]);
+
+        $this->filesystem->deleteDirectory(base_path('app/Core'));
+    });
+
     it('reports a real infrastructure import in domain', function () {
         $path = writeAppFile(
             'app/Domain/Users/Models/User.php',

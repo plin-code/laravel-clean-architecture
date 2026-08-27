@@ -4,10 +4,13 @@ namespace PlinCode\LaravelCleanArchitecture\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
 
 class InstallCleanArchitectureCommand extends Command
 {
-    protected $signature = 'clean-arch:install 
+    use ResolvesArchitectureDirectories;
+
+    protected $signature = 'clean-arch:install
                           {--force : Overwrite existing files}';
 
     protected $description = 'Install Clean Architecture structure in Laravel project';
@@ -51,24 +54,28 @@ class InstallCleanArchitectureCommand extends Command
 
     protected function createDirectoryStructure(): void
     {
+        $domain         = $this->layerDirectory('domain');
+        $application    = $this->layerDirectory('application');
+        $infrastructure = $this->layerDirectory('infrastructure');
+
         $directories = [
-            'app/Domain',
-            'app/Application/Actions',
-            'app/Application/Services',
-            'app/Application/Jobs',
-            'app/Application/Listeners',
-            'app/Application/Console/Commands',
-            'app/Infrastructure/Http/Controllers/Api',
-            'app/Infrastructure/Http/Middleware',
-            'app/Infrastructure/Http/Requests',
-            'app/Infrastructure/Http/Resources',
-            'app/Infrastructure/UI',
-            'app/Infrastructure/Mail',
-            'app/Infrastructure/Notifications',
-            'app/Infrastructure/Observers',
-            'app/Infrastructure/Exports',
-            'app/Infrastructure/Validation',
-            'app/Infrastructure/Exceptions',
+            $domain,
+            "{$application}/Actions",
+            "{$application}/Services",
+            "{$application}/Jobs",
+            "{$application}/Listeners",
+            "{$application}/Console/Commands",
+            "{$infrastructure}/Http/Controllers/Api",
+            "{$infrastructure}/Http/Middleware",
+            "{$infrastructure}/Http/Requests",
+            "{$infrastructure}/Http/Resources",
+            "{$infrastructure}/UI",
+            "{$infrastructure}/Mail",
+            "{$infrastructure}/Notifications",
+            "{$infrastructure}/Observers",
+            "{$infrastructure}/Exports",
+            "{$infrastructure}/Validation",
+            "{$infrastructure}/Exceptions",
         ];
 
         foreach ($directories as $directory) {
@@ -91,64 +98,63 @@ class InstallCleanArchitectureCommand extends Command
 
     protected function createBaseModel(): void
     {
-        $stub = $this->getStub('base-model');
-        if (! $this->files->isDirectory(app_path('Domain/Shared'))) {
-            $this->files->makeDirectory(app_path('Domain/Shared'), 0755, true);
+        $stub      = $this->getStub('base-model');
+        $directory = $this->layerDirectory('domain') . '/Shared';
+
+        if (! $this->files->isDirectory(base_path($directory))) {
+            $this->files->makeDirectory(base_path($directory), 0755, true);
         }
-        $this->files->put(
-            app_path('Domain/Shared/BaseModel.php'),
-            $stub
-        );
-        $this->info('Created: Domain/Shared/BaseModel.php');
+
+        $this->files->put(base_path("{$directory}/BaseModel.php"), $stub);
+        $this->info("Created: {$directory}/BaseModel.php");
     }
 
     protected function createBaseController(): void
     {
-        $stub = $this->getStub('base-controller');
-        if (! $this->files->isDirectory(app_path('Infrastructure/Http/Controllers'))) {
-            $this->files->makeDirectory(app_path('Infrastructure/Http/Controllers'), 0755, true);
+        $stub      = $this->getStub('base-controller');
+        $directory = $this->layerDirectory('infrastructure') . '/Http/Controllers';
+
+        if (! $this->files->isDirectory(base_path($directory))) {
+            $this->files->makeDirectory(base_path($directory), 0755, true);
         }
-        $this->files->put(
-            app_path('Infrastructure/Http/Controllers/Controller.php'),
-            $stub
-        );
-        $this->info('Created: Infrastructure/Http/Controllers/Controller.php');
+
+        $this->files->put(base_path("{$directory}/Controller.php"), $stub);
+        $this->info("Created: {$directory}/Controller.php");
     }
 
     protected function createBaseAction(): void
     {
-        $stub = $this->getStub('base-action');
-        $this->files->put(
-            app_path('Application/Actions/BaseAction.php'),
-            $stub
-        );
-        $this->info('Created: Application/Actions/BaseAction.php');
+        $stub      = $this->getStub('base-action');
+        $directory = $this->layerDirectory('application') . '/Actions';
+
+        $this->files->put(base_path("{$directory}/BaseAction.php"), $stub);
+        $this->info("Created: {$directory}/BaseAction.php");
     }
 
     protected function createBaseService(): void
     {
-        $stub = $this->getStub('base-service');
-        if (! $this->files->isDirectory(app_path('Application/Services'))) {
-            $this->files->makeDirectory(app_path('Application/Services'), 0755, true);
+        $stub      = $this->getStub('base-service');
+        $directory = $this->layerDirectory('application') . '/Services';
+
+        if (! $this->files->isDirectory(base_path($directory))) {
+            $this->files->makeDirectory(base_path($directory), 0755, true);
         }
-        $this->files->put(
-            app_path('Application/Services/BaseService.php'),
-            $stub
-        );
-        $this->info('Created: Application/Services/BaseService.php');
+
+        $this->files->put(base_path("{$directory}/BaseService.php"), $stub);
+        $this->info("Created: {$directory}/BaseService.php");
     }
 
     protected function createBaseRequest(): void
     {
-        $stub = $this->getStub('base-request');
-        if (! $this->files->isDirectory(app_path('Infrastructure/Http/Requests'))) {
-            $this->files->makeDirectory(app_path('Infrastructure/Http/Requests'), 0755, true);
+        $stub      = $this->getStub('base-request');
+        $directory = $this->layerDirectory('infrastructure') . '/Http/Requests';
+
+        if (! $this->files->isDirectory(base_path($directory))) {
+            $this->files->makeDirectory(base_path($directory), 0755, true);
         }
-        $this->files->put(
-            app_path('Infrastructure/Http/Requests/BaseRequest.php'),
-            $stub
-        );
-        $this->info('Created: Infrastructure/Http/Requests/BaseRequest.php');
+
+        $this->files->put(base_path("{$directory}/BaseRequest.php"), $stub);
+        $this->info("Created: {$directory}/BaseRequest.php");
     }
 
     protected function createExceptionClasses(): void
@@ -159,13 +165,12 @@ class InstallCleanArchitectureCommand extends Command
             'BusinessLogicException' => 'business-logic-exception',
         ];
 
+        $directory = $this->layerDirectory('infrastructure') . '/Exceptions';
+
         foreach ($exceptions as $className => $stub) {
             $content = $this->getStub($stub);
-            $this->files->put(
-                app_path("Infrastructure/Exceptions/{$className}.php"),
-                $content
-            );
-            $this->info("Created: Infrastructure/Exceptions/{$className}.php");
+            $this->files->put(base_path("{$directory}/{$className}.php"), $content);
+            $this->info("Created: {$directory}/{$className}.php");
         }
     }
 
