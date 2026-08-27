@@ -205,6 +205,90 @@ describe('ValidateArchitectureCommand', function () {
         expect($this->command->checkQueuedJobViolations('app/Infrastructure'))->toBe([$path]);
     });
 
+    it('keeps every rule enabled when the config is not published', function () {
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('isRuleEnabled');
+        $method->setAccessible(true);
+
+        expect($method->invoke($this->command, 'no_commands_in_infrastructure'))->toBeTrue();
+        expect($method->invoke($this->command, 'no_duplicate_services_directory'))->toBeTrue();
+    });
+
+    it('reads a disabled rule from the config', function () {
+        config()->set('clean-architecture.validation.rules.no_commands_in_infrastructure', false);
+
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('isRuleEnabled');
+        $method->setAccessible(true);
+
+        expect($method->invoke($this->command, 'no_commands_in_infrastructure'))->toBeFalse();
+        expect($method->invoke($this->command, 'no_jobs_in_infrastructure'))->toBeTrue();
+    });
+
+    it('skips a disabled rule instead of counting violations', function () {
+        config()->set('clean-architecture.validation.rules.no_commands_in_infrastructure', false);
+
+        writeAppFile(
+            'app/Infrastructure/Console/Commands/SyncPractices.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Infrastructure\Console\Commands;
+
+            use Illuminate\Console\Command;
+
+            class SyncPractices extends Command {}
+            PHP
+        );
+
+        $reflection = new ReflectionClass($this->command);
+
+        $method = $reflection->getMethod('runClassCheck');
+        $method->setAccessible(true);
+        $method->invoke(
+            $this->command,
+            'no_commands_in_infrastructure',
+            'No Commands in Infrastructure',
+            fn (): array => $this->command->checkConsoleCommandViolations('app/Infrastructure')
+        );
+
+        $violationCount = $reflection->getProperty('violationCount');
+        $violationCount->setAccessible(true);
+
+        expect($violationCount->getValue($this->command))->toBe(0);
+    });
+
+    it('counts violations for the same rule when it stays enabled', function () {
+        writeAppFile(
+            'app/Infrastructure/Console/Commands/SyncPractices.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Infrastructure\Console\Commands;
+
+            use Illuminate\Console\Command;
+
+            class SyncPractices extends Command {}
+            PHP
+        );
+
+        $reflection = new ReflectionClass($this->command);
+
+        $method = $reflection->getMethod('runClassCheck');
+        $method->setAccessible(true);
+        $method->invoke(
+            $this->command,
+            'no_commands_in_infrastructure',
+            'No Commands in Infrastructure',
+            fn (): array => $this->command->checkConsoleCommandViolations('app/Infrastructure')
+        );
+
+        $violationCount = $reflection->getProperty('violationCount');
+        $violationCount->setAccessible(true);
+
+        expect($violationCount->getValue($this->command))->toBe(1);
+    });
+
     it('falls back to the default directories when the config is not published', function () {
         $reflection = new ReflectionClass($this->command);
         $method     = $reflection->getMethod('layerDirectory');
