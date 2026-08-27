@@ -18,6 +18,7 @@ app/
     ├── Http/
     │   ├── Controllers/
     │   │   └── Api/    # API controllers
+    │   ├── Middleware/  # HTTP middleware
     │   ├── Requests/    # Form requests
     │   └── Resources/   # API resources
     ├── UI/
@@ -25,16 +26,16 @@ app/
     ├── Mail/           # Mail classes
     ├── Notifications/  # Notifications
     ├── Observers/      # Model observers
-    ├── Exceptions/     # Custom exceptions
-    └── Middleware/     # Middleware
+    └── Exceptions/     # Custom exceptions
 ```
 
 ## Principles
 
 ### 1. Domain Layer
-- Contains pure business logic
-- Does not depend on frameworks or external libraries
-- Includes entities, value objects, domain events
+- Contains business logic
+- Does not depend on the Application or Infrastructure layers
+- Depends on Eloquent: models generated here extend `App\Domain\Shared\BaseModel`, which extends `Illuminate\Database\Eloquent\Model`
+- Includes models, enums, domain events
 
 ### 2. Application Layer
 - Use case orchestration

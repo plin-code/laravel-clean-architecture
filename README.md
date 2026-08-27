@@ -78,6 +78,10 @@ php artisan clean-arch:validate
 
 This command checks your codebase for layer dependency violations (for example, Domain code importing from Infrastructure). It returns exit code 1 when violations are found, making it suitable for use in CI pipelines.
 
+Checks are based on what the code is, not on how files are named. Imports are read from the real `use` statements of each file, so a trait import inside a class body, a closure `use` clause or a commented out line is never reported. Console commands are recognised by their parent class (`Illuminate\Console\Command`) and jobs by the `Illuminate\Contracts\Queue\ShouldQueue` contract, so a `CommandPaletteController` or a `JobApplicationResource` is left alone. Observers are still matched by the `Observer.php` suffix.
+
+Rules can be disabled one by one, see [Validation rules](#-validation-rules).
+
 ```
 Clean Architecture Validation
 =============================
@@ -113,7 +117,7 @@ No violations found.
 
 ```
 app/
-├── Domain/                          # Pure business logic
+├── Domain/                          # Business logic (Eloquent models, enums, events)
 ├── Application/                     # Use cases and orchestration
 │   ├── Actions/
 │   ├── Services/
@@ -180,9 +184,15 @@ This package implements Clean Architecture principles:
 
 ### 🔗 Dependencies
 
-- **🎯 Domain Layer**: Does not depend on any other layer
+- **🎯 Domain Layer**: Does not depend on the Application or Infrastructure layers
 - **⚡ Application Layer**: Depends only on Domain Layer
 - **🏗️ Infrastructure Layer**: Depends on Application and Domain Layers
+
+### 🗄️ The Domain layer depends on Eloquent
+
+This is a deliberate trade-off, and it is worth stating explicitly. `clean-arch:install` generates `App\Domain\Shared\BaseModel`, which extends `Illuminate\Database\Eloquent\Model`, and every model produced by `clean-arch:make-domain` extends it. The Domain layer is therefore free of Application and Infrastructure imports (that is what `clean-arch:validate` enforces), but it is not free of the framework.
+
+If you need a persistence agnostic domain, this package is not the right starting point.
 
 ## 💡 Examples
 
@@ -216,12 +226,47 @@ class ProductsController extends Controller
 
 ## ⚙️ Configuration
 
-The configuration file `config/clean-architecture.php` allows you to customize:
+`clean-arch:install` writes `config/clean-architecture.php`. You can also publish it on its own:
 
-- 🏷️ Default namespace
-- 📁 Directory paths
-- ✅ Validation options
-- 📊 Logging settings
+```bash
+php artisan vendor:publish --tag=clean-architecture-config
+```
+
+### 📁 Directories
+
+`directories` is read by `clean-arch:install`, which creates the structure at those paths, and by `clean-arch:validate`, which scans them. The layer namespaces are derived from the same values, so `app/Core/Domain` with a `default_namespace` of `Acme` becomes `Acme\Core\Domain`.
+
+```php
+'default_namespace' => 'App',
+
+'directories' => [
+    'domain' => 'app/Domain',
+    'application' => 'app/Application',
+    'infrastructure' => 'app/Infrastructure',
+],
+```
+
+When the config file is not published, the defaults above are used.
+
+### ✅ Validation rules
+
+Every rule run by `clean-arch:validate` can be turned off by name under `validation.rules`. All of them are enabled by default, so a project without a published config file keeps the full set.
+
+```php
+'validation' => [
+    'rules' => [
+        'domain_no_application_imports' => true,
+        'domain_no_infrastructure_imports' => true,
+        'application_no_infrastructure_imports' => true,
+        'no_observers_in_domain' => true,
+        'no_jobs_in_infrastructure' => true,
+        'no_commands_in_infrastructure' => true,
+        'no_duplicate_services_directory' => true,
+    ],
+],
+```
+
+`no_commands_in_infrastructure` is the most likely candidate for opting out. A console command is an input adapter, much like an HTTP controller, and keeping it in `Application` forces the Application layer to depend on `Illuminate\Console`. Turn the rule off if you prefer `Infrastructure/Console/Commands`.
 
 ## 🛠️ Development
 
