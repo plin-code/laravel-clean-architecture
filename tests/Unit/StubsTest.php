@@ -100,6 +100,14 @@ describe('Stub Files', function () {
             ->toContain('public function messages(): array');
     });
 
+    it('request stub wraps messages in a custom_messages block', function () {
+        $content = file_get_contents($this->stubsPath . '/request.stub');
+
+        expect($content)
+            ->toContain('// {{#custom_messages}}')
+            ->toContain('// {{/custom_messages}}');
+    });
+
     it('web controller stub contains required structure', function () {
         $content = file_get_contents($this->stubsPath . '/web-controller.stub');
 
@@ -111,5 +119,21 @@ describe('Stub Files', function () {
             ->toContain('public function show(')
             ->toContain('public function update(')
             ->toContain('public function destroy(');
+    });
+
+    it('shipped config file does not declare the dead strict_mode key', function () {
+        $stub = file_get_contents($this->stubsPath . '/../config/clean-architecture.php');
+
+        expect($stub)
+            ->not->toContain('strict_mode')
+            ->toContain("'custom_messages' => true");
+    });
+
+    it('config stub does not declare the dead strict_mode key', function () {
+        $stub = file_get_contents($this->stubsPath . '/config.stub');
+
+        expect($stub)
+            ->not->toContain('strict_mode')
+            ->toContain("'custom_messages' => true");
     });
 });

@@ -162,6 +162,7 @@ describe('MakeDomainCommand', function () {
         $mockFilesystem = mock(Filesystem::class);
         $mockFilesystem->shouldReceive('exists')->andReturn(true);
         $mockFilesystem->shouldReceive('get')->andReturn('<?php namespace App\Infrastructure\Http\Requests; class {{RequestName}} {}');
+
         $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
         $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
         $mockFilesystem->shouldReceive('put')->andReturnUsing(function ($path) use (&$writtenPaths) {
@@ -174,6 +175,126 @@ describe('MakeDomainCommand', function () {
 
         $method->invoke($this->command, 'User');
         expect($writtenPaths)->each(fn ($path) => $path->toContain('Infrastructure/Http/Requests'));
+    });
+
+    it('applyOptionalBlock keeps content between markers when keeping', function () {
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('applyOptionalBlock');
+        $method->setAccessible(true);
+
+        $stub = "before\n    // {{#custom_messages}}\n    public function messages(): array\n    {\n    }\n    // {{/custom_messages}}\nafter";
+
+        $result = $method->invoke($this->command, $stub, 'custom_messages', true);
+
+        expect($result)
+            ->toContain('public function messages(): array')
+            ->not->toContain('{{#custom_messages')
+            ->not->toContain('{{/custom_messages');
+    });
+
+    it('applyOptionalBlock drops content between markers when not keeping', function () {
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('applyOptionalBlock');
+        $method->setAccessible(true);
+
+        $stub = "before\n    // {{#custom_messages}}\n    public function messages(): array\n    {\n    }\n    // {{/custom_messages}}\nafter";
+
+        $result = $method->invoke($this->command, $stub, 'custom_messages', false);
+
+        expect($result)
+            ->toBe('before' . "\n" . 'after')
+            ->not->toContain('public function messages')
+            ->not->toContain('{{#custom_messages');
+    });
+
+    it('applyOptionalBlock returns stub unchanged when markers are absent', function () {
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('applyOptionalBlock');
+        $method->setAccessible(true);
+
+        $stub   = "<?php\nclass Example {}";
+        $result = $method->invoke($this->command, $stub, 'custom_messages', false);
+
+        expect($result)->toBe($stub);
+    });
+
+    it('includes custom messages in request when config enables it', function () {
+        config()->set('clean-architecture.validation.custom_messages', true);
+
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('createRequests');
+        $method->setAccessible(true);
+
+        $written       = [];
+        $stubWithBlock = <<<'PHP'
+<?php
+class {{RequestName}} extends BaseRequest
+{
+    // {{#custom_messages}}
+    public function messages(): array
+    {
+        return [];
+    }
+    // {{/custom_messages}}
+}
+PHP;
+
+        $mockFilesystem = mock(Filesystem::class);
+        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('get')->andReturn($stubWithBlock);
+        $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
+        $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
+        $mockFilesystem->shouldReceive('put')->andReturnUsing(function ($path, $content) use (&$written) {
+            $written[$path] = $content;
+
+            return true;
+        });
+
+        $reflection->getProperty('files')->setValue($this->command, $mockFilesystem);
+        $method->invoke($this->command, 'User');
+
+        expect(implode('', $written))->toContain('public function messages');
+        expect(implode('', $written))->not->toContain('{{#custom_messages');
+        expect(implode('', $written))->not->toContain('{{/custom_messages');
+    });
+
+    it('omits custom messages in request when config disables it', function () {
+        config()->set('clean-architecture.validation.custom_messages', false);
+
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('createRequests');
+        $method->setAccessible(true);
+
+        $written       = [];
+        $stubWithBlock = <<<'PHP'
+<?php
+class {{RequestName}} extends BaseRequest
+{
+    // {{#custom_messages}}
+    public function messages(): array
+    {
+        return [];
+    }
+    // {{/custom_messages}}
+}
+PHP;
+
+        $mockFilesystem = mock(Filesystem::class);
+        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('get')->andReturn($stubWithBlock);
+        $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
+        $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
+        $mockFilesystem->shouldReceive('put')->andReturnUsing(function ($path, $content) use (&$written) {
+            $written[$path] = $content;
+
+            return true;
+        });
+
+        $reflection->getProperty('files')->setValue($this->command, $mockFilesystem);
+        $method->invoke($this->command, 'User');
+
+        expect(implode('', $written))->not->toContain('public function messages');
+        expect(implode('', $written))->not->toContain('{{#custom_messages');
     });
 
     it('can create resource', function () {

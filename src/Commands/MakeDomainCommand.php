@@ -5,9 +5,12 @@ namespace PlinCode\LaravelCleanArchitecture\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
+use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 
 class MakeDomainCommand extends Command
 {
+    use RendersStubs;
+
     protected $signature = 'clean-arch:make-domain {name : The name of the domain}
                           {--force : Overwrite existing files}';
 
@@ -186,7 +189,12 @@ class MakeDomainCommand extends Command
         }
 
         foreach ($requests as $request) {
-            $stub    = $this->getStub('request');
+            $stub = $this->getStub('request');
+            $stub = $this->applyOptionalBlock(
+                $stub,
+                'custom_messages',
+                (bool) config('clean-architecture.validation.custom_messages', true)
+            );
             $content = $this->replacePlaceholders($stub, $name, [
                 '{{RequestName}}' => $request . $name . 'Request',
             ]);
