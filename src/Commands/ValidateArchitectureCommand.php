@@ -5,11 +5,13 @@ namespace PlinCode\LaravelCleanArchitecture\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use PlinCode\LaravelCleanArchitecture\Concerns\ParsesPhpSource;
+use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
 use Symfony\Component\Finder\Finder;
 
 class ValidateArchitectureCommand extends Command
 {
     use ParsesPhpSource;
+    use ResolvesArchitectureDirectories;
 
     /**
      * Parent class identifying a console command.
@@ -41,13 +43,17 @@ class ValidateArchitectureCommand extends Command
         $this->info('=============================');
         $this->newLine();
 
-        $this->runImportCheck('Domain has no Application imports', 'app/Domain', 'App\\Application\\');
-        $this->runImportCheck('Domain has no Infrastructure imports', 'app/Domain', 'App\\Infrastructure\\');
-        $this->runImportCheck('Application has no Infrastructure imports', 'app/Application', 'App\\Infrastructure\\');
-        $this->runFilePatternCheck('No Observers in Domain', 'app/Domain', '*Observer.php');
-        $this->reportViolations('No Jobs in Infrastructure', $this->checkQueuedJobViolations('app/Infrastructure'));
-        $this->reportViolations('No Commands in Infrastructure', $this->checkConsoleCommandViolations('app/Infrastructure'));
-        $this->runDirectoryCheck('No duplicate Services directory', 'app/Infrastructure/Services');
+        $domain         = $this->layerDirectory('domain');
+        $application    = $this->layerDirectory('application');
+        $infrastructure = $this->layerDirectory('infrastructure');
+
+        $this->runImportCheck('Domain has no Application imports', $domain, $this->layerNamespace('application'));
+        $this->runImportCheck('Domain has no Infrastructure imports', $domain, $this->layerNamespace('infrastructure'));
+        $this->runImportCheck('Application has no Infrastructure imports', $application, $this->layerNamespace('infrastructure'));
+        $this->runFilePatternCheck('No Observers in Domain', $domain, '*Observer.php');
+        $this->reportViolations('No Jobs in Infrastructure', $this->checkQueuedJobViolations($infrastructure));
+        $this->reportViolations('No Commands in Infrastructure', $this->checkConsoleCommandViolations($infrastructure));
+        $this->runDirectoryCheck('No duplicate Services directory', "{$infrastructure}/Services");
 
         $this->newLine();
 
