@@ -285,4 +285,117 @@ describe('Command Integration', function () {
             expect(token_get_all(File::get($file), TOKEN_PARSE))->toBeArray();
         }
     });
+
+    it('includes custom messages in generated requests by default', function () {
+        $this->artisan('clean-arch:install');
+
+        config()->set('clean-architecture.validation.custom_messages', true);
+
+        $this->artisan('clean-arch:make-domain', ['name' => 'Article'])
+            ->expectsConfirmation('Would you like to generate an Observer?', 'no')
+            ->expectsConfirmation('Would you like to generate a Listener?', 'no')
+            ->expectsConfirmation('Would you like to generate a Job?', 'no')
+            ->expectsConfirmation('Would you like to generate a Mail?', 'no')
+            ->expectsConfirmation('Would you like to generate a Notification?', 'no')
+            ->expectsConfirmation('Would you like to generate an Export?', 'no')
+            ->assertExitCode(0);
+
+        $requestPath = app_path('Infrastructure/Http/Requests/CreateArticleRequest.php');
+
+        expect(File::exists($requestPath))->toBeTrue();
+
+        $content = File::get($requestPath);
+
+        expect($content)
+            ->toContain('public function messages(): array')
+            ->toContain('public function rules(): array')
+            ->not->toContain('{{#custom_messages');
+
+        $exitCode = 0;
+        exec('php -l ' . escapeshellarg($requestPath) . ' 2>&1', $output, $exitCode);
+
+        expect($exitCode)->toBe(0)
+            ->and(implode("\n", $output))->toContain('No syntax errors');
+    });
+
+    it('omits custom messages from generated requests when disabled', function () {
+        $this->artisan('clean-arch:install');
+
+        config()->set('clean-architecture.validation.custom_messages', false);
+
+        $this->artisan('clean-arch:make-domain', ['name' => 'Comment'])
+            ->expectsConfirmation('Would you like to generate an Observer?', 'no')
+            ->expectsConfirmation('Would you like to generate a Listener?', 'no')
+            ->expectsConfirmation('Would you like to generate a Job?', 'no')
+            ->expectsConfirmation('Would you like to generate a Mail?', 'no')
+            ->expectsConfirmation('Would you like to generate a Notification?', 'no')
+            ->expectsConfirmation('Would you like to generate an Export?', 'no')
+            ->assertExitCode(0);
+
+        $requestPath = app_path('Infrastructure/Http/Requests/CreateCommentRequest.php');
+
+        expect(File::exists($requestPath))->toBeTrue();
+
+        $content = File::get($requestPath);
+
+        expect($content)
+            ->toContain('public function rules(): array')
+            ->not->toContain('public function messages')
+            ->not->toContain('{{#custom_messages')
+            ->not->toContain('{{/custom_messages');
+
+        $exitCode = 0;
+        exec('php -l ' . escapeshellarg($requestPath) . ' 2>&1', $output, $exitCode);
+
+        expect($exitCode)->toBe(0);
+    });
+
+    it('keeps the rest of the request identical when custom messages are dropped', function () {
+        $this->artisan('clean-arch:install');
+
+        $enabledContent = '';
+
+        config()->set('clean-architecture.validation.custom_messages', true);
+        $this->artisan('clean-arch:make-domain', ['name' => 'Enabled'])
+            ->expectsConfirmation('Would you like to generate an Observer?', 'no')
+            ->expectsConfirmation('Would you like to generate a Listener?', 'no')
+            ->expectsConfirmation('Would you like to generate a Job?', 'no')
+            ->expectsConfirmation('Would you like to generate a Mail?', 'no')
+            ->expectsConfirmation('Would you like to generate a Notification?', 'no')
+            ->expectsConfirmation('Would you like to generate an Export?', 'no')
+            ->assertExitCode(0);
+
+        $enabledContent = File::get(app_path('Infrastructure/Http/Requests/CreateEnabledRequest.php'));
+
+        config()->set('clean-architecture.validation.custom_messages', false);
+        $this->artisan('clean-arch:make-domain', ['name' => 'Disabled'])
+            ->expectsConfirmation('Would you like to generate an Observer?', 'no')
+            ->expectsConfirmation('Would you like to generate a Listener?', 'no')
+            ->expectsConfirmation('Would you like to generate a Job?', 'no')
+            ->expectsConfirmation('Would you like to generate a Mail?', 'no')
+            ->expectsConfirmation('Would you like to generate a Notification?', 'no')
+            ->expectsConfirmation('Would you like to generate an Export?', 'no')
+            ->assertExitCode(0);
+
+        $disabledContent = File::get(app_path('Infrastructure/Http/Requests/CreateDisabledRequest.php'));
+
+        $shared = [
+            'namespace App\Infrastructure\Http\Requests;',
+            'class Create',
+            'extends BaseRequest',
+            'public function authorize(): bool',
+            'return true;',
+            'public function rules(): array',
+            "'name' => 'required|string|max:255'",
+            "'description' => 'nullable|string|max:1000'",
+            "'status' => 'required|string|in:active,inactive,pending'",
+        ];
+
+        foreach ($shared as $needle) {
+            expect($disabledContent)->toContain($needle);
+        }
+
+        expect($disabledContent)->not->toContain('public function messages');
+        expect($enabledContent)->toContain('public function messages');
+    });
 });

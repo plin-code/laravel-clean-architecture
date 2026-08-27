@@ -26,6 +26,7 @@ class {{RequestName}} extends BaseRequest
         ];
     }
 
+    // {{#custom_messages}}
     /**
      * Get custom messages for validator errors.
      */
@@ -39,4 +40,5 @@ class {{RequestName}} extends BaseRequest
             'status.in' => 'The status must be one of: active, inactive, pending.',
         ];
     }
+    // {{/custom_messages}}
 } 
