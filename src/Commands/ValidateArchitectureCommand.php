@@ -94,6 +94,9 @@ class ValidateArchitectureCommand extends Command
         }
     }
 
+    /**
+     * @return list<string>
+     */
     public function checkImportViolations(string $directory, string $importPattern): array
     {
         $violations = [];
@@ -103,18 +106,24 @@ class ValidateArchitectureCommand extends Command
             return $violations;
         }
 
+        $prefix = ltrim($importPattern, '\\');
+
         $finder = new Finder;
         $finder->files()->in($path)->name('*.php');
 
         foreach ($finder as $file) {
-            $contents = $file->getContents();
-            $lines    = explode("\n", $contents);
+            $contents     = $file->getContents();
+            $lines        = explode("\n", $contents);
+            $relativePath = str_replace(base_path() . '/', '', $file->getRealPath());
 
-            foreach ($lines as $lineNumber => $line) {
-                if (str_contains($line, "use {$importPattern}")) {
-                    $relativePath = str_replace(base_path() . '/', '', $file->getRealPath());
-                    $violations[] = "{$relativePath}:" . ($lineNumber + 1) . ' → ' . trim($line);
+            foreach ($this->extractUseStatements($contents) as $statement) {
+                if (! str_starts_with($statement['name'], $prefix)) {
+                    continue;
                 }
+
+                $line         = $statement['line'];
+                $source       = trim($lines[$line - 1] ?? '');
+                $violations[] = "{$relativePath}:{$line} → {$source}";
             }
         }
 

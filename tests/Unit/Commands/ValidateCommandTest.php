@@ -205,6 +205,106 @@ describe('ValidateArchitectureCommand', function () {
         expect($this->command->checkQueuedJobViolations('app/Infrastructure'))->toBe([$path]);
     });
 
+    it('reports a real infrastructure import in domain', function () {
+        $path = writeAppFile(
+            'app/Domain/Users/Models/User.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Domain\Users\Models;
+
+            use App\Infrastructure\Traits\HasSlug;
+
+            class User
+            {
+                use HasSlug;
+            }
+            PHP
+        );
+
+        expect($this->command->checkImportViolations('app/Domain', 'App\\Infrastructure\\'))
+            ->toBe(["{$path}:5 → use App\\Infrastructure\\Traits\\HasSlug;"]);
+    });
+
+    it('does not report a trait use inside the class body', function () {
+        writeAppFile(
+            'app/Domain/Users/Models/Member.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Domain\Users\Models;
+
+            class Member
+            {
+                use App\Infrastructure\Traits\HasSlug;
+            }
+            PHP
+        );
+
+        expect($this->command->checkImportViolations('app/Domain', 'App\\Infrastructure\\'))->toBeEmpty();
+    });
+
+    it('does not report a commented out import', function () {
+        writeAppFile(
+            'app/Domain/Users/Models/Guest.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Domain\Users\Models;
+
+            // use App\Infrastructure\Foo;
+            /* use App\Infrastructure\Bar; */
+
+            class Guest
+            {
+                public function label(): string
+                {
+                    return 'use App\Infrastructure\Baz;';
+                }
+            }
+            PHP
+        );
+
+        expect($this->command->checkImportViolations('app/Domain', 'App\\Infrastructure\\'))->toBeEmpty();
+    });
+
+    it('does not report a closure use clause', function () {
+        writeAppFile(
+            'app/Domain/Users/bootstrap.php',
+            <<<'PHP'
+            <?php
+
+            $prefix = 'App\Infrastructure\\';
+
+            $callback = function () use ($prefix) {
+                return $prefix;
+            };
+            PHP
+        );
+
+        expect($this->command->checkImportViolations('app/Domain', 'App\\Infrastructure\\'))->toBeEmpty();
+    });
+
+    it('reports every name of a grouped import', function () {
+        $path = writeAppFile(
+            'app/Domain/Users/Models/Team.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Domain\Users\Models;
+
+            use App\Infrastructure\Traits\{HasSlug, HasUuid};
+
+            class Team {}
+            PHP
+        );
+
+        expect($this->command->checkImportViolations('app/Domain', 'App\\Infrastructure\\'))->toBe([
+            "{$path}:5 → use App\\Infrastructure\\Traits\\{HasSlug, HasUuid};",
+            "{$path}:5 → use App\\Infrastructure\\Traits\\{HasSlug, HasUuid};",
+        ]);
+    });
+
     it('only matches the Observer suffix in domain', function () {
         writeAppFile(
             'app/Domain/Practices/Models/ObserverSlot.php',

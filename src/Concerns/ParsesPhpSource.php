@@ -203,6 +203,10 @@ trait ParsesPhpSource
                     $alias     = '';
                     $readAlias = false;
 
+                    if ($token === '}') {
+                        $prefix = '';
+                    }
+
                     if ($token === ';') {
                         return $i;
                     }
