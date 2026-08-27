@@ -270,6 +270,20 @@ Every rule run by `clean-arch:validate` can be turned off by name under `validat
 
 `no_commands_in_infrastructure` is the most likely candidate for opting out. A console command is an input adapter, much like an HTTP controller, and keeping it in `Application` forces the Application layer to depend on `Illuminate\Console`. Turn the rule off if you prefer `Infrastructure/Console/Commands`.
 
+### 📝 Custom validation messages
+
+`validation.custom_messages` controls whether `clean-arch:make-domain` generates the `messages()` method in the form requests it creates. It defaults to `true`.
+
+```php
+'validation' => [
+    'custom_messages' => false,
+],
+```
+
+Set it to `false` and the generated `Create*Request` and `Update*Request` classes will omit the `messages()` method entirely. The default `rules()` and `authorize()` methods are unaffected, and the output remains valid PHP either way.
+
+Note the two keys live under `validation` but serve different purposes. The `rules` subgroup is read by `clean-arch:validate`, while `custom_messages` is read by `clean-arch:make-domain` at generation time. They are kept together so that a single published config file is the only place to look.
+
 ## 🛠️ Development
 
 This package uses several tools to maintain code quality:
