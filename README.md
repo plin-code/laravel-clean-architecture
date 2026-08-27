@@ -81,6 +81,8 @@ This command checks your codebase for layer dependency violations (for example, 
 
 Checks are based on what the code is, not on how files are named. Imports are read from the real `use` statements of each file, so a trait import inside a class body, a closure `use` clause or a commented out line is never reported. Console commands are recognised by their parent class (`Illuminate\Console\Command`) and jobs by the `Illuminate\Contracts\Queue\ShouldQueue` contract, so a `CommandPaletteController` or a `JobApplicationResource` is left alone. Observers are still matched by the `Observer.php` suffix.
 
+Inheritance is followed, so a command extending your own `BaseCommand` is reported just like one extending `Illuminate\Console\Command` directly. The chain is resolved by parsing the sources under `app/`, never by loading them, which has one consequence worth knowing: if a class extends something that lives in `vendor/`, the chain stops there and the class is not reported. Only classes are reported, so an interface extending `ShouldQueue` counts as a contract, not as a job.
+
 Rules can be disabled one by one, see [Validation rules](#-validation-rules).
 
 ```
