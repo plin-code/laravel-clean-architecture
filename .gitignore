@@ -44,3 +44,4 @@ phpstan.json
 .Trashes
 ehthumbs.db
 Thumbs.db
+coverage.clover

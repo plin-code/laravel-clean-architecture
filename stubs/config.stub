@@ -28,7 +28,6 @@ return [
     ],
 
     'validation' => [
-        'strict_mode' => false,
         'custom_messages' => true,
 
         /*
