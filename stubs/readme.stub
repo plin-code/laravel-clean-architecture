@@ -7,26 +7,27 @@ This documentation describes the Clean Architecture structure implemented in the
 ```
 app/
 ├── Application/
-│   ├── Actions/          # Application use cases
-│   ├── Services/         # Application services
-│   ├── Jobs/            # Asynchronous jobs
-│   ├── Console/         # Console commands
-│   └── Listeners/       # Event listeners
-├── Domain/              # Business logic
-│   └── Shared/          # Shared classes between domains
-└── Infrastructure/      # Implementation details
+│   ├── Actions/            # Application use cases
+│   ├── Services/           # Application services
+│   ├── Jobs/               # Asynchronous jobs
+│   ├── Console/Commands/   # Console commands
+│   └── Listeners/          # Event listeners
+├── Domain/                 # Business logic
+│   └── Shared/             # Shared classes between domains
+└── Infrastructure/         # Implementation details
     ├── Http/
     │   ├── Controllers/
-    │   │   └── Api/    # API controllers
-    │   ├── Middleware/  # HTTP middleware
-    │   ├── Requests/    # Form requests
-    │   └── Resources/   # API resources
-    ├── UI/
-    │   └── Web/        # Web controllers
-    ├── Mail/           # Mail classes
-    ├── Notifications/  # Notifications
-    ├── Observers/      # Model observers
-    └── Exceptions/     # Custom exceptions
+    │   │   └── Api/        # API controllers
+    │   ├── Middleware/     # HTTP middleware
+    │   ├── Requests/       # Form requests
+    │   └── Resources/      # API resources
+    ├── UI/                 # Web controllers go in UI/Web/Controllers
+    ├── Mail/               # Mail classes
+    ├── Notifications/      # Notifications
+    ├── Observers/          # Model observers
+    ├── Exports/            # Excel and CSV exports
+    ├── Validation/         # Custom validation rules
+    └── Exceptions/         # Custom exceptions
 ```
 
 ## Principles
