@@ -137,8 +137,8 @@ class MakeDomainCommand extends Command
         foreach ($actions as $action => $requestClass) {
             $stub    = $this->getStub('action');
             $content = $this->replacePlaceholders($stub, $name, [
-                'ActionName'  => $action . $name . 'Action',
-                'RequestName' => $requestClass ?: 'Request',
+                '{{ActionName}}'  => $action . $name . 'Action',
+                '{{RequestName}}' => $requestClass ?: 'Request',
             ]);
 
             $this->files->put("{$actionsPath}/{$action}{$name}Action.php", $content);
@@ -188,7 +188,7 @@ class MakeDomainCommand extends Command
         foreach ($requests as $request) {
             $stub    = $this->getStub('request');
             $content = $this->replacePlaceholders($stub, $name, [
-                'RequestName' => $request . $name . 'Request',
+                '{{RequestName}}' => $request . $name . 'Request',
             ]);
 
             $this->files->put("{$requestsPath}/{$request}{$name}Request.php", $content);

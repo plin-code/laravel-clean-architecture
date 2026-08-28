@@ -236,4 +236,53 @@ describe('Command Integration', function () {
         expect(File::exists(app_path('Infrastructure/Notifications/OrderNotification.php')))->toBeTrue();
         expect(File::exists(app_path('Infrastructure/Exports/OrderExport.php')))->toBeTrue();
     });
+
+    it('generates action and request classes without leftover placeholders', function () {
+        $this->artisan('clean-arch:install');
+
+        $this->artisan('clean-arch:make-domain', ['name' => 'Invoice'])
+            ->expectsConfirmation('Would you like to generate an Observer?', 'no')
+            ->expectsConfirmation('Would you like to generate a Listener?', 'no')
+            ->expectsConfirmation('Would you like to generate a Job?', 'no')
+            ->expectsConfirmation('Would you like to generate a Mail?', 'no')
+            ->expectsConfirmation('Would you like to generate a Notification?', 'no')
+            ->expectsConfirmation('Would you like to generate an Export?', 'no')
+            ->assertExitCode(0);
+
+        $action = File::get(app_path('Application/Actions/Invoices/CreateInvoiceAction.php'));
+        expect($action)->toContain('class CreateInvoiceAction');
+        expect($action)->not->toContain('{{');
+
+        $request = File::get(app_path('Infrastructure/Http/Requests/CreateInvoiceRequest.php'));
+        expect($request)->toContain('class CreateInvoiceRequest');
+        expect($request)->not->toContain('{{');
+    });
+
+    it('generates every domain file as valid php', function () {
+        $this->artisan('clean-arch:install');
+
+        $this->artisan('clean-arch:make-domain', ['name' => 'Receipt'])
+            ->expectsConfirmation('Would you like to generate an Observer?', 'no')
+            ->expectsConfirmation('Would you like to generate a Listener?', 'no')
+            ->expectsConfirmation('Would you like to generate a Job?', 'no')
+            ->expectsConfirmation('Would you like to generate a Mail?', 'no')
+            ->expectsConfirmation('Would you like to generate a Notification?', 'no')
+            ->expectsConfirmation('Would you like to generate an Export?', 'no')
+            ->assertExitCode(0);
+
+        $files = [
+            app_path('Domain/Receipts/Models/Receipt.php'),
+            app_path('Application/Actions/Receipts/CreateReceiptAction.php'),
+            app_path('Application/Actions/Receipts/GetByIdReceiptAction.php'),
+            app_path('Application/Services/ReceiptService.php'),
+            app_path('Infrastructure/Http/Requests/CreateReceiptRequest.php'),
+            app_path('Infrastructure/Http/Requests/UpdateReceiptRequest.php'),
+            app_path('Infrastructure/Http/Controllers/Api/ReceiptsController.php'),
+        ];
+
+        foreach ($files as $file) {
+            expect(File::exists($file))->toBeTrue();
+            expect(token_get_all(File::get($file), TOKEN_PARSE))->toBeArray();
+        }
+    });
 });
