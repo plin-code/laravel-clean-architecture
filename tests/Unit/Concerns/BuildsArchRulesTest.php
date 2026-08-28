@@ -45,19 +45,19 @@ describe('BuildsArchRules', function () {
 
         expect($rules[0])
             ->toContain("new ResideInOneOfTheseNamespaces('App\\\\Domain')")
-            ->toContain("new NotDependsOnTheseNamespaces('App\\\\Application')");
+            ->toContain("new NotDependsOnTheseNamespaces(['App\\\\Application'])");
     });
 
     it('keeps the domain away from the infrastructure layer', function () {
         expect(buildArchRules()[1])
             ->toContain("new ResideInOneOfTheseNamespaces('App\\\\Domain')")
-            ->toContain("new NotDependsOnTheseNamespaces('App\\\\Infrastructure')");
+            ->toContain("new NotDependsOnTheseNamespaces(['App\\\\Infrastructure'])");
     });
 
     it('keeps the application away from the infrastructure layer', function () {
         expect(buildArchRules()[2])
             ->toContain("new ResideInOneOfTheseNamespaces('App\\\\Application')")
-            ->toContain("new NotDependsOnTheseNamespaces('App\\\\Infrastructure')");
+            ->toContain("new NotDependsOnTheseNamespaces(['App\\\\Infrastructure'])");
     });
 
     it('forbids observers in the domain layer', function () {

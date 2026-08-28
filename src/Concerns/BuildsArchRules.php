@@ -38,17 +38,17 @@ trait BuildsArchRules
         $definitions = [
             'domain_no_application_imports' => [
                 $domain,
-                "new NotDependsOnTheseNamespaces({$this->archLiteral($application)})",
+                "new NotDependsOnTheseNamespaces([{$this->archLiteral($application)}])",
                 'the domain layer must not depend on the application layer',
             ],
             'domain_no_infrastructure_imports' => [
                 $domain,
-                "new NotDependsOnTheseNamespaces({$this->archLiteral($infrastructure)})",
+                "new NotDependsOnTheseNamespaces([{$this->archLiteral($infrastructure)}])",
                 'the domain layer must not depend on the infrastructure layer',
             ],
             'application_no_infrastructure_imports' => [
                 $application,
-                "new NotDependsOnTheseNamespaces({$this->archLiteral($infrastructure)})",
+                "new NotDependsOnTheseNamespaces([{$this->archLiteral($infrastructure)}])",
                 'the application layer must not depend on the infrastructure layer',
             ],
             'no_observers_in_domain' => [
