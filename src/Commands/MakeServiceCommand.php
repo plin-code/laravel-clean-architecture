@@ -5,11 +5,15 @@ namespace PlinCode\LaravelCleanArchitecture\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
+use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 
 class MakeServiceCommand extends Command
 {
+    use RendersStubs;
+
     protected $signature = 'clean-arch:make-service {name : The name of the service}
-                          {--force : Overwrite existing files}';
+                           {--force : Overwrite existing files}
+                           {--no-base : Do not extend BaseService}';
 
     protected $description = 'Create a new service in the Application layer';
 
@@ -37,8 +41,12 @@ class MakeServiceCommand extends Command
 
     protected function createService(string $name): void
     {
+        $extend  = $this->shouldExtendBaseClasses((bool) $this->option('no-base'));
         $stub    = $this->getStub('service');
-        $content = $this->replacePlaceholders($stub, $name);
+        $stub    = $this->applyOptionalBlock($stub, 'base_class', $extend);
+        $content = $this->replacePlaceholders($stub, $name, [
+            '{{ServiceExtends}}' => $extend ? ' extends BaseService' : '',
+        ]);
 
         $servicesPath = app_path('Application/Services');
         if (! $this->files->isDirectory($servicesPath)) {
@@ -49,16 +57,16 @@ class MakeServiceCommand extends Command
         $this->info("Created: Application/Services/{$name}Service.php");
     }
 
-    protected function replacePlaceholders(string $content, string $name): string
+    protected function replacePlaceholders(string $content, string $name, array $extra = []): string
     {
         $pluralName     = Str::plural($name);
         $domainVariable = Str::camel($name);
 
-        $replacements = [
+        $replacements = array_merge([
             '{{DomainName}}'       => $name,
             '{{PluralDomainName}}' => $pluralName,
             '{{domainVariable}}'   => $domainVariable,
-        ];
+        ], $extra);
 
         return str_replace(array_keys($replacements), array_values($replacements), $content);
     }
