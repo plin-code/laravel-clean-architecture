@@ -43,10 +43,7 @@ class MakeServiceCommand extends Command
     {
         $extend  = $this->shouldExtendBaseClasses((bool) $this->option('no-base'));
         $stub    = $this->getStub('service');
-        $stub    = $this->applyOptionalBlock($stub, 'base_class', $extend);
-        $content = $this->replacePlaceholders($stub, $name, [
-            '{{ServiceExtends}}' => $extend ? ' extends BaseService' : '',
-        ]);
+        $content = $this->replacePlaceholders($stub, $name, $this->baseServiceReplacements($extend));
 
         $servicesPath = app_path('Application/Services');
         if (! $this->files->isDirectory($servicesPath)) {

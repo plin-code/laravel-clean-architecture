@@ -62,13 +62,12 @@ describe('Stub Files', function () {
             ->toContain('public function execute');
     });
 
-    it('action stub wraps BaseAction import in a base_class block', function () {
+    it('action stub carries the optional BaseAction import placeholder', function () {
         $content = file_get_contents($this->stubsPath . '/action.stub');
 
         expect($content)
-            ->toContain('// {{#base_class}}')
-            ->toContain('use App\Application\Actions\BaseAction;')
-            ->toContain('// {{/base_class}}');
+            ->toContain('{{ActionBaseImport}}use App\\Domain\\')
+            ->not->toContain('// {{#base_class}}');
     });
 
     it('controller stub contains required structure', function () {
@@ -87,13 +86,12 @@ describe('Stub Files', function () {
             ->toContain('class {{DomainName}}Service{{ServiceExtends}}');
     });
 
-    it('service stub wraps BaseService import in a base_class block', function () {
+    it('service stub carries the optional BaseService import placeholder', function () {
         $content = file_get_contents($this->stubsPath . '/service.stub');
 
         expect($content)
-            ->toContain('// {{#base_class}}')
-            ->toContain('use App\Application\Services\BaseService;')
-            ->toContain('// {{/base_class}}');
+            ->toContain('{{ServiceBaseImport}}use App\\Domain\\')
+            ->not->toContain('// {{#base_class}}');
     });
 
     it('domain model stub contains required content', function () {
