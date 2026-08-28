@@ -179,6 +179,33 @@ describe('ValidateArchitectureCommand', function () {
         expect($this->command->checkQueuedJobViolations('app/Infrastructure'))->toBe([$path]);
     });
 
+    it('warns that the command is deprecated and points at its replacement', function () {
+        $this->artisan('clean-arch:validate')
+            ->expectsOutputToContain('clean-arch:validate is deprecated')
+            ->expectsOutputToContain('clean-arch:make-arch-rules')
+            ->assertExitCode(0);
+    });
+
+    it('keeps reporting violations while deprecated', function () {
+        writeAppFile(
+            'app/Domain/Models/Product.php',
+            <<<'PHP'
+            <?php
+
+            namespace App\Domain\Models;
+
+            use App\Application\Services\ProductService;
+
+            class Product
+            {
+                public function __construct(private ProductService $service) {}
+            }
+            PHP
+        );
+
+        $this->artisan('clean-arch:validate')->assertExitCode(1);
+    });
+
     it('keeps every rule enabled when the config is not published', function () {
         $reflection = new ReflectionClass($this->command);
         $method     = $reflection->getMethod('isRuleEnabled');

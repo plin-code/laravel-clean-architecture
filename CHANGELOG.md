@@ -2,7 +2,15 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
-## [Unreleased]
+## [2.2.0] - 2026-08-28
+
+### Added
+
+- `clean-arch:make-arch-rules` writes a `phparkitect.php` built from `directories`, `default_namespace` and `validation.rules`. The package neither depends on phparkitect nor runs it: install it in your own `require-dev` and run `vendor/bin/phparkitect check`. The generated rules follow inheritance chains, so a command extending a project base command is reported where `clean-arch:validate` misses it. The file opens with a `class_exists` guard, because the reflection based rules report nothing and exit 0 when autoloading does not resolve, which in CI reads as a pass. Pass `--force` to overwrite an existing file
+
+### Deprecated
+
+- `clean-arch:validate` prints a deprecation warning and will be removed in 3.0.0. It still runs every enabled rule and its exit codes are unchanged, so a pipeline that uses it keeps working until then. Replace it with `clean-arch:make-arch-rules` plus `vendor/bin/phparkitect check`, and use `vendor/bin/phparkitect generate-baseline` if the codebase already has violations to record
 
 ### Removed
 

@@ -39,6 +39,10 @@ class ValidateArchitectureCommand extends Command
 
     public function handle(): int
     {
+        $this->warn('clean-arch:validate is deprecated and will be removed in 3.0.0.');
+        $this->warn('Run clean-arch:make-arch-rules and check the generated phparkitect.php instead.');
+        $this->newLine();
+
         $this->info('Clean Architecture Validation');
         $this->info('=============================');
         $this->newLine();

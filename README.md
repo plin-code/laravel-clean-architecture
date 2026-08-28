@@ -121,7 +121,7 @@ vendor/bin/phparkitect check
 php artisan clean-arch:validate
 ```
 
-`clean-arch:validate` still ships and still works. It reads the same `validation.rules` and needs no extra dependency, but it inspects each class as written and does not follow inheritance chains, so a command extending a base command is not reported. It is being replaced by the generated rules.
+`clean-arch:validate` is deprecated and will be removed in 3.0.0. It still runs every enabled rule with unchanged exit codes, and it reads the same `validation.rules`, but it inspects each class as written and does not follow inheritance chains, so a command extending a base command is not reported. Replace it with `clean-arch:make-arch-rules` plus `vendor/bin/phparkitect check`.
 
 ### 🛠️ Available commands
 
