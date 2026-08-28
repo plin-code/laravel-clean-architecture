@@ -45,10 +45,7 @@ class MakeActionCommand extends Command
     {
         $extend  = $this->shouldExtendBaseClasses((bool) $this->option('no-base'));
         $stub    = $this->getStub('action');
-        $stub    = $this->applyOptionalBlock($stub, 'base_class', $extend);
-        $content = $this->replacePlaceholders($stub, $name, [
-            '{{ActionExtends}}' => $extend ? ' extends BaseAction' : '',
-        ], $domain);
+        $content = $this->replacePlaceholders($stub, $name, $this->baseActionReplacements($extend), $domain);
 
         $pluralDomain = Str::plural($domain);
         $actionsPath  = app_path("Application/Actions/{$pluralDomain}");

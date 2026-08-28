@@ -2,10 +2,7 @@
 
 namespace App\Application\Actions\{{PluralDomainName}};
 
-// {{#base_class}}
-use App\Application\Actions\BaseAction;
-// {{/base_class}}
-use App\Domain\{{PluralDomainName}}\Models\{{DomainName}};
+{{ActionBaseImport}}use App\Domain\{{PluralDomainName}}\Models\{{DomainName}};
 
 class {{ActionName}}{{ActionExtends}}
 {

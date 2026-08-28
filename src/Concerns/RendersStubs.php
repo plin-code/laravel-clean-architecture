@@ -63,6 +63,35 @@ trait RendersStubs
     }
 
     /**
+     * Replacements driving the optional `BaseService` extension.
+     *
+     * The import placeholder carries its own newline, so dropping it leaves no
+     * blank line behind in the generated file.
+     *
+     * @return array<string, string>
+     */
+    protected function baseServiceReplacements(bool $extend): array
+    {
+        return [
+            '{{ServiceBaseImport}}' => $extend ? "use App\\Application\\Services\\BaseService;\n" : '',
+            '{{ServiceExtends}}'    => $extend ? ' extends BaseService' : '',
+        ];
+    }
+
+    /**
+     * Replacements driving the optional `BaseAction` extension.
+     *
+     * @return array<string, string>
+     */
+    protected function baseActionReplacements(bool $extend): array
+    {
+        return [
+            '{{ActionBaseImport}}' => $extend ? "use App\\Application\\Actions\\BaseAction;\n" : '',
+            '{{ActionExtends}}'    => $extend ? ' extends BaseAction' : '',
+        ];
+    }
+
+    /**
      * Whether generated classes should extend their application-layer base class.
      *
      * Driven by the `generation.extend_base_classes` config value (default true)

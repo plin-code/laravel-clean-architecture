@@ -138,15 +138,14 @@ class MakeDomainCommand extends Command
             $this->files->makeDirectory($actionsPath, 0755, true);
         }
 
+        $extend = $this->shouldExtendBaseClasses((bool) $this->option('no-base'));
+
         foreach ($actions as $action => $requestClass) {
-            $extend  = $this->shouldExtendBaseClasses((bool) $this->option('no-base'));
             $stub    = $this->getStub('action');
-            $stub    = $this->applyOptionalBlock($stub, 'base_class', $extend);
-            $content = $this->replacePlaceholders($stub, $name, [
-                '{{ActionName}}'    => $action . $name . 'Action',
-                '{{ActionExtends}}' => $extend ? ' extends BaseAction' : '',
-                '{{RequestName}}'   => $requestClass ?: 'Request',
-            ]);
+            $content = $this->replacePlaceholders($stub, $name, array_merge($this->baseActionReplacements($extend), [
+                '{{ActionName}}'  => $action . $name . 'Action',
+                '{{RequestName}}' => $requestClass ?: 'Request',
+            ]));
 
             $this->files->put("{$actionsPath}/{$action}{$name}Action.php", $content);
             $this->info("Created: Application/Actions/{$pluralName}/{$action}{$name}Action.php");
@@ -157,10 +156,7 @@ class MakeDomainCommand extends Command
     {
         $extend  = $this->shouldExtendBaseClasses((bool) $this->option('no-base'));
         $stub    = $this->getStub('service');
-        $stub    = $this->applyOptionalBlock($stub, 'base_class', $extend);
-        $content = $this->replacePlaceholders($stub, $name, [
-            '{{ServiceExtends}}' => $extend ? ' extends BaseService' : '',
-        ]);
+        $content = $this->replacePlaceholders($stub, $name, $this->baseServiceReplacements($extend));
 
         $servicesPath = app_path('Application/Services');
         if (! $this->files->isDirectory($servicesPath)) {
