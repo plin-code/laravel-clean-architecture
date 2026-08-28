@@ -46,4 +46,18 @@ return [
             'no_duplicate_services_directory'       => true,
         ],
     ],
+
+    /*
+    | Options read by clean-arch:make-domain and the individual make-* commands
+    | when they generate code.
+    */
+    'generation' => [
+        /*
+        | When true (the default) generated services and actions extend the
+        | BaseService and BaseAction classes created by clean-arch:install.
+        | Pass --no-base to the command, or set this to false, to generate
+        | standalone classes without a base class.
+        */
+        'extend_base_classes' => true,
+    ],
 ];
