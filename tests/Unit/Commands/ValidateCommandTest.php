@@ -70,32 +70,6 @@ describe('ValidateArchitectureCommand', function () {
         expect($violations)->toBeArray()->toBeEmpty();
     });
 
-    it('detects duplicate services directory when it exists', function () {
-        $reflection = new ReflectionClass($this->command);
-        $method     = $reflection->getMethod('checkDirectoryNotExists');
-        $method->setAccessible(true);
-
-        $mockFilesystem = mock(Filesystem::class);
-        $mockFilesystem->shouldReceive('isDirectory')->andReturn(true);
-        $reflection->getProperty('files')->setValue($this->command, $mockFilesystem);
-
-        $result = $method->invoke($this->command, 'app/Infrastructure/Services');
-        expect($result)->toBeTrue();
-    });
-
-    it('passes when services directory does not exist in infrastructure', function () {
-        $reflection = new ReflectionClass($this->command);
-        $method     = $reflection->getMethod('checkDirectoryNotExists');
-        $method->setAccessible(true);
-
-        $mockFilesystem = mock(Filesystem::class);
-        $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
-        $reflection->getProperty('files')->setValue($this->command, $mockFilesystem);
-
-        $result = $method->invoke($this->command, 'app/Infrastructure/Services');
-        expect($result)->toBeFalse();
-    });
-
     it('does not report a business class whose name merely contains Command', function () {
         writeAppFile(
             'app/Infrastructure/Http/Controllers/Api/CommandPaletteController.php',
@@ -211,7 +185,6 @@ describe('ValidateArchitectureCommand', function () {
         $method->setAccessible(true);
 
         expect($method->invoke($this->command, 'no_commands_in_infrastructure'))->toBeTrue();
-        expect($method->invoke($this->command, 'no_duplicate_services_directory'))->toBeTrue();
     });
 
     it('reads a disabled rule from the config', function () {

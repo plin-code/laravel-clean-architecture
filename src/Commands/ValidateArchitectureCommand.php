@@ -53,7 +53,6 @@ class ValidateArchitectureCommand extends Command
         $this->runFilePatternCheck('no_observers_in_domain', 'No Observers in Domain', $domain, '*Observer.php');
         $this->runClassCheck('no_jobs_in_infrastructure', 'No Jobs in Infrastructure', fn (): array => $this->checkQueuedJobViolations($infrastructure));
         $this->runClassCheck('no_commands_in_infrastructure', 'No Commands in Infrastructure', fn (): array => $this->checkConsoleCommandViolations($infrastructure));
-        $this->runDirectoryCheck('no_duplicate_services_directory', 'No duplicate Services directory', "{$infrastructure}/Services");
 
         $this->newLine();
 
@@ -257,25 +256,5 @@ class ValidateArchitectureCommand extends Command
         }
 
         return $violations;
-    }
-
-    protected function runDirectoryCheck(string $rule, string $label, string $directory): void
-    {
-        if ($this->skipsRule($rule, $label)) {
-            return;
-        }
-
-        if ($this->checkDirectoryNotExists($directory)) {
-            $this->violationCount++;
-            $this->line("  ✗ {$label}");
-            $this->line("    - {$directory} exists");
-        } else {
-            $this->line("  ✓ {$label}");
-        }
-    }
-
-    public function checkDirectoryNotExists(string $directory): bool
-    {
-        return $this->files->isDirectory(base_path($directory));
     }
 }
