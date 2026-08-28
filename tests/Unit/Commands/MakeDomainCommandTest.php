@@ -2,6 +2,7 @@
 
 use Illuminate\Filesystem\Filesystem;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeDomainCommand;
+use Symfony\Component\Console\Input\ArrayInput;
 
 describe('MakeDomainCommand', function () {
     beforeEach(function () {
@@ -17,6 +18,11 @@ describe('MakeDomainCommand', function () {
         $outputProperty = $reflection->getProperty('output');
         $outputProperty->setAccessible(true);
         $outputProperty->setValue($this->command, $mockOutput);
+
+        $input         = new ArrayInput(['name' => 'User'], $this->command->getDefinition());
+        $inputProperty = $reflection->getProperty('input');
+        $inputProperty->setAccessible(true);
+        $inputProperty->setValue($this->command, $input);
     });
 
     it('has correct command signature and description', function () {
@@ -29,8 +35,46 @@ describe('MakeDomainCommand', function () {
 
         expect($definition->hasArgument('name'))->toBeTrue();
         expect($definition->hasOption('force'))->toBeTrue();
+        expect($definition->hasOption('no-base'))->toBeTrue();
         expect($definition->getArgument('name')->getDescription())->toBe('The name of the domain');
         expect($definition->getOption('force')->getDescription())->toBe('Overwrite existing files');
+        expect($definition->getOption('no-base')->getDescription())->toBe('Do not extend BaseService and BaseAction');
+    });
+
+    it('shouldExtendBaseClasses returns true by default', function () {
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('shouldExtendBaseClasses');
+        $method->setAccessible(true);
+
+        expect($method->invoke($this->command, false))->toBeTrue();
+    });
+
+    it('shouldExtendBaseClasses returns false when config disables it', function () {
+        config()->set('clean-architecture.generation.extend_base_classes', false);
+
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('shouldExtendBaseClasses');
+        $method->setAccessible(true);
+
+        expect($method->invoke($this->command, false))->toBeFalse();
+    });
+
+    it('shouldExtendBaseClasses returns false when no-base flag is set', function () {
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('shouldExtendBaseClasses');
+        $method->setAccessible(true);
+
+        expect($method->invoke($this->command, true))->toBeFalse();
+    });
+
+    it('shouldExtendBaseClasses lets config override when no-base flag is clear', function () {
+        config()->set('clean-architecture.generation.extend_base_classes', true);
+
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('shouldExtendBaseClasses');
+        $method->setAccessible(true);
+
+        expect($method->invoke($this->command, false))->toBeTrue();
     });
 
     it('can create domain model', function () {
@@ -126,6 +170,195 @@ describe('MakeDomainCommand', function () {
 
         $result = $method->invoke($this->command, 'User');
         expect($result)->toBeNull(); // Void method returns null
+    });
+
+    it('createService extends BaseService by default', function () {
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('createService');
+        $method->setAccessible(true);
+
+        $written = [];
+        $stub    = <<<'PHP'
+<?php
+namespace App\Application\Services;
+
+// {{#base_class}}
+use App\Application\Services\BaseService;
+// {{/base_class}}
+class {{DomainName}}Service{{ServiceExtends}} {}
+PHP;
+
+        $mockFilesystem = mock(Filesystem::class);
+        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('get')->andReturn($stub);
+        $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
+        $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
+        $mockFilesystem->shouldReceive('put')->andReturnUsing(function ($path, $content) use (&$written) {
+            $written[$path] = $content;
+
+            return true;
+        });
+
+        $reflection->getProperty('files')->setValue($this->command, $mockFilesystem);
+        $method->invoke($this->command, 'User');
+
+        expect(implode('', $written))
+            ->toContain('use App\Application\Services\BaseService;')
+            ->toContain('class UserService extends BaseService');
+    });
+
+    it('createService omits BaseService with no-base flag', function () {
+        $reflection    = new ReflectionClass($this->command);
+        $input         = new ArrayInput(['name' => 'User', '--no-base' => true], $this->command->getDefinition());
+        $inputProperty = $reflection->getProperty('input');
+        $inputProperty->setAccessible(true);
+        $inputProperty->setValue($this->command, $input);
+
+        $method = $reflection->getMethod('createService');
+        $method->setAccessible(true);
+
+        $written = [];
+        $stub    = <<<'PHP'
+<?php
+namespace App\Application\Services;
+
+// {{#base_class}}
+use App\Application\Services\BaseService;
+// {{/base_class}}
+class {{DomainName}}Service{{ServiceExtends}} {}
+PHP;
+
+        $mockFilesystem = mock(Filesystem::class);
+        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('get')->andReturn($stub);
+        $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
+        $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
+        $mockFilesystem->shouldReceive('put')->andReturnUsing(function ($path, $content) use (&$written) {
+            $written[$path] = $content;
+
+            return true;
+        });
+
+        $reflection->getProperty('files')->setValue($this->command, $mockFilesystem);
+        $method->invoke($this->command, 'User');
+
+        expect(implode('', $written))
+            ->not->toContain('use App\Application\Services\BaseService;')
+            ->not->toContain('extends BaseService')
+            ->toContain('class UserService {}');
+    });
+
+    it('createService omits BaseService when config disables it', function () {
+        config()->set('clean-architecture.generation.extend_base_classes', false);
+
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('createService');
+        $method->setAccessible(true);
+
+        $written = [];
+        $stub    = <<<'PHP'
+<?php
+namespace App\Application\Services;
+
+// {{#base_class}}
+use App\Application\Services\BaseService;
+// {{/base_class}}
+class {{DomainName}}Service{{ServiceExtends}} {}
+PHP;
+
+        $mockFilesystem = mock(Filesystem::class);
+        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('get')->andReturn($stub);
+        $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
+        $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
+        $mockFilesystem->shouldReceive('put')->andReturnUsing(function ($path, $content) use (&$written) {
+            $written[$path] = $content;
+
+            return true;
+        });
+
+        $reflection->getProperty('files')->setValue($this->command, $mockFilesystem);
+        $method->invoke($this->command, 'User');
+
+        expect(implode('', $written))
+            ->not->toContain('use App\Application\Services\BaseService;')
+            ->not->toContain('extends BaseService');
+    });
+
+    it('createActions extends BaseAction by default', function () {
+        $reflection = new ReflectionClass($this->command);
+        $method     = $reflection->getMethod('createActions');
+        $method->setAccessible(true);
+
+        $written = [];
+        $stub    = <<<'PHP'
+<?php
+namespace App\Application\Actions\{{PluralDomainName}};
+
+// {{#base_class}}
+use App\Application\Actions\BaseAction;
+// {{/base_class}}
+class {{ActionName}}{{ActionExtends}} {}
+PHP;
+
+        $mockFilesystem = mock(Filesystem::class);
+        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('get')->andReturn($stub);
+        $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
+        $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
+        $mockFilesystem->shouldReceive('put')->andReturnUsing(function ($path, $content) use (&$written) {
+            $written[$path] = $content;
+
+            return true;
+        });
+
+        $reflection->getProperty('files')->setValue($this->command, $mockFilesystem);
+        $method->invoke($this->command, 'User');
+
+        expect(implode('', $written))
+            ->toContain('use App\Application\Actions\BaseAction;')
+            ->toContain('extends BaseAction');
+    });
+
+    it('createActions omits BaseAction with no-base flag', function () {
+        $reflection    = new ReflectionClass($this->command);
+        $input         = new ArrayInput(['name' => 'User', '--no-base' => true], $this->command->getDefinition());
+        $inputProperty = $reflection->getProperty('input');
+        $inputProperty->setAccessible(true);
+        $inputProperty->setValue($this->command, $input);
+
+        $method = $reflection->getMethod('createActions');
+        $method->setAccessible(true);
+
+        $written = [];
+        $stub    = <<<'PHP'
+<?php
+namespace App\Application\Actions\{{PluralDomainName}};
+
+// {{#base_class}}
+use App\Application\Actions\BaseAction;
+// {{/base_class}}
+class {{ActionName}}{{ActionExtends}} {}
+PHP;
+
+        $mockFilesystem = mock(Filesystem::class);
+        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('get')->andReturn($stub);
+        $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
+        $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
+        $mockFilesystem->shouldReceive('put')->andReturnUsing(function ($path, $content) use (&$written) {
+            $written[$path] = $content;
+
+            return true;
+        });
+
+        $reflection->getProperty('files')->setValue($this->command, $mockFilesystem);
+        $method->invoke($this->command, 'User');
+
+        expect(implode('', $written))
+            ->not->toContain('use App\Application\Actions\BaseAction;')
+            ->not->toContain('extends BaseAction')
+            ->toContain('class CreateUserAction {}');
     });
 
     it('can create controller', function () {
