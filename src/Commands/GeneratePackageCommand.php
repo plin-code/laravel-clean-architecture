@@ -5,9 +5,12 @@ namespace PlinCode\LaravelCleanArchitecture\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
+use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 
 class GeneratePackageCommand extends Command
 {
+    use RendersStubs;
+
     protected $signature = 'clean-arch:generate-package {name : The name of the package}
                           {vendor : The vendor name}
                           {--path= : Custom path for the package}
@@ -175,16 +178,5 @@ class GeneratePackageCommand extends Command
 
         $this->files->put("{$path}/README.md", $content);
         $this->info('Created: README.md');
-    }
-
-    protected function getStub(string $stub): string
-    {
-        $stubPath = __DIR__ . "/../../stubs/{$stub}.stub";
-
-        if (! $this->files->exists($stubPath)) {
-            throw new \Exception("Stub file not found: {$stubPath}");
-        }
-
-        return $this->files->get($stubPath);
     }
 }

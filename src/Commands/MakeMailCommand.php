@@ -4,10 +4,12 @@ namespace PlinCode\LaravelCleanArchitecture\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Str;
+use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 
 class MakeMailCommand extends Command
 {
+    use RendersStubs;
+
     protected $signature = 'clean-arch:make-mail {name : The name of the mailable}
                           {--force : Overwrite existing files}';
 
@@ -35,7 +37,7 @@ class MakeMailCommand extends Command
     protected function createMail(string $name): void
     {
         $stub    = $this->getStub('mail');
-        $content = $this->replacePlaceholders($stub, $name);
+        $content = $this->replaceDomainPlaceholders($stub, $name);
 
         $mailPath = app_path('Infrastructure/Mail');
 
@@ -45,28 +47,5 @@ class MakeMailCommand extends Command
 
         $this->files->put("{$mailPath}/{$name}Mail.php", $content);
         $this->info("Created: Infrastructure/Mail/{$name}Mail.php");
-    }
-
-    protected function replacePlaceholders(string $content, string $name): string
-    {
-        $pluralName     = Str::plural($name);
-        $domainVariable = Str::camel($name);
-
-        return str_replace(
-            ['{{DomainName}}', '{{PluralDomainName}}', '{{domainVariable}}'],
-            [$name, $pluralName, $domainVariable],
-            $content
-        );
-    }
-
-    protected function getStub(string $stub): string
-    {
-        $stubPath = __DIR__ . "/../../stubs/{$stub}.stub";
-
-        if (! $this->files->exists($stubPath)) {
-            throw new \Exception("Stub file not found: {$stubPath}");
-        }
-
-        return $this->files->get($stubPath);
     }
 }

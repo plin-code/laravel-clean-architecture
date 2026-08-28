@@ -2,8 +2,12 @@
 
 namespace PlinCode\LaravelCleanArchitecture\Concerns;
 
+use Illuminate\Support\Str;
+
 /**
  * Helpers shared by commands that render stubs before writing files.
+ *
+ * The using class must expose a `$files` Filesystem property.
  *
  * The package ships stubs with optional regions delimited by comment
  * markers, `// {{#name}}` and `// {{/name}}`. A command can keep or drop a
@@ -12,6 +16,34 @@ namespace PlinCode\LaravelCleanArchitecture\Concerns;
  */
 trait RendersStubs
 {
+    /**
+     * Read a stub shipped with the package.
+     *
+     * @throws \Exception when the stub does not exist.
+     */
+    protected function getStub(string $stub): string
+    {
+        $stubPath = __DIR__ . "/../../stubs/{$stub}.stub";
+
+        if (! $this->files->exists($stubPath)) {
+            throw new \Exception("Stub file not found: {$stubPath}");
+        }
+
+        return $this->files->get($stubPath);
+    }
+
+    /**
+     * Apply the placeholders every domain oriented stub shares.
+     */
+    protected function replaceDomainPlaceholders(string $content, string $name): string
+    {
+        return str_replace(
+            ['{{DomainName}}', '{{PluralDomainName}}', '{{domainVariable}}'],
+            [$name, Str::plural($name), Str::camel($name)],
+            $content
+        );
+    }
+
     /**
      * Keep or drop a named block delimited by `// {{#name}}` / `// {{/name}}` markers.
      *

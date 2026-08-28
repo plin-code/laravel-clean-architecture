@@ -4,10 +4,12 @@ namespace PlinCode\LaravelCleanArchitecture\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Str;
+use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 
 class MakeExportCommand extends Command
 {
+    use RendersStubs;
+
     protected $signature = 'clean-arch:make-export {name : The name of the export}
                           {--force : Overwrite existing files}';
 
@@ -35,7 +37,7 @@ class MakeExportCommand extends Command
     protected function createExport(string $name): void
     {
         $stub    = $this->getStub('export');
-        $content = $this->replacePlaceholders($stub, $name);
+        $content = $this->replaceDomainPlaceholders($stub, $name);
 
         $exportPath = app_path('Infrastructure/Exports');
 
@@ -45,28 +47,5 @@ class MakeExportCommand extends Command
 
         $this->files->put("{$exportPath}/{$name}Export.php", $content);
         $this->info("Created: Infrastructure/Exports/{$name}Export.php");
-    }
-
-    protected function replacePlaceholders(string $content, string $name): string
-    {
-        $pluralName     = Str::plural($name);
-        $domainVariable = Str::camel($name);
-
-        return str_replace(
-            ['{{DomainName}}', '{{PluralDomainName}}', '{{domainVariable}}'],
-            [$name, $pluralName, $domainVariable],
-            $content
-        );
-    }
-
-    protected function getStub(string $stub): string
-    {
-        $stubPath = __DIR__ . "/../../stubs/{$stub}.stub";
-
-        if (! $this->files->exists($stubPath)) {
-            throw new \Exception("Stub file not found: {$stubPath}");
-        }
-
-        return $this->files->get($stubPath);
     }
 }
