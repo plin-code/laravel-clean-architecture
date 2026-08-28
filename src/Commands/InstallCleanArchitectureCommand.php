@@ -4,10 +4,12 @@ namespace PlinCode\LaravelCleanArchitecture\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
 
 class InstallCleanArchitectureCommand extends Command
 {
+    use RendersStubs;
     use ResolvesArchitectureDirectories;
 
     protected $signature = 'clean-arch:install
@@ -201,16 +203,5 @@ class InstallCleanArchitectureCommand extends Command
         $stub = $this->getStub('readme');
         $this->files->put(base_path('CLEAN_ARCHITECTURE.md'), $stub);
         $this->info('Created: CLEAN_ARCHITECTURE.md');
-    }
-
-    protected function getStub(string $stub): string
-    {
-        $stubPath = __DIR__ . "/../../stubs/{$stub}.stub";
-
-        if (! $this->files->exists($stubPath)) {
-            throw new \Exception("Stub file not found: {$stubPath}");
-        }
-
-        return $this->files->get($stubPath);
     }
 }

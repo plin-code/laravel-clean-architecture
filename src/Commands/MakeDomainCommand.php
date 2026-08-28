@@ -378,15 +378,4 @@ class MakeDomainCommand extends Command
     {
         return Str::snake(Str::plural($name));
     }
-
-    protected function getStub(string $stub): string
-    {
-        $stubPath = __DIR__ . "/../../stubs/{$stub}.stub";
-
-        if (! $this->files->exists($stubPath)) {
-            throw new \Exception("Stub file not found: {$stubPath}");
-        }
-
-        return $this->files->get($stubPath);
-    }
 }

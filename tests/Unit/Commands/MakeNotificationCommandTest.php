@@ -47,7 +47,7 @@ describe('MakeNotificationCommand', function () {
 
     it('replaces placeholders correctly', function () {
         $reflection = new ReflectionClass($this->command);
-        $method     = $reflection->getMethod('replacePlaceholders');
+        $method     = $reflection->getMethod('replaceDomainPlaceholders');
         $method->setAccessible(true);
 
         $content = '{{DomainName}} {{PluralDomainName}} {{domainVariable}}';

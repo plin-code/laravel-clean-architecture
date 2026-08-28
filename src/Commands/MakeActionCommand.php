@@ -73,15 +73,4 @@ class MakeActionCommand extends Command
 
         return str_replace(array_keys(array_merge($replacements, $extra)), array_values(array_merge($replacements, $extra)), $content);
     }
-
-    protected function getStub(string $stub): string
-    {
-        $stubPath = __DIR__ . "/../../stubs/{$stub}.stub";
-
-        if (! $this->files->exists($stubPath)) {
-            throw new \Exception("Stub file not found: {$stubPath}");
-        }
-
-        return $this->files->get($stubPath);
-    }
 }
