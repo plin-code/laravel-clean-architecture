@@ -58,8 +58,17 @@ describe('Stub Files', function () {
 
         expect($content)
             ->toContain('namespace App\Application\Actions\{{PluralDomainName}};')
-            ->toContain('class {{ActionName}} extends BaseAction')
+            ->toContain('class {{ActionName}}{{ActionExtends}}')
             ->toContain('public function execute');
+    });
+
+    it('action stub wraps BaseAction import in a base_class block', function () {
+        $content = file_get_contents($this->stubsPath . '/action.stub');
+
+        expect($content)
+            ->toContain('// {{#base_class}}')
+            ->toContain('use App\Application\Actions\BaseAction;')
+            ->toContain('// {{/base_class}}');
     });
 
     it('controller stub contains required structure', function () {
@@ -75,7 +84,16 @@ describe('Stub Files', function () {
 
         expect($content)
             ->toContain('namespace App\Application\Services;')
-            ->toContain('class {{DomainName}}Service extends BaseService');
+            ->toContain('class {{DomainName}}Service{{ServiceExtends}}');
+    });
+
+    it('service stub wraps BaseService import in a base_class block', function () {
+        $content = file_get_contents($this->stubsPath . '/service.stub');
+
+        expect($content)
+            ->toContain('// {{#base_class}}')
+            ->toContain('use App\Application\Services\BaseService;')
+            ->toContain('// {{/base_class}}');
     });
 
     it('domain model stub contains required content', function () {
@@ -134,6 +152,15 @@ describe('Stub Files', function () {
 
         expect($stub)
             ->not->toContain('strict_mode')
-            ->toContain("'custom_messages' => true");
+            ->toContain("'custom_messages' => true")
+            ->toContain("'extend_base_classes' => true");
+    });
+
+    it('shipped config declares extend_base_classes', function () {
+        $config = file_get_contents($this->stubsPath . '/../config/clean-architecture.php');
+
+        expect($config)
+            ->toContain("'extend_base_classes' => true")
+            ->not->toContain('strict_mode');
     });
 });

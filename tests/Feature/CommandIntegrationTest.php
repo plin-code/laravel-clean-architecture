@@ -398,4 +398,120 @@ describe('Command Integration', function () {
         expect($disabledContent)->not->toContain('public function messages');
         expect($enabledContent)->toContain('public function messages');
     });
+
+    it('generates service with base class by default', function () {
+        $this->artisan('clean-arch:install');
+
+        $this->artisan('clean-arch:make-service', ['name' => 'Product'])
+            ->assertExitCode(0);
+
+        $path    = app_path('Application/Services/ProductService.php');
+        $content = File::get($path);
+
+        expect($content)
+            ->toContain('use App\Application\Services\BaseService;')
+            ->toContain('class ProductService extends BaseService');
+    });
+
+    it('generates service without base class with no-base flag', function () {
+        $this->artisan('clean-arch:install');
+
+        $this->artisan('clean-arch:make-service', ['name' => 'Order', '--no-base' => true])
+            ->assertExitCode(0);
+
+        $path    = app_path('Application/Services/OrderService.php');
+        $content = File::get($path);
+
+        expect($content)
+            ->not->toContain('BaseService')
+            ->not->toContain('extends BaseService')
+            ->toContain('class OrderService');
+
+        exec('php -l ' . escapeshellarg($path) . ' 2>&1', $output, $exitCode);
+        expect($exitCode)->toBe(0);
+    });
+
+    it('falls back to config when no-base flag is absent for service', function () {
+        $this->artisan('clean-arch:install');
+
+        config()->set('clean-architecture.generation.extend_base_classes', false);
+
+        $this->artisan('clean-arch:make-service', ['name' => 'Article'])
+            ->assertExitCode(0);
+
+        $path    = app_path('Application/Services/ArticleService.php');
+        $content = File::get($path);
+
+        expect($content)
+            ->not->toContain('BaseService')
+            ->toContain('class ArticleService');
+    });
+
+    it('generates action with base class by default', function () {
+        $this->artisan('clean-arch:install');
+
+        $this->artisan('clean-arch:make-action', ['name' => 'CreateUser', 'domain' => 'User'])
+            ->assertExitCode(0);
+
+        $path    = app_path('Application/Actions/Users/CreateUserAction.php');
+        $content = File::get($path);
+
+        expect($content)
+            ->toContain('use App\Application\Actions\BaseAction;')
+            ->toContain('class CreateUserAction extends BaseAction');
+    });
+
+    it('generates action without base class with no-base flag', function () {
+        $this->artisan('clean-arch:install');
+
+        $this->artisan('clean-arch:make-action', ['name' => 'UpdateUser', 'domain' => 'User', '--no-base' => true])
+            ->assertExitCode(0);
+
+        $path    = app_path('Application/Actions/Users/UpdateUserAction.php');
+        $content = File::get($path);
+
+        expect($content)
+            ->not->toContain('BaseAction')
+            ->not->toContain('extends BaseAction')
+            ->toContain('class UpdateUserAction');
+
+        exec('php -l ' . escapeshellarg($path) . ' 2>&1', $output, $exitCode);
+        expect($exitCode)->toBe(0);
+    });
+
+    it('generates make-domain service and action without base classes with no-base flag', function () {
+        $this->artisan('clean-arch:install');
+
+        $this->artisan('clean-arch:make-domain', ['name' => 'Brand', '--no-base' => true])
+            ->expectsConfirmation('Would you like to generate an Observer?', 'no')
+            ->expectsConfirmation('Would you like to generate a Listener?', 'no')
+            ->expectsConfirmation('Would you like to generate a Job?', 'no')
+            ->expectsConfirmation('Would you like to generate a Mail?', 'no')
+            ->expectsConfirmation('Would you like to generate a Notification?', 'no')
+            ->expectsConfirmation('Would you like to generate an Export?', 'no')
+            ->assertExitCode(0);
+
+        $servicePath = app_path('Application/Services/BrandService.php');
+        $actionPath  = app_path('Application/Actions/Brands/CreateBrandAction.php');
+
+        expect(file_exists($servicePath))->toBeTrue();
+        expect(file_exists($actionPath))->toBeTrue();
+
+        $serviceContent = File::get($servicePath);
+        $actionContent  = File::get($actionPath);
+
+        expect($serviceContent)
+            ->not->toContain('BaseService')
+            ->not->toContain('extends BaseService');
+
+        expect($actionContent)
+            ->not->toContain('BaseAction')
+            ->not->toContain('extends BaseAction');
+
+        exec('php -l ' . escapeshellarg($servicePath) . ' 2>&1', $output, $serviceExit);
+        expect($serviceExit)->toBe(0);
+
+        exec('php -l ' . escapeshellarg($actionPath) . ' 2>&1', $output, $actionExit);
+        expect($actionExit)->toBe(0);
+    });
 });
