@@ -12,7 +12,8 @@ class MakeDomainCommand extends Command
     use RendersStubs;
 
     protected $signature = 'clean-arch:make-domain {name : The name of the domain}
-                          {--force : Overwrite existing files}';
+                        {--force : Overwrite existing files}
+                        {--no-base : Do not extend BaseService and BaseAction}';
 
     protected $description = 'Create a new domain with complete Clean Architecture structure';
 
@@ -138,10 +139,13 @@ class MakeDomainCommand extends Command
         }
 
         foreach ($actions as $action => $requestClass) {
+            $extend  = $this->shouldExtendBaseClasses((bool) $this->option('no-base'));
             $stub    = $this->getStub('action');
+            $stub    = $this->applyOptionalBlock($stub, 'base_class', $extend);
             $content = $this->replacePlaceholders($stub, $name, [
-                '{{ActionName}}'  => $action . $name . 'Action',
-                '{{RequestName}}' => $requestClass ?: 'Request',
+                '{{ActionName}}'    => $action . $name . 'Action',
+                '{{ActionExtends}}' => $extend ? ' extends BaseAction' : '',
+                '{{RequestName}}'   => $requestClass ?: 'Request',
             ]);
 
             $this->files->put("{$actionsPath}/{$action}{$name}Action.php", $content);
@@ -151,8 +155,12 @@ class MakeDomainCommand extends Command
 
     protected function createService(string $name): void
     {
+        $extend  = $this->shouldExtendBaseClasses((bool) $this->option('no-base'));
         $stub    = $this->getStub('service');
-        $content = $this->replacePlaceholders($stub, $name);
+        $stub    = $this->applyOptionalBlock($stub, 'base_class', $extend);
+        $content = $this->replacePlaceholders($stub, $name, [
+            '{{ServiceExtends}}' => $extend ? ' extends BaseService' : '',
+        ]);
 
         $servicesPath = app_path('Application/Services');
         if (! $this->files->isDirectory($servicesPath)) {

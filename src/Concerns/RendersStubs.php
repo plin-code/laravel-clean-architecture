@@ -61,4 +61,16 @@ trait RendersStubs
 
         return $rendered;
     }
+
+    /**
+     * Whether generated classes should extend their application-layer base class.
+     *
+     * Driven by the `generation.extend_base_classes` config value (default true)
+     * and overridden by the `--no-base` option, which always wins.
+     */
+    protected function shouldExtendBaseClasses(bool $noBaseOption = false): bool
+    {
+        return (bool) config('clean-architecture.generation.extend_base_classes', true)
+            && ! $noBaseOption;
+    }
 }
