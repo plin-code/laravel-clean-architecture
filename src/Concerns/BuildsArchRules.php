@@ -20,6 +20,11 @@ trait BuildsArchRules
     abstract protected function layerNamespace(string $layer): string;
 
     /**
+     * Provided by ResolvesArchitectureDirectories.
+     */
+    abstract protected function layerDirectory(string $layer): string;
+
+    /**
      * One entry per enabled rule, each a complete `$rules[] = ...;` statement.
      *
      * @return array<int, string>
@@ -74,6 +79,26 @@ trait BuildsArchRules
         }
 
         return $rules;
+    }
+
+    /**
+     * The `$config->add()` calls, one class set per configured layer directory.
+     *
+     * Scanning the layers instead of the whole application keeps projects that
+     * moved the directories working, and leaves the rest of the codebase out of
+     * the scan.
+     */
+    protected function archClassSets(): string
+    {
+        $calls = [];
+
+        foreach (['domain', 'application', 'infrastructure'] as $layer) {
+            $directory = $this->layerDirectory($layer);
+
+            $calls[] = "    \$config->add(ClassSet::fromDir(__DIR__ . '/{$directory}'), ...\$rules);";
+        }
+
+        return implode("\n", $calls);
     }
 
     /**
