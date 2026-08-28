@@ -102,9 +102,9 @@ No violations found.
 ### 🛠️ Available commands
 
 - `clean-arch:install` - 🏗️ Install Clean Architecture structure
-- `clean-arch:make-domain {name}` - 🆕 Create a complete new domain
-- `clean-arch:make-action {name} {domain}` - ⚡ Create a new action
-- `clean-arch:make-service {name}` - 🔧 Create a new service
+- `clean-arch:make-domain {name} {--no-base}` - 🆕 Create a complete new domain
+- `clean-arch:make-action {name} {domain} {--no-base}` - ⚡ Create a new action
+- `clean-arch:make-service {name} {--no-base}` - 🔧 Create a new service
 - `clean-arch:make-controller {name}` - 🌐 Create a new controller
 - `clean-arch:make-observer {name} {domain}` - 👁️ Create a new observer
 - `clean-arch:make-listener {name}` - 👂 Create a new listener
@@ -283,6 +283,26 @@ Every rule run by `clean-arch:validate` can be turned off by name under `validat
 Set it to `false` and the generated `Create*Request` and `Update*Request` classes will omit the `messages()` method entirely. The default `rules()` and `authorize()` methods are unaffected, and the output remains valid PHP either way.
 
 Note the two keys live under `validation` but serve different purposes. The `rules` subgroup is read by `clean-arch:validate`, while `custom_messages` is read by `clean-arch:make-domain` at generation time. They are kept together so that a single published config file is the only place to look.
+
+### 🏗️ Optional base classes
+
+`generation.extend_base_classes` (default `true`) controls whether generated services extend `BaseService` and generated actions extend `BaseAction`. Set it to `false` to produce standalone classes:
+
+```php
+'generation' => [
+    'extend_base_classes' => false,
+],
+```
+
+You can also override the config per invocation with `--no-base` on `make-domain`, `make-service`, or `make-action`. The flag always wins:
+
+```bash
+php artisan clean-arch:make-service Order --no-base
+php artisan clean-arch:make-action CreateOrder Order --no-base
+php artisan clean-arch:make-domain Brand --no-base
+```
+
+The `BaseService` and `BaseAction` classes created by `clean-arch:install` remain in `Application/Services` and `Application/Actions` regardless. Only the `extends` clause and its `use` statement are omitted.
 
 ## 🛠️ Development
 
