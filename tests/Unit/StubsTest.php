@@ -154,6 +154,13 @@ describe('Stub Files', function () {
             ->toContain("'extend_base_classes' => true");
     });
 
+    it('keeps the shipped config and the install stub in sync', function () {
+        $shipped = require __DIR__ . '/../../config/clean-architecture.php';
+        $stub    = require $this->stubsPath . '/config.stub';
+
+        expect($stub)->toEqual($shipped);
+    });
+
     it('shipped config declares extend_base_classes', function () {
         $config = file_get_contents($this->stubsPath . '/../config/clean-architecture.php');
 
