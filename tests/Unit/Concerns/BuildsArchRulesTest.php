@@ -22,6 +22,23 @@ function buildArchRules(): array
     return $method->invoke($subject);
 }
 
+/**
+ * Call the protected guard builder on an anonymous class that uses the trait.
+ */
+function buildAutoloadGuard(): string
+{
+    $subject = new class
+    {
+        use BuildsArchRules;
+        use ResolvesArchitectureDirectories;
+    };
+
+    $method = new ReflectionMethod($subject, 'autoloadGuard');
+    $method->setAccessible(true);
+
+    return $method->invoke($subject);
+}
+
 describe('BuildsArchRules', function () {
     it('builds a dependency rule for the domain layer', function () {
         $rules = buildArchRules();
@@ -77,6 +94,26 @@ describe('BuildsArchRules', function () {
 
         expect($rules)->toHaveCount(5)
             ->and(implode("\n", $rules))->not->toContain('Illuminate\\\\Console\\\\Command');
+    });
+
+    it('emits an autoload guard naming a framework class and an application class', function () {
+        expect(buildAutoloadGuard())
+            ->toContain('class_exists(\\Illuminate\\Console\\Command::class)')
+            ->toContain('App\\Domain\\Shared\\BaseModel')
+            ->toContain('throw new RuntimeException');
+    });
+
+    it('points the guard at the configured domain namespace', function () {
+        config()->set('clean-architecture.directories.domain', 'app/Core/Domain');
+        config()->set('clean-architecture.default_namespace', 'Acme');
+
+        expect(buildAutoloadGuard())->toContain('Acme\\Core\\Domain\\Shared\\BaseModel');
+    });
+
+    it('explains in a comment why the guard exists and how to change it', function () {
+        expect(buildAutoloadGuard())
+            ->toContain('// ')
+            ->toContain('exits 0');
     });
 
     it('follows the configured namespace and directories', function () {
