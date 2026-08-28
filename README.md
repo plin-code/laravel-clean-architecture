@@ -72,31 +72,56 @@ After generating the core files, `make-domain` prompts interactively for optiona
 
 ### ✅ Architecture validation
 
+Architectural rules are enforced by [phparkitect](https://github.com/phparkitect/arkitect). The package does not depend on it and does not run it: it generates a configuration file from `config/clean-architecture.php`, and your project runs the tool.
+
+```bash
+composer require --dev phparkitect/phparkitect
+php artisan clean-arch:make-arch-rules
+vendor/bin/phparkitect check
+```
+
+`clean-arch:make-arch-rules` writes `phparkitect.php` in the project root, built from `directories`, `default_namespace` and `validation.rules`. It refuses to overwrite an existing file, so pass `--force` when you want to regenerate one. The generated file is ordinary PHP: once you need rules the package does not generate, edit it by hand and stop regenerating it.
+
+`phparkitect check` exits 1 when it finds violations, which is what you want in CI. Rules can be disabled one by one, see [Validation rules](#-validation-rules).
+
+Delegating brings something the previous hand written analyser could not do: inheritance chains are followed. A console command extending a project specific base class that itself extends `Illuminate\Console\Command` is now reported, and so is a job extending an abstract base job that implements `ShouldQueue`.
+
+#### 🛡️ The autoload guard
+
+The generated file opens with a check that looks out of place until it saves you:
+
+```php
+if (! class_exists(\Illuminate\Console\Command::class)
+    || ! class_exists(\App\Domain\Shared\BaseModel::class)) {
+    throw new RuntimeException(
+        'clean-architecture: autoloading does not resolve the application classes, '
+        . 'so the reflection based rules would pass silently. Run composer dump-autoload.'
+    );
+}
+```
+
+Two of the rules are reflection based. When autoloading does not resolve the classes being scanned, `is_a()` reads an unloadable class as "not a subclass", so those rules report nothing and phparkitect exits 0. In CI that is indistinguishable from a clean run. The guard turns that case into a failure with a message, and it costs nothing because it runs before the scan.
+
+The class it names is the one `clean-arch:install` generates for your domain layer. If you rename or remove it, the guard fires even with a sound autoloader. That is a false alarm, and it is the right way round to be wrong: a false alarm is loud and the message says what to look at, a silent pass is neither. Point the check at another class of yours and keep it.
+
+#### 📋 Adopting it on an existing codebase
+
+A codebase that has never been checked usually starts with a long list of violations. Record them once and fail only on new ones:
+
+```bash
+vendor/bin/phparkitect generate-baseline
+vendor/bin/phparkitect check
+```
+
+`generate-baseline` writes `phparkitect-baseline.json` with the violations found today, and `check` picks that file up automatically and exits 0. Regenerate it as you fix things, or pass `--skip-baseline` to see the full list again. Fixing the recorded violations does not require regenerating: the baseline is a list of what to ignore, not a target.
+
+#### 🗂️ The bundled validate command
+
 ```bash
 php artisan clean-arch:validate
 ```
 
-This command checks your codebase for layer dependency violations (for example, Domain code importing from Infrastructure). It returns exit code 1 when violations are found, making it suitable for use in CI pipelines.
-
-Checks are based on what the code is, not on how files are named. Imports are read from the real `use` statements of each file, so a trait import inside a class body, a closure `use` clause or a commented out line is never reported. Console commands are recognised by their parent class (`Illuminate\Console\Command`) and jobs by the `Illuminate\Contracts\Queue\ShouldQueue` contract, so a `CommandPaletteController` or a `JobApplicationResource` is left alone. Observers are still matched by the `Observer.php` suffix.
-
-Only the class as written is inspected. A command extending a project specific base class that itself extends `Illuminate\Console\Command` is not reported, and neither is a job extending an abstract base job that implements `ShouldQueue`. The chain is not followed, because resolving it would mean loading application code inside a validation command.
-
-Rules can be disabled one by one, see [Validation rules](#-validation-rules).
-
-```
-Clean Architecture Validation
-=============================
-
-  ✓ Domain has no Application imports
-  ✓ Domain has no Infrastructure imports
-  ✓ Application has no Infrastructure imports
-  ✓ No Observers in Domain
-  ✓ No Jobs in Infrastructure
-  ✓ No Commands in Infrastructure
-
-No violations found.
-```
+`clean-arch:validate` still ships and still works. It reads the same `validation.rules` and needs no extra dependency, but it inspects each class as written and does not follow inheritance chains, so a command extending a base command is not reported. It is being replaced by the generated rules.
 
 ### 🛠️ Available commands
 
@@ -112,6 +137,7 @@ No violations found.
 - `clean-arch:make-notification {name}` - 🔔 Create a new notification
 - `clean-arch:make-export {name}` - 📤 Create a new export
 - `clean-arch:validate` - ✅ Validate architecture dependency rules
+- `clean-arch:make-arch-rules {--force}` - 🛡️ Generate a phparkitect config from the configured rules
 - `clean-arch:generate-package {name} {vendor}` - 📦 Generate a new package
 
 ### 📂 Project structure after `clean-arch:install`
@@ -235,7 +261,7 @@ php artisan vendor:publish --tag=clean-architecture-config
 
 ### 📁 Directories
 
-`directories` is read by `clean-arch:install`, which creates the structure at those paths, and by `clean-arch:validate`, which scans them. The layer namespaces are derived from the same values, so `app/Core/Domain` with a `default_namespace` of `Acme` becomes `Acme\Core\Domain`.
+`directories` is read by `clean-arch:install`, which creates the structure at those paths, by `clean-arch:validate`, which scans them, and by `clean-arch:make-arch-rules`, which turns them into the namespaces and the class sets of the generated config. The layer namespaces are derived from the same values, so `app/Core/Domain` with a `default_namespace` of `Acme` becomes `Acme\Core\Domain`.
 
 ```php
 'default_namespace' => 'App',
@@ -251,7 +277,7 @@ When the config file is not published, the defaults above are used.
 
 ### ✅ Validation rules
 
-Every rule run by `clean-arch:validate` can be turned off by name under `validation.rules`. All of them are enabled by default, so a project without a published config file keeps the full set.
+Every rule can be turned off by name under `validation.rules`. The same keys drive `clean-arch:validate` and the config written by `clean-arch:make-arch-rules`, so a disabled rule is skipped by both. All of them are enabled by default, so a project without a published config file keeps the full set.
 
 ```php
 'validation' => [
@@ -280,7 +306,7 @@ Every rule run by `clean-arch:validate` can be turned off by name under `validat
 
 Set it to `false` and the generated `Create*Request` and `Update*Request` classes will omit the `messages()` method entirely. The default `rules()` and `authorize()` methods are unaffected, and the output remains valid PHP either way.
 
-Note the two keys live under `validation` but serve different purposes. The `rules` subgroup is read by `clean-arch:validate`, while `custom_messages` is read by `clean-arch:make-domain` at generation time. They are kept together so that a single published config file is the only place to look.
+Note the two keys live under `validation` but serve different purposes. The `rules` subgroup is read by `clean-arch:validate` and `clean-arch:make-arch-rules`, while `custom_messages` is read by `clean-arch:make-domain` at generation time. They are kept together so that a single published config file is the only place to look.
 
 ### 🏗️ Optional base classes
 
