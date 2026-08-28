@@ -1,10 +1,10 @@
 name: Code Style (Auto-fix)
 
+# Not part of the quality gate and never triggered automatically: this workflow
+# rewrites files and pushes a commit, so it must never race the code-style check
+# that guards pull requests. Run it by hand from the Actions tab when needed.
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+  workflow_dispatch:
 
 jobs:
   lint:
