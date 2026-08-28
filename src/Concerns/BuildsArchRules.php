@@ -77,6 +77,38 @@ trait BuildsArchRules
     }
 
     /**
+     * The block that stops phparkitect when autoloading does not resolve.
+     *
+     * The IsNotA expressions are reflection based. When a class cannot be
+     * loaded, is_a() with allow_string returns false instead of raising, so
+     * every rule reports nothing and phparkitect exits 0, which in CI reads as
+     * a success. The guard turns that into a loud failure before the scan.
+     *
+     * It names an application class on purpose. If that class is renamed the
+     * guard fires with a sound autoloader, which is a false alarm, and the
+     * comment in the generated file says how to change the target. A false
+     * alarm is noisy, a silent pass is not.
+     */
+    protected function autoloadGuard(): string
+    {
+        $target = $this->layerNamespace('domain') . 'Shared\\BaseModel';
+
+        return <<<PHP
+                // The IsNotA rules below are reflection based. With autoloading broken they
+                // report nothing and phparkitect exits 0, which is indistinguishable from a
+                // pass. Fail here instead. Change the application class named below if you
+                // renamed or removed it.
+                if (! class_exists(\\Illuminate\\Console\\Command::class)
+                    || ! class_exists(\\{$target}::class)) {
+                    throw new RuntimeException(
+                        'clean-architecture: autoloading does not resolve the application classes, '
+                        . 'so the reflection based rules would pass silently. Run composer dump-autoload.'
+                    );
+                }
+            PHP;
+    }
+
+    /**
      * A rule is enabled unless the config says otherwise, so an unpublished
      * config still generates the full set.
      */
