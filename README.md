@@ -94,7 +94,6 @@ Clean Architecture Validation
   ✓ No Observers in Domain
   ✓ No Jobs in Infrastructure
   ✓ No Commands in Infrastructure
-  ✓ No duplicate Services directory
 
 No violations found.
 ```
@@ -263,7 +262,6 @@ Every rule run by `clean-arch:validate` can be turned off by name under `validat
         'no_observers_in_domain' => true,
         'no_jobs_in_infrastructure' => true,
         'no_commands_in_infrastructure' => true,
-        'no_duplicate_services_directory' => true,
     ],
 ],
 ```

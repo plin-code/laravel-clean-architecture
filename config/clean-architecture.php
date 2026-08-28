@@ -43,7 +43,6 @@ return [
             'no_observers_in_domain'                => true,
             'no_jobs_in_infrastructure'             => true,
             'no_commands_in_infrastructure'         => true,
-            'no_duplicate_services_directory'       => true,
         ],
     ],
 

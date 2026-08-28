@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
+## [Unreleased]
+
+### Removed
+
+- `no_duplicate_services_directory`, the rule that failed the validation when `app/Infrastructure/Services` existed. It checked a directory rather than a property of a class, so it has no equivalent in the rule set the package now generates for phparkitect, and keeping it would mean keeping a hand written check next to a delegated one. It came from a convention of this package, not from a principle of the architecture: a project that wants it back can assert `is_dir()` in three lines of its own. The `validation.rules` key is gone from `config/clean-architecture.php`, and a leftover key in a published config file is ignored
+
 ## [2.1.0] - 2026-08-28
 
 ### Fixed

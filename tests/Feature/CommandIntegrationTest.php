@@ -173,15 +173,6 @@ describe('Command Integration', function () {
             ->assertExitCode(1);
     });
 
-    it('runs validate command and detects directory violations', function () {
-        // Create Infrastructure/Services directory (not allowed)
-        File::ensureDirectoryExists(app_path('Infrastructure/Services'));
-        File::put(app_path('Infrastructure/Services/.gitkeep'), '');
-
-        $this->artisan('clean-arch:validate')
-            ->assertExitCode(1);
-    });
-
     it('runs generate-package command', function () {
         $packagePath = base_path('packages/test-vendor/test-package');
 
