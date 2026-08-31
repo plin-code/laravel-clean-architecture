@@ -15,7 +15,6 @@ use PlinCode\LaravelCleanArchitecture\Commands\MakeMailCommand;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeNotificationCommand;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeObserverCommand;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeServiceCommand;
-use PlinCode\LaravelCleanArchitecture\Commands\ValidateArchitectureCommand;
 
 describe('CleanArchitectureServiceProvider', function () {
     it('does not register commands when not running in console', function () {
@@ -41,7 +40,6 @@ describe('CleanArchitectureServiceProvider', function () {
             'clean-arch:make-mail'         => MakeMailCommand::class,
             'clean-arch:make-notification' => MakeNotificationCommand::class,
             'clean-arch:make-export'       => MakeExportCommand::class,
-            'clean-arch:validate'          => ValidateArchitectureCommand::class,
             'clean-arch:generate-package'  => GeneratePackageCommand::class,
         ];
 

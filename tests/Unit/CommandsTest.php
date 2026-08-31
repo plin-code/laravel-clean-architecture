@@ -76,11 +76,6 @@ describe('Commands', function () {
         expect($exitCode)->toBe(0);
     });
 
-    it('shows help for validate command', function () {
-        $exitCode = Artisan::call('clean-arch:validate', ['--help' => true]);
-
-        expect($exitCode)->toBe(0);
-    });
 });
 
 describe('Command Registration', function () {
@@ -99,8 +94,7 @@ describe('Command Registration', function () {
             ->toHaveKey('clean-arch:make-job')
             ->toHaveKey('clean-arch:make-mail')
             ->toHaveKey('clean-arch:make-notification')
-            ->toHaveKey('clean-arch:make-export')
-            ->toHaveKey('clean-arch:validate');
+            ->toHaveKey('clean-arch:make-export');
     });
 
     it('has command instances that extend laravel command class', function () {
