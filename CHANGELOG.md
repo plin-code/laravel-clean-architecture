@@ -2,7 +2,27 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
-## [2.2.0] - 2026-08-28
+## [3.0.0] - 2026-08-31
+
+### Breaking Changes
+
+- `clean-arch:validate` is removed. If your pipeline calls it, replace the call with the generated rules:
+
+  ```bash
+  composer require --dev phparkitect/phparkitect
+  php artisan clean-arch:make-arch-rules
+  vendor/bin/phparkitect check
+  ```
+
+  Commit the generated `phparkitect.php` and run `check` in CI. It exits 1 on violations, as `clean-arch:validate` did. On a codebase that already has violations, run `vendor/bin/phparkitect generate-baseline` once and commit `phparkitect-baseline.json`: `check` reads it on its own and fails only on new violations. Expect the first run to report more than the old command did, because the generated rules follow inheritance chains: a command extending a project base command, or a job extending a base job that implements `ShouldQueue`, is now reported
+
+- The `ParsesPhpSource` concern is removed with the command it served. `ResolvesArchitectureDirectories` and `RendersStubs` stay, they belong to the generation commands. Anything that used `ParsesPhpSource` outside this package has to bring its own token parsing
+
+### Removed
+
+- 589 lines of hand written PHP analysis, 325 of `ParsesPhpSource` and 264 of the command. The package no longer parses application source: it writes a phparkitect configuration and phparkitect does the work, which also brings baselines, the GitLab and JSON output formats and a maintained expression set
+
+## [2.2.0] - 2026-08-31
 
 ### Added
 

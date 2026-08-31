@@ -115,14 +115,6 @@ vendor/bin/phparkitect check
 
 `generate-baseline` writes `phparkitect-baseline.json` with the violations found today, and `check` picks that file up automatically and exits 0. Regenerate it as you fix things, or pass `--skip-baseline` to see the full list again. Fixing the recorded violations does not require regenerating: the baseline is a list of what to ignore, not a target.
 
-#### 🗂️ The bundled validate command
-
-```bash
-php artisan clean-arch:validate
-```
-
-`clean-arch:validate` is deprecated and will be removed in 3.0.0. It still runs every enabled rule with unchanged exit codes, and it reads the same `validation.rules`, but it inspects each class as written and does not follow inheritance chains, so a command extending a base command is not reported. Replace it with `clean-arch:make-arch-rules` plus `vendor/bin/phparkitect check`.
-
 ### 🛠️ Available commands
 
 - `clean-arch:install` - 🏗️ Install Clean Architecture structure
@@ -136,7 +128,6 @@ php artisan clean-arch:validate
 - `clean-arch:make-mail {name}` - 📧 Create a new mailable
 - `clean-arch:make-notification {name}` - 🔔 Create a new notification
 - `clean-arch:make-export {name}` - 📤 Create a new export
-- `clean-arch:validate` - ✅ Validate architecture dependency rules
 - `clean-arch:make-arch-rules {--force}` - 🛡️ Generate a phparkitect config from the configured rules
 - `clean-arch:generate-package {name} {vendor}` - 📦 Generate a new package
 
@@ -217,7 +208,7 @@ This package implements Clean Architecture principles:
 
 ### 🗄️ The Domain layer depends on Eloquent
 
-This is a deliberate trade-off, and it is worth stating explicitly. `clean-arch:install` generates `App\Domain\Shared\BaseModel`, which extends `Illuminate\Database\Eloquent\Model`, and every model produced by `clean-arch:make-domain` extends it. The Domain layer is therefore free of Application and Infrastructure imports (that is what `clean-arch:validate` enforces), but it is not free of the framework.
+This is a deliberate trade-off, and it is worth stating explicitly. `clean-arch:install` generates `App\Domain\Shared\BaseModel`, which extends `Illuminate\Database\Eloquent\Model`, and every model produced by `clean-arch:make-domain` extends it. The Domain layer is therefore free of Application and Infrastructure imports (that is what the generated rules enforce), but it is not free of the framework.
 
 If you need a persistence agnostic domain, this package is not the right starting point.
 
@@ -261,7 +252,7 @@ php artisan vendor:publish --tag=clean-architecture-config
 
 ### 📁 Directories
 
-`directories` is read by `clean-arch:install`, which creates the structure at those paths, by `clean-arch:validate`, which scans them, and by `clean-arch:make-arch-rules`, which turns them into the namespaces and the class sets of the generated config. The layer namespaces are derived from the same values, so `app/Core/Domain` with a `default_namespace` of `Acme` becomes `Acme\Core\Domain`.
+`directories` is read by `clean-arch:install`, which creates the structure at those paths, and by `clean-arch:make-arch-rules`, which turns them into the namespaces and the class sets of the generated config. The layer namespaces are derived from the same values, so `app/Core/Domain` with a `default_namespace` of `Acme` becomes `Acme\Core\Domain`.
 
 ```php
 'default_namespace' => 'App',
@@ -277,7 +268,7 @@ When the config file is not published, the defaults above are used.
 
 ### ✅ Validation rules
 
-Every rule can be turned off by name under `validation.rules`. The same keys drive `clean-arch:validate` and the config written by `clean-arch:make-arch-rules`, so a disabled rule is skipped by both. All of them are enabled by default, so a project without a published config file keeps the full set.
+Every rule can be turned off by name under `validation.rules`. A rule set to `false` is left out of the config written by `clean-arch:make-arch-rules`. All of them are enabled by default, so a project without a published config file keeps the full set.
 
 ```php
 'validation' => [
@@ -306,7 +297,7 @@ Every rule can be turned off by name under `validation.rules`. The same keys dri
 
 Set it to `false` and the generated `Create*Request` and `Update*Request` classes will omit the `messages()` method entirely. The default `rules()` and `authorize()` methods are unaffected, and the output remains valid PHP either way.
 
-Note the two keys live under `validation` but serve different purposes. The `rules` subgroup is read by `clean-arch:validate` and `clean-arch:make-arch-rules`, while `custom_messages` is read by `clean-arch:make-domain` at generation time. They are kept together so that a single published config file is the only place to look.
+Note the two keys live under `validation` but serve different purposes. The `rules` subgroup is read by `clean-arch:make-arch-rules`, while `custom_messages` is read by `clean-arch:make-domain` at generation time. They are kept together so that a single published config file is the only place to look.
 
 ### 🏗️ Optional base classes
 

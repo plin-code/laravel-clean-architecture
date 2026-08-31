@@ -16,7 +16,6 @@ use PlinCode\LaravelCleanArchitecture\Commands\MakeMailCommand;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeNotificationCommand;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeObserverCommand;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeServiceCommand;
-use PlinCode\LaravelCleanArchitecture\Commands\ValidateArchitectureCommand;
 
 class CleanArchitectureServiceProvider extends ServiceProvider
 {
@@ -36,7 +35,6 @@ class CleanArchitectureServiceProvider extends ServiceProvider
                 MakeNotificationCommand::class,
                 MakeExportCommand::class,
                 MakeArchRulesCommand::class,
-                ValidateArchitectureCommand::class,
                 GeneratePackageCommand::class,
             ]);
         }

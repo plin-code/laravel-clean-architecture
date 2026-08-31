@@ -148,31 +148,6 @@ describe('Command Integration', function () {
         expect(File::exists(app_path('Infrastructure/Exports/UserExport.php')))->toBeTrue();
     });
 
-    it('runs validate command on clean project', function () {
-        $this->artisan('clean-arch:validate')
-            ->assertExitCode(0);
-    });
-
-    it('runs validate command and detects import violations', function () {
-        File::ensureDirectoryExists(app_path('Domain/Users/Models'));
-        File::put(
-            app_path('Domain/Users/Models/User.php'),
-            "<?php\n\nnamespace App\\Domain\\Users\\Models;\n\nuse App\\Infrastructure\\Traits\\HasSlug;\n\nclass User {}\n"
-        );
-
-        $this->artisan('clean-arch:validate')
-            ->assertExitCode(1);
-    });
-
-    it('runs validate command and detects file pattern violations', function () {
-        // Create an Observer inside Domain (not allowed)
-        File::ensureDirectoryExists(app_path('Domain/Users'));
-        File::put(app_path('Domain/Users/UserObserver.php'), "<?php\nclass UserObserver {}\n");
-
-        $this->artisan('clean-arch:validate')
-            ->assertExitCode(1);
-    });
-
     it('runs generate-package command', function () {
         $packagePath = base_path('packages/test-vendor/test-package');
 
