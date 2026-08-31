@@ -1,6 +1,8 @@
-# 🏗️ Laravel Clean Architecture Package
+![Laravel Clean Architecture](https://raw.githubusercontent.com/plin-code/laravel-clean-architecture/main/art/banner.png)
 
-A Laravel package to easily implement Clean Architecture in your projects. 🚀
+# Laravel Clean Architecture
+
+A Laravel package to easily implement Clean Architecture in your projects.
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/plin-code/laravel-clean-architecture.svg?style=flat-square)](https://packagist.org/packages/plin-code/laravel-clean-architecture)
 [![CI](https://img.shields.io/github/actions/workflow/status/plin-code/laravel-clean-architecture/ci.yml?branch=main&label=ci&style=flat-square)](https://github.com/plin-code/laravel-clean-architecture/actions/workflows/ci.yml?query=branch%3Amain)
