@@ -4,9 +4,13 @@
 
 A Laravel package to easily implement Clean Architecture in your projects.
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/plin-code/laravel-clean-architecture.svg?style=flat-square)](https://packagist.org/packages/plin-code/laravel-clean-architecture)
-[![CI](https://img.shields.io/github/actions/workflow/status/plin-code/laravel-clean-architecture/ci.yml?branch=main&label=ci&style=flat-square)](https://github.com/plin-code/laravel-clean-architecture/actions/workflows/ci.yml?query=branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/plin-code/laravel-clean-architecture.svg?style=flat-square)](https://packagist.org/packages/plin-code/laravel-clean-architecture)
+<p align="center">
+    <a href="https://packagist.org/packages/plin-code/laravel-clean-architecture"><img src="https://img.shields.io/packagist/v/plin-code/laravel-clean-architecture.svg?style=flat-square" alt="Packagist"></a>
+    <a href="https://packagist.org/packages/plin-code/laravel-clean-architecture"><img src="https://img.shields.io/packagist/php-v/plin-code/laravel-clean-architecture.svg?style=flat-square" alt="PHP from Packagist"></a>
+    <a href="https://packagist.org/packages/plin-code/laravel-clean-architecture"><img src="https://badge.laravel.cloud/badge/plin-code/laravel-clean-architecture?style=flat" alt="Laravel versions"></a>
+    <a href="https://github.com/plin-code/laravel-clean-architecture/actions"><img alt="GitHub Workflow Status (main)" src="https://img.shields.io/github/actions/workflow/status/plin-code/laravel-clean-architecture/tests.yml?branch=main&label=Tests&style=flat-square"></a>
+    <a href="https://packagist.org/packages/plin-code/laravel-clean-architecture"><img src="https://img.shields.io/packagist/dt/plin-code/laravel-clean-architecture.svg?style=flat-square" alt="Total Downloads"></a>
+</p>
 
 ## ✨ Features
 
