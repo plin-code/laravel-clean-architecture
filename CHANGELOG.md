@@ -10,6 +10,7 @@ All notable changes to `laravel-clean-architecture` will be documented in this f
 - `clean-arch:install` wrote the base classes to the configured paths but kept the default namespaces inside them. With `directories.domain` set to `app/Core/Domain`, `BaseModel.php` landed in `app/Core/Domain/Shared` declaring `namespace App\Domain\Shared`, which autoloading cannot resolve and which tripped the autoload guard of the generated `phparkitect.php`
 - Generated API and web controllers extended `Controller` without importing it. The name resolved inside their own namespace, `Http\Controllers\Api` and `UI\Web\Controllers`, where no such class exists, so loading a generated controller failed with a class not found error. Both stubs now import the base controller created by `clean-arch:install`
 - The shipped config, the config written by `clean-arch:install` and the generated `CLEAN_ARCHITECTURE.md` still referred to `clean-arch:validate`, removed in 3.0.0. They now point to `clean-arch:make-arch-rules` and `vendor/bin/phparkitect check`
+- `clean-arch:install` declared `--force` but never read it, so every run overwrote `config/clean-architecture.php`, the base classes and `CLEAN_ARCHITECTURE.md`. Publishing the config, editing `directories` and then running `install` created the structure at the custom paths but reset the file to the defaults, so the following `make-*` commands wrote to `app/Domain` again, and a second run discarded any edit to the base classes. Existing files are now skipped with a message, and `--force` overwrites them
 
 ### Changed
 
