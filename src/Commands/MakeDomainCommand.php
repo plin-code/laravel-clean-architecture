@@ -244,8 +244,8 @@ class MakeDomainCommand extends Command
         $stub    = $this->getStub('test');
         $content = $this->replacePlaceholders($stub, $name);
 
-        $this->files->put("{$testsPath}/{$name}Test.php", $content);
-        $this->info("Created: tests/Feature/{$pluralName}/{$name}Test.php");
+        $this->files->put("{$testsPath}/{$pluralName}Test.php", $content);
+        $this->info("Created: tests/Feature/{$pluralName}/{$pluralName}Test.php");
     }
 
     protected function createMigration(string $name): void

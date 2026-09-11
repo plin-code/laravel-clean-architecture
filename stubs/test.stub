@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\{{PluralDomainName}};
 
 use {{DomainNamespace}}\{{PluralDomainName}}\Models\{{DomainName}};
 use {{DomainNamespace}}\{{PluralDomainName}}\Enums\{{DomainName}}Status;

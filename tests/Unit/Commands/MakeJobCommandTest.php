@@ -29,7 +29,7 @@ describe('MakeJobCommand', function () {
         $filesystem->shouldReceive('isDirectory')->andReturn(false);
         $filesystem->shouldReceive('makeDirectory')->once();
         $filesystem->shouldReceive('put')->once()->withArgs(function ($path, $content) {
-            return str_contains($path, 'Application/Jobs/UserJob.php');
+            return str_contains($path, 'Application/Jobs/ProcessUserJob.php');
         });
 
         $command = new MakeJobCommand($filesystem);
