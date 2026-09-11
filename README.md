@@ -272,6 +272,16 @@ php artisan vendor:publish --tag=clean-architecture-config
 
 When the config file is not published, the defaults above are used.
 
+The package does not edit your autoloader. Laravel maps `App\` to `app/` in `composer.json`, which covers every directory under `app/` as long as `default_namespace` stays `App`. Any other combination needs a PSR-4 entry of its own, otherwise the classes are generated but cannot be loaded:
+
+| Configuration | Generated namespace | Entry to add under `autoload.psr-4` |
+|---|---|---|
+| `app/Core/Domain` with `App` | `App\Core\Domain` | none |
+| `app/Domain` with `Acme` | `Acme\Domain` | `"Acme\\": "app/"` |
+| `src/Domain` with `App` | `App\src\Domain` | `"App\\src\\": "src/"` |
+
+Two prefixes can point to the same directory, so `"Acme\\": "app/"` sits next to Laravel's `"App\\": "app/"`. Run `composer dump-autoload` after editing `composer.json`.
+
 ### ✅ Validation rules
 
 Every rule can be turned off by name under `validation.rules`. A rule set to `false` is left out of the config written by `clean-arch:make-arch-rules`. All of them are enabled by default, so a project without a published config file keeps the full set.
