@@ -48,7 +48,7 @@ class MakeListenerCommand extends Command
             $this->files->makeDirectory($listenerPath, 0755, true);
         }
 
-        $this->files->put("{$listenerPath}/{$name}Listener.php", $content);
-        $this->info("Created: {$directory}/{$name}Listener.php");
+        $this->files->put("{$listenerPath}/{$name}EventListener.php", $content);
+        $this->info("Created: {$directory}/{$name}EventListener.php");
     }
 }

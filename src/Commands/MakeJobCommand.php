@@ -48,7 +48,7 @@ class MakeJobCommand extends Command
             $this->files->makeDirectory($jobPath, 0755, true);
         }
 
-        $this->files->put("{$jobPath}/{$name}Job.php", $content);
-        $this->info("Created: {$directory}/{$name}Job.php");
+        $this->files->put("{$jobPath}/Process{$name}Job.php", $content);
+        $this->info("Created: {$directory}/Process{$name}Job.php");
     }
 }
