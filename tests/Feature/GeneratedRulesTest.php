@@ -77,7 +77,27 @@ describe('Generated phparkitect rules', function () {
             ->toContain('ArchFixture\Domain\Models\Product')
             ->toContain('should not depend on these namespaces: ArchFixture\Application')
             ->toContain('ArchFixture\Domain\Models\ProductObserver')
-            ->toContain('4 violations detected');
+            ->toContain('6 violations detected');
+    });
+
+    it('reports every application import of the infrastructure layer without an allowlist', function () {
+        $result = runPhparkitect($this->config, fixtureDirectory() . '/autoload.php');
+
+        expect($result['output'])
+            ->toContain('ArchFixture\Application\Actions\SendProductMail has 1 violations')
+            ->toContain('ArchFixture\Application\Actions\ShowProduct has 1 violations');
+    });
+
+    it('lets the application import an allowed infrastructure namespace', function () {
+        config()->set('clean-architecture.validation.application_infrastructure_allowed', ['Mail']);
+
+        $result = runPhparkitect(generateFixtureConfig(), fixtureDirectory() . '/autoload.php');
+
+        expect($result['exitCode'])->toBe(1)
+            ->and($result['output'])
+            ->toContain('ArchFixture\Application\Actions\ShowProduct has 1 violations')
+            ->not->toContain('SendProductMail')
+            ->toContain('5 violations detected');
     });
 
     it('follows inheritance chains the removed validate command could not', function () {
