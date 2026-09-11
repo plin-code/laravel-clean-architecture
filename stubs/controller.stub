@@ -7,7 +7,7 @@ use {{ApplicationNamespace}}\Actions\{{PluralDomainName}}\Update{{DomainName}}Ac
 use {{ApplicationNamespace}}\Actions\{{PluralDomainName}}\Delete{{DomainName}}Action;
 use {{ApplicationNamespace}}\Actions\{{PluralDomainName}}\GetById{{DomainName}}Action;
 use {{ApplicationNamespace}}\Services\{{DomainName}}Service;
-use {{DomainNamespace}}\{{PluralDomainName}}\Models\{{DomainName}};
+use {{DomainNamespace}}\{{PluralDomainName}}{{ModelNamespace}}\{{DomainName}};
 use {{InfrastructureNamespace}}\Http\Controllers\Controller;
 use {{InfrastructureNamespace}}\Http\Requests\Create{{DomainName}}Request;
 use {{InfrastructureNamespace}}\Http\Requests\Update{{DomainName}}Request;

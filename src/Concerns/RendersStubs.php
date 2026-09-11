@@ -19,6 +19,8 @@ trait RendersStubs
 {
     abstract protected function layerNamespace(string $layer): string;
 
+    abstract protected function modelDirectorySegment(): string;
+
     /**
      * Read a stub shipped with the package, with the layer namespaces resolved.
      *
@@ -26,6 +28,11 @@ trait RendersStubs
      * `{{ApplicationNamespace}}` and `{{InfrastructureNamespace}}`, so the
      * generated classes follow `directories` and `default_namespace` instead
      * of assuming `App\Domain` and its siblings.
+     *
+     * They refer to the model's own subfolder through `{{ModelNamespace}}`,
+     * which carries its own leading backslash so it resolves cleanly both
+     * with a segment configured (`\Models`) and without one (an empty
+     * string), never leaving a double or trailing backslash behind.
      *
      * @throws \Exception when the stub does not exist.
      */
@@ -37,12 +44,15 @@ trait RendersStubs
             throw new \Exception("Stub file not found: {$stubPath}");
         }
 
+        $modelSegment = $this->modelDirectorySegment();
+
         return str_replace(
-            ['{{DomainNamespace}}', '{{ApplicationNamespace}}', '{{InfrastructureNamespace}}'],
+            ['{{DomainNamespace}}', '{{ApplicationNamespace}}', '{{InfrastructureNamespace}}', '{{ModelNamespace}}'],
             [
                 rtrim($this->layerNamespace('domain'), '\\'),
                 rtrim($this->layerNamespace('application'), '\\'),
                 rtrim($this->layerNamespace('infrastructure'), '\\'),
+                $modelSegment === '' ? '' : '\\' . $modelSegment,
             ],
             $this->files->get($stubPath)
         );

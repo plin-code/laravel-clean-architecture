@@ -34,6 +34,27 @@ trait ResolvesArchitectureDirectories
     }
 
     /**
+     * Subfolder the domain model is generated under, inside each domain's
+     * directory, without leading or trailing slashes.
+     *
+     * Configured through `generation.model_directory` (default `Models`). A
+     * `null` or empty value means no subfolder: the model sits directly in
+     * the domain directory, `App\Domain\Articles\Article` instead of
+     * `App\Domain\Articles\Models\Article`. Surrounding slashes and
+     * backslashes are trimmed, so `/Entities/` behaves like `Entities`.
+     */
+    protected function modelDirectorySegment(): string
+    {
+        $configured = config('clean-architecture.generation.model_directory', 'Models');
+
+        if (! is_string($configured)) {
+            return '';
+        }
+
+        return trim($configured, '/\\');
+    }
+
+    /**
      * Namespace of a layer, derived from its directory, with a trailing separator.
      *
      * `app/Domain` becomes `App\Domain\`, following the psr-4 mapping Laravel

@@ -2,7 +2,7 @@
 
 namespace {{ApplicationNamespace}}\Actions\{{PluralDomainName}};
 
-{{ActionBaseImport}}use {{DomainNamespace}}\{{PluralDomainName}}\Models\{{DomainName}};
+{{ActionBaseImport}}use {{DomainNamespace}}\{{PluralDomainName}}{{ModelNamespace}}\{{DomainName}};
 
 class {{ActionName}}{{ActionExtends}}
 {

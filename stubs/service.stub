@@ -2,7 +2,7 @@
 
 namespace {{ApplicationNamespace}}\Services;
 
-{{ServiceBaseImport}}use {{DomainNamespace}}\{{PluralDomainName}}\Models\{{DomainName}};
+{{ServiceBaseImport}}use {{DomainNamespace}}\{{PluralDomainName}}{{ModelNamespace}}\{{DomainName}};
 use {{DomainNamespace}}\{{PluralDomainName}}\Enums\{{DomainName}}Status;
 use Illuminate\Database\Eloquent\Collection;
 

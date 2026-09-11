@@ -1,6 +1,6 @@
 <?php
 
-namespace {{DomainNamespace}}\{{PluralDomainName}}\Models;
+namespace {{DomainNamespace}}\{{PluralDomainName}}{{ModelNamespace}};
 
 use {{DomainNamespace}}\Shared\BaseModel;
 use {{DomainNamespace}}\{{PluralDomainName}}\Enums\{{DomainName}}Status;
