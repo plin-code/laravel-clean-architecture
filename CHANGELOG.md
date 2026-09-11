@@ -2,6 +2,17 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
+## [3.1.1] - 2026-09-11
+
+### Fixed
+
+- Every `make-*` command and `clean-arch:generate-package` declared `--force` but never read it, so rerunning a generator silently overwrote hand written code. Commands that write a single file (`make-action`, `make-service`, `make-controller`, `make-observer`, `make-listener`, `make-job`, `make-mail`, `make-notification`, `make-export`) now refuse to overwrite an existing file: they print the path and exit 1 unless `--force` is passed. `make-domain` and `generate-package` skip existing files with a `Skipped:` line and write the rest, as `clean-arch:install` already did
+- A second `make-domain` run for the same name created another `create_{table}_table` migration, which failed on `migrate`. The command now finds the existing migration whatever its timestamp, skips it, and with `--force` overwrites it in place
+
+### Changed
+
+- A script that reruns a single file generator on an existing class now gets exit code 1 instead of a silent overwrite. Add `--force` where overwriting is intended
+
 ## [3.1.0] - 2026-09-11
 
 ### Added
