@@ -165,6 +165,8 @@ app/
 
 ### 📂 Generated structure after `clean-arch:make-domain User`
 
+The model sits in a `Models` subfolder by default. Set `generation.model_directory` to change or drop it, see [Model directory](#-model-directory).
+
 ```
 app/
 ├── Domain/
@@ -334,6 +336,28 @@ php artisan clean-arch:make-domain Brand --no-base
 ```
 
 The `BaseService` and `BaseAction` classes created by `clean-arch:install` remain in `Application/Services` and `Application/Actions` regardless. Only the `extends` clause and its `use` statement are omitted.
+
+### 🗂️ Model directory
+
+`generation.model_directory` (default `'Models'`) controls the subfolder the domain model is generated under, inside each domain's directory. It is read by every command that writes or imports the model, `make-domain` as well as the standalone `make-action`, `make-controller`, `make-export`, `make-job`, `make-mail`, `make-notification`, `make-observer` and `make-service`, so a domain stays consistent no matter which command touches it next.
+
+```php
+'generation' => [
+    'model_directory' => 'Models',
+],
+```
+
+Set it to `null` or an empty string to generate the model directly inside the domain directory, with no subfolder:
+
+```php
+'generation' => [
+    'model_directory' => null,
+],
+```
+
+`clean-arch:make-domain User` then writes `app/Domain/Users/User.php`, declaring `App\Domain\Users\User`, instead of `app/Domain/Users/Models/User.php` declaring `App\Domain\Users\Models\User`.
+
+Any other single segment replaces `Models`, for example `'Entities'` produces `app/Domain/Users/Entities/User.php` declaring `App\Domain\Users\Entities\User`. Surrounding slashes are trimmed, so `'/Entities/'` behaves the same as `'Entities'`.
 
 ## 🛠️ Development
 
