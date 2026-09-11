@@ -46,6 +46,17 @@ return [
             'no_jobs_in_infrastructure'             => true,
             'no_commands_in_infrastructure'         => true,
         ],
+
+        /*
+        | Infrastructure namespaces the application layer may import without
+        | breaking 'application_no_infrastructure_imports', for side effects
+        | such as mail and notifications sent straight from an action. Values
+        | are relative to the infrastructure layer, so ['Mail', 'Notifications']
+        | allows App\Infrastructure\Mail and App\Infrastructure\Notifications
+        | while every other infrastructure import is still reported. Empty by
+        | default. Regenerate phparkitect.php with --force after changing it.
+        */
+        'application_infrastructure_allowed' => [],
     ],
 
     /*

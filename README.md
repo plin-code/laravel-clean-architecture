@@ -305,6 +305,16 @@ Every rule can be turned off by name under `validation.rules`. A rule set to `fa
 
 `no_commands_in_infrastructure` is the most likely candidate for opting out. A console command is an input adapter, much like an HTTP controller, and keeping it in `Application` forces the Application layer to depend on `Illuminate\Console`. Turn the rule off if you prefer `Infrastructure/Console/Commands`.
 
+Some projects send mail and notifications straight from an action, importing `App\Infrastructure\Mail` or `App\Infrastructure\Notifications` without an interface in between. Turning `application_no_infrastructure_imports` off to accept that would also hide the imports you still want reported. List the accepted namespaces under `validation.application_infrastructure_allowed` instead:
+
+```php
+'validation' => [
+    'application_infrastructure_allowed' => ['Mail', 'Notifications'],
+],
+```
+
+Values are relative to the infrastructure layer, so they keep working with custom `directories` and `default_namespace`. With the example above an action importing `App\Infrastructure\Mail\ArticleMail` passes, while one importing `App\Infrastructure\Http\Controllers\Controller` or `App\Infrastructure\Filament\ArticleResource` is still reported. The list is empty by default, and an empty list generates exactly the same `phparkitect.php` as before. An invalid entry (not a string, or empty) makes `clean-arch:make-arch-rules` fail without writing the file. After changing the key, regenerate the file with `php artisan clean-arch:make-arch-rules --force`.
+
 ### 📝 Custom validation messages
 
 `validation.custom_messages` controls whether `clean-arch:make-domain` generates the `messages()` method in the form requests it creates. It defaults to `true`.
@@ -317,7 +327,7 @@ Every rule can be turned off by name under `validation.rules`. A rule set to `fa
 
 Set it to `false` and the generated `Create*Request` and `Update*Request` classes will omit the `messages()` method entirely. The default `rules()` and `authorize()` methods are unaffected, and the output remains valid PHP either way.
 
-Note the two keys live under `validation` but serve different purposes. The `rules` subgroup is read by `clean-arch:make-arch-rules`, while `custom_messages` is read by `clean-arch:make-domain` at generation time. They are kept together so that a single published config file is the only place to look.
+Note the keys under `validation` serve different purposes. The `rules` subgroup and `application_infrastructure_allowed` are read by `clean-arch:make-arch-rules`, while `custom_messages` is read by `clean-arch:make-domain` at generation time. They are kept together so that a single published config file is the only place to look.
 
 ### 🏗️ Optional base classes
 
