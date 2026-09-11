@@ -2,7 +2,7 @@
 
 namespace {{DomainNamespace}}\{{PluralDomainName}}\Events;
 
-use {{DomainNamespace}}\{{PluralDomainName}}\Models\{{DomainName}};
+use {{DomainNamespace}}\{{PluralDomainName}}{{ModelNamespace}}\{{DomainName}};
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;

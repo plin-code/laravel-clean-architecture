@@ -2,7 +2,7 @@
 
 namespace {{InfrastructureNamespace}}\Observers\{{PluralDomainName}};
 
-use {{DomainNamespace}}\{{PluralDomainName}}\Models\{{DomainName}};
+use {{DomainNamespace}}\{{PluralDomainName}}{{ModelNamespace}}\{{DomainName}};
 
 class {{DomainName}}Observer
 {

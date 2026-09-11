@@ -2,7 +2,7 @@
 
 namespace {{InfrastructureNamespace}}\Exports;
 
-use {{DomainNamespace}}\{{PluralDomainName}}\Models\{{DomainName}};
+use {{DomainNamespace}}\{{PluralDomainName}}{{ModelNamespace}}\{{DomainName}};
 use Illuminate\Support\Collection;
 
 class {{DomainName}}Export

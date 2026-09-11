@@ -76,9 +76,10 @@ class MakeDomainCommand extends Command
         $stub    = $this->getStub('domain-model');
         $content = $this->replacePlaceholders($stub, $name);
 
-        $pluralName = Str::plural($name);
-        $directory  = $this->layerDirectory('domain') . "/{$pluralName}/Models";
-        $path       = base_path("{$directory}/{$name}.php");
+        $pluralName   = Str::plural($name);
+        $modelSegment = $this->modelDirectorySegment();
+        $directory    = $this->layerDirectory('domain') . "/{$pluralName}" . ($modelSegment !== '' ? "/{$modelSegment}" : '');
+        $path         = base_path("{$directory}/{$name}.php");
 
         if (! $this->files->isDirectory(dirname($path))) {
             $this->files->makeDirectory(dirname($path), 0755, true);
@@ -271,14 +272,15 @@ class MakeDomainCommand extends Command
         $domain         = $this->layerDirectory('domain');
         $application    = $this->layerDirectory('application');
         $infrastructure = $this->layerDirectory('infrastructure');
-        $directories    = [
-            base_path("{$domain}/{$pluralName}/Models"),
+        $modelSegment   = $this->modelDirectorySegment();
+        $directories    = array_filter([
+            $modelSegment !== '' ? base_path("{$domain}/{$pluralName}/{$modelSegment}") : null,
             base_path("{$domain}/{$pluralName}/Enums"),
             base_path("{$domain}/{$pluralName}/Events"),
             base_path("{$application}/Actions/{$pluralName}"),
             base_path("{$infrastructure}/Http/Requests"),
             base_path("{$infrastructure}/Http/Resources"),
-        ];
+        ]);
 
         foreach ($directories as $directory) {
             if ($this->files->isDirectory($directory) && count($this->files->files($directory)) === 0) {
