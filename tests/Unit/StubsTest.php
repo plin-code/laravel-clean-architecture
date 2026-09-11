@@ -99,7 +99,7 @@ describe('Stub Files', function () {
         $content = file_get_contents($this->stubsPath . '/domain-model.stub');
 
         expect($content)
-            ->toContain('namespace {{DomainNamespace}}\{{PluralDomainName}}\Models;')
+            ->toContain('namespace {{DomainNamespace}}\{{PluralDomainName}}{{ModelNamespace}};')
             ->toContain('class {{DomainName}} extends BaseModel')
             ->toContain('protected $table = \'{{domain-table}}\';')
             ->toContain('protected $fillable')
@@ -152,7 +152,8 @@ describe('Stub Files', function () {
         expect($stub)
             ->not->toContain('strict_mode')
             ->toContain("'custom_messages' => true")
-            ->toContain("'extend_base_classes' => true");
+            ->toContain("'extend_base_classes' => true")
+            ->toContain("'model_directory' => 'Models'");
     });
 
     it('keeps the shipped config and the install stub in sync', function () {
@@ -168,5 +169,11 @@ describe('Stub Files', function () {
         expect($config)
             ->toContain("'extend_base_classes' => true")
             ->not->toContain('strict_mode');
+    });
+
+    it('shipped config declares model_directory', function () {
+        $config = file_get_contents($this->stubsPath . '/../config/clean-architecture.php');
+
+        expect($config)->toContain("'model_directory' => 'Models'");
     });
 });
