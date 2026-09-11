@@ -15,6 +15,7 @@ describe('Stub Files', function () {
             'base-service.stub',
             'controller.stub',
             'domain-model.stub',
+            'migration.stub',
             'request.stub',
             'service.stub',
             'web-controller.stub',

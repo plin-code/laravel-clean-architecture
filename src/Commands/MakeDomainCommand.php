@@ -251,11 +251,18 @@ class MakeDomainCommand extends Command
     protected function createMigration(string $name): void
     {
         $tableName = $this->getTableName($name);
-        $this->call('make:migration', [
-            'name'     => "create_{$tableName}_table",
-            '--create' => $tableName,
-        ]);
-        $this->info("Created migration for table: {$tableName}");
+        $stub      = $this->getStub('migration');
+        $content   = $this->replacePlaceholders($stub, $name);
+
+        $migrationsPath = database_path('migrations');
+        if (! $this->files->isDirectory($migrationsPath)) {
+            $this->files->makeDirectory($migrationsPath, 0755, true);
+        }
+
+        $fileName = date('Y_m_d_His') . "_create_{$tableName}_table.php";
+
+        $this->files->put("{$migrationsPath}/{$fileName}", $content);
+        $this->info("Created: database/migrations/{$fileName}");
     }
 
     protected function addGitKeepFiles(string $name): void
