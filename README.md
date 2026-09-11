@@ -258,7 +258,7 @@ php artisan vendor:publish --tag=clean-architecture-config
 
 ### 📁 Directories
 
-`directories` is read by `clean-arch:install`, which creates the structure at those paths, and by `clean-arch:make-arch-rules`, which turns them into the namespaces and the class sets of the generated config. The layer namespaces are derived from the same values, so `app/Core/Domain` with a `default_namespace` of `Acme` becomes `Acme\Core\Domain`.
+`directories` is read by `clean-arch:install` and the `make-*` commands, which write the generated classes at those paths, and by `clean-arch:make-arch-rules`, which turns them into the namespaces and the class sets of the generated config. The layer namespaces are derived from the same values, so `app/Core/Domain` with a `default_namespace` of `Acme` becomes `Acme\Core\Domain`.
 
 ```php
 'default_namespace' => 'App',
