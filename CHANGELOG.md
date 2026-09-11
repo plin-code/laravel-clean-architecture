@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
+## [3.2.0] - 2026-09-12
+
+### Added
+
+- `validation.application_infrastructure_allowed` lists infrastructure namespaces the application layer may import without breaking `application_no_infrastructure_imports`, for side effects such as mail and notifications sent from an action. Values are relative to the infrastructure layer, so `['Mail', 'Notifications']` allows `App\Infrastructure\Mail` and `App\Infrastructure\Notifications` while imports from `Infrastructure\Http` or `Infrastructure\Filament` are still reported. The list is empty by default and an empty list generates the same `phparkitect.php` as before. Invalid entries make `clean-arch:make-arch-rules` fail without writing the file
+
 ## [3.1.1] - 2026-09-11
 
 ### Fixed
