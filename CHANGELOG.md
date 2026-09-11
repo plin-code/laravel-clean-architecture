@@ -2,7 +2,7 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
-## [Unreleased]
+## [3.0.1] - 2026-09-11
 
 ### Fixed
 
@@ -128,7 +128,7 @@ All notable changes to `laravel-clean-architecture` will be documented in this f
 
 - `clean-arch:generate-package` updated to reflect v2 nested directory structure
 
-## [Unreleased]
+## [3.0.1] - 2026-09-11
 
 ### Added
 - Initial release of Laravel Clean Architecture package
