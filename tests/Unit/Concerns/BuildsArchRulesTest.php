@@ -116,6 +116,64 @@ describe('BuildsArchRules', function () {
             ->toContain('exits 0');
     });
 
+    it('generates the application rule unchanged when the allowlist is missing or empty', function (?array $allowed) {
+        if ($allowed !== null) {
+            config()->set('clean-architecture.validation.application_infrastructure_allowed', $allowed);
+        }
+
+        $expected = <<<'PHP'
+                $rules[] = Rule::allClasses()
+                    ->that(new ResideInOneOfTheseNamespaces('App\\Application'))
+                    ->should(new NotDependsOnTheseNamespaces(['App\\Infrastructure']))
+                    ->because('the application layer must not depend on the infrastructure layer');
+            PHP;
+
+        expect(buildArchRules()[2])->toBe($expected);
+    })->with([
+        'missing' => [null],
+        'empty'   => [[]],
+    ]);
+
+    it('excludes the allowed infrastructure namespaces from the application rule', function () {
+        config()->set('clean-architecture.validation.application_infrastructure_allowed', ['Mail', 'Notifications']);
+
+        expect(buildArchRules()[2])
+            ->toContain("new NotDependsOnTheseNamespaces(['App\\\\Infrastructure'], ['App\\\\Infrastructure\\\\Mail', 'App\\\\Infrastructure\\\\Notifications'])");
+    });
+
+    it('resolves the allowed namespaces against the configured infrastructure layer', function () {
+        config()->set('clean-architecture.default_namespace', 'Acme');
+        config()->set('clean-architecture.directories.infrastructure', 'app/Core/Infrastructure');
+        config()->set('clean-architecture.validation.application_infrastructure_allowed', ['Mail']);
+
+        expect(buildArchRules()[2])
+            ->toContain("new NotDependsOnTheseNamespaces(['Acme\\\\Core\\\\Infrastructure'], ['Acme\\\\Core\\\\Infrastructure\\\\Mail'])");
+    });
+
+    it('trims separators around the allowed segments', function (string $segment) {
+        config()->set('clean-architecture.validation.application_infrastructure_allowed', [$segment]);
+
+        expect(buildArchRules()[2])
+            ->toContain("new NotDependsOnTheseNamespaces(['App\\\\Infrastructure'], ['App\\\\Infrastructure\\\\Mail'])");
+    })->with([
+        'backslashes' => ['\\Mail\\'],
+        'slashes'     => ['/Mail/'],
+    ]);
+
+    it('leaves the other rules unchanged when the allowlist is set', function () {
+        $before = buildArchRules();
+
+        config()->set('clean-architecture.validation.application_infrastructure_allowed', ['Mail', 'Notifications']);
+
+        $after = buildArchRules();
+
+        expect($after)->toHaveCount(6);
+
+        foreach ([0, 1, 3, 4, 5] as $index) {
+            expect($after[$index])->toBe($before[$index]);
+        }
+    });
+
     it('follows the configured namespace and directories', function () {
         config()->set('clean-architecture.default_namespace', 'Acme');
         config()->set('clean-architecture.directories.domain', 'app/Core/Domain');
