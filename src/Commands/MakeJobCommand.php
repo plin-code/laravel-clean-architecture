@@ -6,11 +6,13 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
+use PlinCode\LaravelCleanArchitecture\Concerns\WritesFiles;
 
 class MakeJobCommand extends Command
 {
     use RendersStubs;
     use ResolvesArchitectureDirectories;
+    use WritesFiles;
 
     protected $signature = 'clean-arch:make-job {name : The name of the job}
                           {--force : Overwrite existing files}';
@@ -29,14 +31,19 @@ class MakeJobCommand extends Command
     {
         $name = $this->argument('name');
 
-        $this->info("Creating job: {$name}");
-        $this->createJob($name);
-        $this->info("Job {$name} created successfully!");
+        $this->resolveForce();
 
-        return self::SUCCESS;
+        $this->info("Creating job: {$name}");
+        $exitCode = $this->createJob($name);
+
+        if ($exitCode === self::SUCCESS) {
+            $this->info("Job {$name} created successfully!");
+        }
+
+        return $exitCode;
     }
 
-    protected function createJob(string $name): void
+    protected function createJob(string $name): int
     {
         $stub    = $this->getStub('job');
         $content = $this->replaceDomainPlaceholders($stub, $name);
@@ -48,7 +55,6 @@ class MakeJobCommand extends Command
             $this->files->makeDirectory($jobPath, 0755, true);
         }
 
-        $this->files->put("{$jobPath}/Process{$name}Job.php", $content);
-        $this->info("Created: {$directory}/Process{$name}Job.php");
+        return $this->writeOrFail("{$jobPath}/Process{$name}Job.php", $content, "{$directory}/Process{$name}Job.php");
     }
 }

@@ -160,7 +160,7 @@ describe('MakeDomainCommand', function () {
         $writtenPath = null;
 
         $mockFilesystem = mock(Filesystem::class);
-        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('exists')->andReturnUsing(fn ($path) => str_contains($path, '.stub'));
         $mockFilesystem->shouldReceive('get')->andReturn('<?php namespace App\Infrastructure\Http\Controllers\Api; class {{PluralDomainName}}Controller {}');
         $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
         $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
@@ -184,7 +184,7 @@ describe('MakeDomainCommand', function () {
         $writtenPaths = [];
 
         $mockFilesystem = mock(Filesystem::class);
-        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('exists')->andReturnUsing(fn ($path) => str_contains($path, '.stub'));
         $mockFilesystem->shouldReceive('get')->andReturn('<?php namespace App\Infrastructure\Http\Requests; class {{RequestName}} {}');
 
         $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
@@ -264,7 +264,7 @@ class {{RequestName}} extends BaseRequest
 PHP;
 
         $mockFilesystem = mock(Filesystem::class);
-        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('exists')->andReturnUsing(fn ($path) => str_contains($path, '.stub'));
         $mockFilesystem->shouldReceive('get')->andReturn($stubWithBlock);
         $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
         $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
@@ -304,7 +304,7 @@ class {{RequestName}} extends BaseRequest
 PHP;
 
         $mockFilesystem = mock(Filesystem::class);
-        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('exists')->andReturnUsing(fn ($path) => str_contains($path, '.stub'));
         $mockFilesystem->shouldReceive('get')->andReturn($stubWithBlock);
         $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
         $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
@@ -329,7 +329,7 @@ PHP;
         $writtenPath = null;
 
         $mockFilesystem = mock(Filesystem::class);
-        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('exists')->andReturnUsing(fn ($path) => str_contains($path, '.stub'));
         $mockFilesystem->shouldReceive('get')->andReturn('<?php namespace App\Infrastructure\Http\Resources; class {{DomainName}}Resource {}');
         $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
         $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
@@ -429,7 +429,7 @@ PHP;
         $writtenPath = null;
 
         $mockFilesystem = mock(Filesystem::class);
-        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('exists')->andReturnUsing(fn ($path) => str_contains($path, '.stub'));
         $mockFilesystem->shouldReceive('get')->andReturn('<?php namespace App\Domain\{{PluralDomainName}}\Models; class {{DomainName}} {}');
         $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
         $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
@@ -453,7 +453,7 @@ PHP;
         $writtenPath = null;
 
         $mockFilesystem = mock(Filesystem::class);
-        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('exists')->andReturnUsing(fn ($path) => str_contains($path, '.stub'));
         $mockFilesystem->shouldReceive('get')->andReturn('<?php class {{DomainName}}Observer {}');
         $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
         $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
@@ -477,7 +477,7 @@ PHP;
         $writtenPath = null;
 
         $mockFilesystem = mock(Filesystem::class);
-        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('exists')->andReturnUsing(fn ($path) => str_contains($path, '.stub'));
         $mockFilesystem->shouldReceive('get')->andReturn('<?php class {{DomainName}}EventListener {}');
         $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
         $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
@@ -501,7 +501,7 @@ PHP;
         $writtenPath = null;
 
         $mockFilesystem = mock(Filesystem::class);
-        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('exists')->andReturnUsing(fn ($path) => str_contains($path, '.stub'));
         $mockFilesystem->shouldReceive('get')->andReturn('<?php class Process{{DomainName}}Job {}');
         $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
         $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
@@ -525,7 +525,7 @@ PHP;
         $writtenPath = null;
 
         $mockFilesystem = mock(Filesystem::class);
-        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('exists')->andReturnUsing(fn ($path) => str_contains($path, '.stub'));
         $mockFilesystem->shouldReceive('get')->andReturn('<?php class {{DomainName}}Mail {}');
         $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
         $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
@@ -549,7 +549,7 @@ PHP;
         $writtenPath = null;
 
         $mockFilesystem = mock(Filesystem::class);
-        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('exists')->andReturnUsing(fn ($path) => str_contains($path, '.stub'));
         $mockFilesystem->shouldReceive('get')->andReturn('<?php class {{DomainName}}Notification {}');
         $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
         $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
@@ -573,7 +573,7 @@ PHP;
         $writtenPath = null;
 
         $mockFilesystem = mock(Filesystem::class);
-        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        $mockFilesystem->shouldReceive('exists')->andReturnUsing(fn ($path) => str_contains($path, '.stub'));
         $mockFilesystem->shouldReceive('get')->andReturn('<?php class {{DomainName}}Export {}');
         $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
         $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);

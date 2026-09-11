@@ -82,7 +82,9 @@ describe('MakeControllerCommand', function () {
 
         $writtenPath    = null;
         $mockFilesystem = mock(Filesystem::class);
-        $mockFilesystem->shouldReceive('exists')->andReturn(true);
+        // The target file does not exist yet, so the command writes it: this
+        // is not verifying overwrite behaviour, only the resulting path.
+        $mockFilesystem->shouldReceive('exists')->andReturnUsing(fn ($path) => str_contains($path, '.stub'));
         $mockFilesystem->shouldReceive('get')->andReturn('<?php // controller stub');
         $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
         $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);

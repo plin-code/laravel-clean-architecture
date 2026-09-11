@@ -7,11 +7,13 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
+use PlinCode\LaravelCleanArchitecture\Concerns\WritesFiles;
 
 class MakeControllerCommand extends Command
 {
     use RendersStubs;
     use ResolvesArchitectureDirectories;
+    use WritesFiles;
 
     protected $signature = 'clean-arch:make-controller {name : The name of the controller}
                           {--api : Generate API controller}
@@ -33,28 +35,33 @@ class MakeControllerCommand extends Command
         $name  = $this->argument('name');
         $isApi = $this->option('api');
         $isWeb = $this->option('web');
-        $force = $this->option('force');
 
         if (! $isApi && ! $isWeb) {
             $isApi = true; // Default to API
         }
 
+        $this->resolveForce();
+
         $this->info("🚀 Creating controller: {$name}");
 
+        $exitCode = self::SUCCESS;
+
         if ($isApi) {
-            $this->createApiController($name);
+            $exitCode = max($exitCode, $this->createApiController($name));
         }
 
         if ($isWeb) {
-            $this->createWebController($name);
+            $exitCode = max($exitCode, $this->createWebController($name));
         }
 
-        $this->info("✅ Controller {$name} created successfully!");
+        if ($exitCode === self::SUCCESS) {
+            $this->info("✅ Controller {$name} created successfully!");
+        }
 
-        return self::SUCCESS;
+        return $exitCode;
     }
 
-    protected function createApiController(string $name): void
+    protected function createApiController(string $name): int
     {
         $stub    = $this->getStub('controller');
         $content = $this->replacePlaceholders($stub, $name);
@@ -66,11 +73,10 @@ class MakeControllerCommand extends Command
             $this->files->makeDirectory($controllersPath, 0755, true);
         }
 
-        $this->files->put("{$controllersPath}/{$pluralName}Controller.php", $content);
-        $this->info("Created: {$directory}/{$pluralName}Controller.php");
+        return $this->writeOrFail("{$controllersPath}/{$pluralName}Controller.php", $content, "{$directory}/{$pluralName}Controller.php");
     }
 
-    protected function createWebController(string $name): void
+    protected function createWebController(string $name): int
     {
         $stub    = $this->getStub('web-controller');
         $content = $this->replacePlaceholders($stub, $name);
@@ -81,8 +87,7 @@ class MakeControllerCommand extends Command
             $this->files->makeDirectory($controllersPath, 0755, true);
         }
 
-        $this->files->put("{$controllersPath}/{$name}Controller.php", $content);
-        $this->info("Created: {$directory}/{$name}Controller.php");
+        return $this->writeOrFail("{$controllersPath}/{$name}Controller.php", $content, "{$directory}/{$name}Controller.php");
     }
 
     protected function replacePlaceholders(string $content, string $name): string

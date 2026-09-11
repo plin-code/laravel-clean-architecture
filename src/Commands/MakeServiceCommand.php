@@ -7,11 +7,13 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
+use PlinCode\LaravelCleanArchitecture\Concerns\WritesFiles;
 
 class MakeServiceCommand extends Command
 {
     use RendersStubs;
     use ResolvesArchitectureDirectories;
+    use WritesFiles;
 
     protected $signature = 'clean-arch:make-service {name : The name of the service}
                            {--force : Overwrite existing files}
@@ -29,19 +31,22 @@ class MakeServiceCommand extends Command
 
     public function handle(): int
     {
-        $name  = $this->argument('name');
-        $force = $this->option('force');
+        $name = $this->argument('name');
+
+        $this->resolveForce();
 
         $this->info("🚀 Creating service: {$name}");
 
-        $this->createService($name);
+        $exitCode = $this->createService($name);
 
-        $this->info("✅ Service {$name} created successfully!");
+        if ($exitCode === self::SUCCESS) {
+            $this->info("✅ Service {$name} created successfully!");
+        }
 
-        return self::SUCCESS;
+        return $exitCode;
     }
 
-    protected function createService(string $name): void
+    protected function createService(string $name): int
     {
         $extend  = $this->shouldExtendBaseClasses((bool) $this->option('no-base'));
         $stub    = $this->getStub('service');
@@ -53,8 +58,7 @@ class MakeServiceCommand extends Command
             $this->files->makeDirectory($servicesPath, 0755, true);
         }
 
-        $this->files->put("{$servicesPath}/{$name}Service.php", $content);
-        $this->info("Created: {$directory}/{$name}Service.php");
+        return $this->writeOrFail("{$servicesPath}/{$name}Service.php", $content, "{$directory}/{$name}Service.php");
     }
 
     protected function replacePlaceholders(string $content, string $name, array $extra = []): string

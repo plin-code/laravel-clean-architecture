@@ -6,11 +6,13 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
+use PlinCode\LaravelCleanArchitecture\Concerns\WritesFiles;
 
 class InstallCleanArchitectureCommand extends Command
 {
     use RendersStubs;
     use ResolvesArchitectureDirectories;
+    use WritesFiles;
 
     protected $signature = 'clean-arch:install
                           {--force : Overwrite existing files}';
@@ -18,8 +20,6 @@ class InstallCleanArchitectureCommand extends Command
     protected $description = 'Install Clean Architecture structure in Laravel project';
 
     protected Filesystem $files;
-
-    protected bool $force = false;
 
     public function __construct(Filesystem $files)
     {
@@ -31,7 +31,7 @@ class InstallCleanArchitectureCommand extends Command
     {
         $this->info('🚀 Installing Clean Architecture...');
 
-        $this->force = (bool) $this->option('force');
+        $this->resolveForce();
 
         // Create directory structure
         $this->createDirectoryStructure();
@@ -199,30 +199,5 @@ class InstallCleanArchitectureCommand extends Command
     {
         $stub = $this->getStub('readme');
         $this->writePath(base_path('CLEAN_ARCHITECTURE.md'), $stub, 'CLEAN_ARCHITECTURE.md');
-    }
-
-    /**
-     * Write a file relative to the base path, skipping it when it already
-     * exists unless `--force` was passed.
-     */
-    protected function writeFile(string $relativePath, string $content): void
-    {
-        $this->writePath(base_path($relativePath), $content, $relativePath);
-    }
-
-    /**
-     * Write a file at an absolute path, skipping it when it already exists
-     * unless `--force` was passed.
-     */
-    protected function writePath(string $path, string $content, string $label): void
-    {
-        if ($this->files->exists($path) && ! $this->force) {
-            $this->info("Skipped: {$label} (already exists, use --force to overwrite)");
-
-            return;
-        }
-
-        $this->files->put($path, $content);
-        $this->info("Created: {$label}");
     }
 }

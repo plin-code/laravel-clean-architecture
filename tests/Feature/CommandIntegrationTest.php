@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 describe('Command Integration', function () {
 
@@ -20,12 +21,14 @@ describe('Command Integration', function () {
             }
         }
 
-        // Clean up test Feature directories created by make-domain
-        $testFeatureDirs = [
-            base_path('tests/Feature/Products'),
-            base_path('tests/Feature/Orders'),
-        ];
-        foreach ($testFeatureDirs as $dir) {
+        // Clean up test Feature directories created by every make-domain call
+        // in this file. Now that an existing file is skipped instead of
+        // silently overwritten, a leftover from one test would otherwise
+        // leak into another when the suite runs out of declaration order.
+        $tables = ['Products', 'Orders', 'Invoices', 'Receipts', 'Articles', 'Comments', 'Enableds', 'Disableds', 'Brands'];
+
+        foreach ($tables as $plural) {
+            $dir = base_path("tests/Feature/{$plural}");
             if (File::isDirectory($dir)) {
                 File::deleteDirectory($dir);
             }
@@ -35,9 +38,12 @@ describe('Command Integration', function () {
         $migrationPath = database_path('migrations');
         if (File::isDirectory($migrationPath)) {
             foreach (File::files($migrationPath) as $file) {
-                if (str_contains($file->getFilename(), 'create_products_table') ||
-                    str_contains($file->getFilename(), 'create_orders_table')) {
-                    File::delete($file->getRealPath());
+                foreach ($tables as $plural) {
+                    if (str_contains($file->getFilename(), 'create_' . Str::snake($plural) . '_table')) {
+                        File::delete($file->getRealPath());
+
+                        break;
+                    }
                 }
             }
         }

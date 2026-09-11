@@ -7,11 +7,13 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
+use PlinCode\LaravelCleanArchitecture\Concerns\WritesFiles;
 
 class MakeObserverCommand extends Command
 {
     use RendersStubs;
     use ResolvesArchitectureDirectories;
+    use WritesFiles;
 
     protected $signature = 'clean-arch:make-observer {name : The name of the observer}
                           {domain : The domain name}
@@ -32,14 +34,19 @@ class MakeObserverCommand extends Command
         $name   = $this->argument('name');
         $domain = $this->argument('domain');
 
-        $this->info("Creating observer: {$name} for domain: {$domain}");
-        $this->createObserver($name, $domain);
-        $this->info("Observer {$name} created successfully!");
+        $this->resolveForce();
 
-        return self::SUCCESS;
+        $this->info("Creating observer: {$name} for domain: {$domain}");
+        $exitCode = $this->createObserver($name, $domain);
+
+        if ($exitCode === self::SUCCESS) {
+            $this->info("Observer {$name} created successfully!");
+        }
+
+        return $exitCode;
     }
 
-    protected function createObserver(string $name, string $domain): void
+    protected function createObserver(string $name, string $domain): int
     {
         $stub    = $this->getStub('observer');
         $content = $this->replacePlaceholders($stub, $name, $domain);
@@ -52,8 +59,7 @@ class MakeObserverCommand extends Command
             $this->files->makeDirectory($observerPath, 0755, true);
         }
 
-        $this->files->put("{$observerPath}/{$name}Observer.php", $content);
-        $this->info("Created: {$directory}/{$name}Observer.php");
+        return $this->writeOrFail("{$observerPath}/{$name}Observer.php", $content, "{$directory}/{$name}Observer.php");
     }
 
     protected function replacePlaceholders(string $content, string $name, string $domain): string
