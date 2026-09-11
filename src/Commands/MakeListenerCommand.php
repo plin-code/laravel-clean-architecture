@@ -6,11 +6,13 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
+use PlinCode\LaravelCleanArchitecture\Concerns\WritesFiles;
 
 class MakeListenerCommand extends Command
 {
     use RendersStubs;
     use ResolvesArchitectureDirectories;
+    use WritesFiles;
 
     protected $signature = 'clean-arch:make-listener {name : The name of the listener}
                           {--force : Overwrite existing files}';
@@ -29,14 +31,19 @@ class MakeListenerCommand extends Command
     {
         $name = $this->argument('name');
 
-        $this->info("Creating listener: {$name}");
-        $this->createListener($name);
-        $this->info("Listener {$name} created successfully!");
+        $this->resolveForce();
 
-        return self::SUCCESS;
+        $this->info("Creating listener: {$name}");
+        $exitCode = $this->createListener($name);
+
+        if ($exitCode === self::SUCCESS) {
+            $this->info("Listener {$name} created successfully!");
+        }
+
+        return $exitCode;
     }
 
-    protected function createListener(string $name): void
+    protected function createListener(string $name): int
     {
         $stub    = $this->getStub('listener');
         $content = $this->replaceDomainPlaceholders($stub, $name);
@@ -48,7 +55,6 @@ class MakeListenerCommand extends Command
             $this->files->makeDirectory($listenerPath, 0755, true);
         }
 
-        $this->files->put("{$listenerPath}/{$name}EventListener.php", $content);
-        $this->info("Created: {$directory}/{$name}EventListener.php");
+        return $this->writeOrFail("{$listenerPath}/{$name}EventListener.php", $content, "{$directory}/{$name}EventListener.php");
     }
 }

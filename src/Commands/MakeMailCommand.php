@@ -6,11 +6,13 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
+use PlinCode\LaravelCleanArchitecture\Concerns\WritesFiles;
 
 class MakeMailCommand extends Command
 {
     use RendersStubs;
     use ResolvesArchitectureDirectories;
+    use WritesFiles;
 
     protected $signature = 'clean-arch:make-mail {name : The name of the mailable}
                           {--force : Overwrite existing files}';
@@ -29,14 +31,19 @@ class MakeMailCommand extends Command
     {
         $name = $this->argument('name');
 
-        $this->info("Creating mailable: {$name}");
-        $this->createMail($name);
-        $this->info("Mailable {$name} created successfully!");
+        $this->resolveForce();
 
-        return self::SUCCESS;
+        $this->info("Creating mailable: {$name}");
+        $exitCode = $this->createMail($name);
+
+        if ($exitCode === self::SUCCESS) {
+            $this->info("Mailable {$name} created successfully!");
+        }
+
+        return $exitCode;
     }
 
-    protected function createMail(string $name): void
+    protected function createMail(string $name): int
     {
         $stub    = $this->getStub('mail');
         $content = $this->replaceDomainPlaceholders($stub, $name);
@@ -48,7 +55,6 @@ class MakeMailCommand extends Command
             $this->files->makeDirectory($mailPath, 0755, true);
         }
 
-        $this->files->put("{$mailPath}/{$name}Mail.php", $content);
-        $this->info("Created: {$directory}/{$name}Mail.php");
+        return $this->writeOrFail("{$mailPath}/{$name}Mail.php", $content, "{$directory}/{$name}Mail.php");
     }
 }

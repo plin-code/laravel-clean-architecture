@@ -7,11 +7,13 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
+use PlinCode\LaravelCleanArchitecture\Concerns\WritesFiles;
 
 class MakeActionCommand extends Command
 {
     use RendersStubs;
     use ResolvesArchitectureDirectories;
+    use WritesFiles;
 
     protected $signature = 'clean-arch:make-action {name : The name of the action}
                            {domain : The domain name}
@@ -32,18 +34,21 @@ class MakeActionCommand extends Command
     {
         $name   = $this->argument('name');
         $domain = $this->argument('domain');
-        $force  = $this->option('force');
+
+        $this->resolveForce();
 
         $this->info("🚀 Creating action: {$name} for domain: {$domain}");
 
-        $this->createAction($name, $domain);
+        $exitCode = $this->createAction($name, $domain);
 
-        $this->info("✅ Action {$name} created successfully!");
+        if ($exitCode === self::SUCCESS) {
+            $this->info("✅ Action {$name} created successfully!");
+        }
 
-        return self::SUCCESS;
+        return $exitCode;
     }
 
-    protected function createAction(string $name, string $domain): void
+    protected function createAction(string $name, string $domain): int
     {
         $extend  = $this->shouldExtendBaseClasses((bool) $this->option('no-base'));
         $stub    = $this->getStub('action');
@@ -57,8 +62,7 @@ class MakeActionCommand extends Command
             $this->files->makeDirectory($actionsPath, 0755, true);
         }
 
-        $this->files->put("{$actionsPath}/{$name}Action.php", $content);
-        $this->info("Created: {$directory}/{$name}Action.php");
+        return $this->writeOrFail("{$actionsPath}/{$name}Action.php", $content, "{$directory}/{$name}Action.php");
     }
 
     protected function replacePlaceholders(string $content, string $name, array $extra, string $domain): string

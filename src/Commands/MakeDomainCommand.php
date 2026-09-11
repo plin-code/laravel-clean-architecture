@@ -7,11 +7,13 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
+use PlinCode\LaravelCleanArchitecture\Concerns\WritesFiles;
 
 class MakeDomainCommand extends Command
 {
     use RendersStubs;
     use ResolvesArchitectureDirectories;
+    use WritesFiles;
 
     protected $signature = 'clean-arch:make-domain {name : The name of the domain}
                         {--force : Overwrite existing files}
@@ -29,8 +31,9 @@ class MakeDomainCommand extends Command
 
     public function handle(): int
     {
-        $name  = $this->argument('name');
-        $force = $this->option('force');
+        $name = $this->argument('name');
+
+        $this->resolveForce();
 
         $this->info("Creating domain: {$name}");
 
@@ -79,14 +82,12 @@ class MakeDomainCommand extends Command
         $pluralName   = Str::plural($name);
         $modelSegment = $this->modelDirectorySegment();
         $directory    = $this->layerDirectory('domain') . "/{$pluralName}" . ($modelSegment !== '' ? "/{$modelSegment}" : '');
-        $path         = base_path("{$directory}/{$name}.php");
 
-        if (! $this->files->isDirectory(dirname($path))) {
-            $this->files->makeDirectory(dirname($path), 0755, true);
+        if (! $this->files->isDirectory(base_path($directory))) {
+            $this->files->makeDirectory(base_path($directory), 0755, true);
         }
 
-        $this->files->put($path, $content);
-        $this->info("Created: {$directory}/{$name}.php");
+        $this->writeFile("{$directory}/{$name}.php", $content);
     }
 
     protected function createDomainEnums(string $name): void
@@ -102,8 +103,7 @@ class MakeDomainCommand extends Command
             $this->files->makeDirectory($enumsPath, 0755, true);
         }
 
-        $this->files->put("{$enumsPath}/{$name}Status.php", $content);
-        $this->info("Created: {$directory}/{$name}Status.php");
+        $this->writeFile("{$directory}/{$name}Status.php", $content);
     }
 
     protected function createDomainEvents(string $name): void
@@ -123,8 +123,7 @@ class MakeDomainCommand extends Command
                 '{{EventName}}' => $name . $event,
             ]);
 
-            $this->files->put("{$eventsPath}/{$name}{$event}.php", $content);
-            $this->info("Created: {$directory}/{$name}{$event}.php");
+            $this->writeFile("{$directory}/{$name}{$event}.php", $content);
         }
     }
 
@@ -154,8 +153,7 @@ class MakeDomainCommand extends Command
                 '{{RequestName}}' => $requestClass ?: 'Request',
             ]));
 
-            $this->files->put("{$actionsPath}/{$action}{$name}Action.php", $content);
-            $this->info("Created: {$directory}/{$action}{$name}Action.php");
+            $this->writeFile("{$directory}/{$action}{$name}Action.php", $content);
         }
     }
 
@@ -171,8 +169,7 @@ class MakeDomainCommand extends Command
             $this->files->makeDirectory($servicesPath, 0755, true);
         }
 
-        $this->files->put("{$servicesPath}/{$name}Service.php", $content);
-        $this->info("Created: {$directory}/{$name}Service.php");
+        $this->writeFile("{$directory}/{$name}Service.php", $content);
     }
 
     protected function createController(string $name): void
@@ -188,8 +185,7 @@ class MakeDomainCommand extends Command
             $this->files->makeDirectory($controllersPath, 0755, true);
         }
 
-        $this->files->put("{$controllersPath}/{$pluralName}Controller.php", $content);
-        $this->info("Created: {$directory}/{$pluralName}Controller.php");
+        $this->writeFile("{$directory}/{$pluralName}Controller.php", $content);
     }
 
     protected function createRequests(string $name): void
@@ -213,8 +209,7 @@ class MakeDomainCommand extends Command
                 '{{RequestName}}' => $request . $name . 'Request',
             ]);
 
-            $this->files->put("{$requestsPath}/{$request}{$name}Request.php", $content);
-            $this->info("Created: {$directory}/{$request}{$name}Request.php");
+            $this->writeFile("{$directory}/{$request}{$name}Request.php", $content);
         }
     }
 
@@ -229,8 +224,7 @@ class MakeDomainCommand extends Command
             $this->files->makeDirectory($resourcesPath, 0755, true);
         }
 
-        $this->files->put("{$resourcesPath}/{$name}Resource.php", $content);
-        $this->info("Created: {$directory}/{$name}Resource.php");
+        $this->writeFile("{$directory}/{$name}Resource.php", $content);
     }
 
     protected function createTests(string $name): void
@@ -245,10 +239,16 @@ class MakeDomainCommand extends Command
         $stub    = $this->getStub('test');
         $content = $this->replacePlaceholders($stub, $name);
 
-        $this->files->put("{$testsPath}/{$pluralName}Test.php", $content);
-        $this->info("Created: tests/Feature/{$pluralName}/{$pluralName}Test.php");
+        $this->writeFile("tests/Feature/{$pluralName}/{$pluralName}Test.php", $content);
     }
 
+    /**
+     * The migration file name carries a timestamp, so a plain path check
+     * never matches an existing migration for the same table. Any existing
+     * `*_create_{table}_table.php` is treated as the file to skip or
+     * overwrite (keeping its original name) instead of adding a second
+     * migration for the same table.
+     */
     protected function createMigration(string $name): void
     {
         $tableName = $this->getTableName($name);
@@ -260,10 +260,12 @@ class MakeDomainCommand extends Command
             $this->files->makeDirectory($migrationsPath, 0755, true);
         }
 
-        $fileName = date('Y_m_d_His') . "_create_{$tableName}_table.php";
+        $existing = collect($this->files->files($migrationsPath))
+            ->first(fn ($file): bool => (bool) preg_match('/_create_' . preg_quote($tableName, '/') . '_table\.php$/', $file->getFilename()));
 
-        $this->files->put("{$migrationsPath}/{$fileName}", $content);
-        $this->info("Created: database/migrations/{$fileName}");
+        $fileName = $existing?->getFilename() ?? date('Y_m_d_His') . "_create_{$tableName}_table.php";
+
+        $this->writePath("{$migrationsPath}/{$fileName}", $content, "database/migrations/{$fileName}");
     }
 
     protected function addGitKeepFiles(string $name): void
@@ -302,8 +304,7 @@ class MakeDomainCommand extends Command
             $this->files->makeDirectory($observerPath, 0755, true);
         }
 
-        $this->files->put("{$observerPath}/{$name}Observer.php", $content);
-        $this->info("Created: {$directory}/{$name}Observer.php");
+        $this->writeFile("{$directory}/{$name}Observer.php", $content);
     }
 
     protected function createListener(string $name): void
@@ -318,8 +319,7 @@ class MakeDomainCommand extends Command
             $this->files->makeDirectory($listenerPath, 0755, true);
         }
 
-        $this->files->put("{$listenerPath}/{$name}EventListener.php", $content);
-        $this->info("Created: {$directory}/{$name}EventListener.php");
+        $this->writeFile("{$directory}/{$name}EventListener.php", $content);
     }
 
     protected function createJob(string $name): void
@@ -334,8 +334,7 @@ class MakeDomainCommand extends Command
             $this->files->makeDirectory($jobsPath, 0755, true);
         }
 
-        $this->files->put("{$jobsPath}/Process{$name}Job.php", $content);
-        $this->info("Created: {$directory}/Process{$name}Job.php");
+        $this->writeFile("{$directory}/Process{$name}Job.php", $content);
     }
 
     protected function createMail(string $name): void
@@ -350,8 +349,7 @@ class MakeDomainCommand extends Command
             $this->files->makeDirectory($mailPath, 0755, true);
         }
 
-        $this->files->put("{$mailPath}/{$name}Mail.php", $content);
-        $this->info("Created: {$directory}/{$name}Mail.php");
+        $this->writeFile("{$directory}/{$name}Mail.php", $content);
     }
 
     protected function createNotification(string $name): void
@@ -366,8 +364,7 @@ class MakeDomainCommand extends Command
             $this->files->makeDirectory($notificationsPath, 0755, true);
         }
 
-        $this->files->put("{$notificationsPath}/{$name}Notification.php", $content);
-        $this->info("Created: {$directory}/{$name}Notification.php");
+        $this->writeFile("{$directory}/{$name}Notification.php", $content);
     }
 
     protected function createExport(string $name): void
@@ -382,8 +379,7 @@ class MakeDomainCommand extends Command
             $this->files->makeDirectory($exportsPath, 0755, true);
         }
 
-        $this->files->put("{$exportsPath}/{$name}Export.php", $content);
-        $this->info("Created: {$directory}/{$name}Export.php");
+        $this->writeFile("{$directory}/{$name}Export.php", $content);
     }
 
     protected function replacePlaceholders(string $content, string $name, array $extra = []): string

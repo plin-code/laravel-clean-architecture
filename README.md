@@ -123,19 +123,19 @@ vendor/bin/phparkitect check
 
 ### 🛠️ Available commands
 
-- `clean-arch:install {--force}` - 🏗️ Install Clean Architecture structure
-- `clean-arch:make-domain {name} {--no-base}` - 🆕 Create a complete new domain
-- `clean-arch:make-action {name} {domain} {--no-base}` - ⚡ Create a new action
-- `clean-arch:make-service {name} {--no-base}` - 🔧 Create a new service
-- `clean-arch:make-controller {name}` - 🌐 Create a new controller
-- `clean-arch:make-observer {name} {domain}` - 👁️ Create a new observer
-- `clean-arch:make-listener {name}` - 👂 Create a new listener
-- `clean-arch:make-job {name}` - ⏳ Create a new job
-- `clean-arch:make-mail {name}` - 📧 Create a new mailable
-- `clean-arch:make-notification {name}` - 🔔 Create a new notification
-- `clean-arch:make-export {name}` - 📤 Create a new export
-- `clean-arch:make-arch-rules {--force}` - 🛡️ Generate a phparkitect config from the configured rules
-- `clean-arch:generate-package {name} {vendor}` - 📦 Generate a new package
+- `clean-arch:install {--force}`: 🏗️ Install Clean Architecture structure
+- `clean-arch:make-domain {name} {--force} {--no-base}`: 🆕 Create a complete new domain
+- `clean-arch:make-action {name} {domain} {--force} {--no-base}`: ⚡ Create a new action
+- `clean-arch:make-service {name} {--force} {--no-base}`: 🔧 Create a new service
+- `clean-arch:make-controller {name} {--force}`: 🌐 Create a new controller
+- `clean-arch:make-observer {name} {domain} {--force}`: 👁️ Create a new observer
+- `clean-arch:make-listener {name} {--force}`: 👂 Create a new listener
+- `clean-arch:make-job {name} {--force}`: ⏳ Create a new job
+- `clean-arch:make-mail {name} {--force}`: 📧 Create a new mailable
+- `clean-arch:make-notification {name} {--force}`: 🔔 Create a new notification
+- `clean-arch:make-export {name} {--force}`: 📤 Create a new export
+- `clean-arch:make-arch-rules {--force}`: 🛡️ Generate a phparkitect config from the configured rules
+- `clean-arch:generate-package {name} {vendor} {--force}`: 📦 Generate a new package
 
 ### 📂 Project structure after `clean-arch:install`
 
@@ -257,6 +257,8 @@ class ProductsController extends Controller
 ```bash
 php artisan vendor:publish --tag=clean-architecture-config
 ```
+
+Every `make-*` command and `clean-arch:generate-package` follow the same rule for the files they write. A command that only ever writes one file (`make-action`, `make-service`, `make-controller`, `make-observer`, `make-listener`, `make-job`, `make-mail`, `make-notification`, `make-export`) refuses to overwrite an existing target, prints an error naming the path, and exits with a failure code, so a script or an AI agent rerunning a generator notices instead of losing hand written code. A command that writes several files (`make-domain`, `clean-arch:generate-package`) skips the ones that already exist and still writes the rest, printing a `Skipped:` line for each. Pass `--force` on any of them to overwrite instead.
 
 ### 📁 Directories
 

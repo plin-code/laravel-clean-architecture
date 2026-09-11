@@ -7,6 +7,7 @@ use Illuminate\Filesystem\Filesystem;
 use PlinCode\LaravelCleanArchitecture\Concerns\BuildsArchRules;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
+use PlinCode\LaravelCleanArchitecture\Concerns\WritesFiles;
 
 /**
  * Write a phparkitect configuration built from config/clean-architecture.php.
@@ -20,6 +21,7 @@ class MakeArchRulesCommand extends Command
     use BuildsArchRules;
     use RendersStubs;
     use ResolvesArchitectureDirectories;
+    use WritesFiles;
 
     protected $signature = 'clean-arch:make-arch-rules {--force : Overwrite an existing phparkitect.php}';
 
@@ -35,20 +37,15 @@ class MakeArchRulesCommand extends Command
 
     public function handle(): int
     {
-        $path = base_path('phparkitect.php');
+        $this->resolveForce();
 
-        if ($this->files->exists($path) && ! $this->option('force')) {
-            $this->error('phparkitect.php already exists. Run again with --force to overwrite it.');
+        $exitCode = $this->writeOrFail(base_path('phparkitect.php'), $this->renderConfig(), 'phparkitect.php');
 
-            return self::FAILURE;
+        if ($exitCode === self::SUCCESS) {
+            $this->line('Install phparkitect with "composer require --dev phparkitect/phparkitect", then run "vendor/bin/phparkitect check".');
         }
 
-        $this->files->put($path, $this->renderConfig());
-
-        $this->info('Created: phparkitect.php');
-        $this->line('Install phparkitect with "composer require --dev phparkitect/phparkitect", then run "vendor/bin/phparkitect check".');
-
-        return self::SUCCESS;
+        return $exitCode;
     }
 
     /**

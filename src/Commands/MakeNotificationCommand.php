@@ -6,11 +6,13 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
+use PlinCode\LaravelCleanArchitecture\Concerns\WritesFiles;
 
 class MakeNotificationCommand extends Command
 {
     use RendersStubs;
     use ResolvesArchitectureDirectories;
+    use WritesFiles;
 
     protected $signature = 'clean-arch:make-notification {name : The name of the notification}
                           {--force : Overwrite existing files}';
@@ -29,14 +31,19 @@ class MakeNotificationCommand extends Command
     {
         $name = $this->argument('name');
 
-        $this->info("Creating notification: {$name}");
-        $this->createNotification($name);
-        $this->info("Notification {$name} created successfully!");
+        $this->resolveForce();
 
-        return self::SUCCESS;
+        $this->info("Creating notification: {$name}");
+        $exitCode = $this->createNotification($name);
+
+        if ($exitCode === self::SUCCESS) {
+            $this->info("Notification {$name} created successfully!");
+        }
+
+        return $exitCode;
     }
 
-    protected function createNotification(string $name): void
+    protected function createNotification(string $name): int
     {
         $stub    = $this->getStub('notification');
         $content = $this->replaceDomainPlaceholders($stub, $name);
@@ -48,7 +55,6 @@ class MakeNotificationCommand extends Command
             $this->files->makeDirectory($notificationPath, 0755, true);
         }
 
-        $this->files->put("{$notificationPath}/{$name}Notification.php", $content);
-        $this->info("Created: {$directory}/{$name}Notification.php");
+        return $this->writeOrFail("{$notificationPath}/{$name}Notification.php", $content, "{$directory}/{$name}Notification.php");
     }
 }

@@ -7,11 +7,13 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
+use PlinCode\LaravelCleanArchitecture\Concerns\WritesFiles;
 
 class GeneratePackageCommand extends Command
 {
     use RendersStubs;
     use ResolvesArchitectureDirectories;
+    use WritesFiles;
 
     protected $signature = 'clean-arch:generate-package {name : The name of the package}
                           {vendor : The vendor name}
@@ -33,7 +35,8 @@ class GeneratePackageCommand extends Command
         $packageName = $this->argument('name');
         $vendor      = $this->argument('vendor');
         $customPath  = $this->option('path');
-        $force       = $this->option('force');
+
+        $this->resolveForce();
 
         $this->info("🚀 Generating package: {$vendor}/{$packageName}");
 
@@ -126,8 +129,7 @@ class GeneratePackageCommand extends Command
             'prefer-stable'     => true,
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
-        $this->files->put("{$path}/composer.json", $content);
-        $this->info('Created: composer.json');
+        $this->writePath("{$path}/composer.json", $content, 'composer.json');
     }
 
     protected function createPackageServiceProvider(string $path, string $studlyName, string $namespace): void
@@ -139,8 +141,7 @@ class GeneratePackageCommand extends Command
             $stub
         );
 
-        $this->files->put("{$path}/src/{$studlyName}ServiceProvider.php", $content);
-        $this->info("Created: src/{$studlyName}ServiceProvider.php");
+        $this->writePath("{$path}/src/{$studlyName}ServiceProvider.php", $content, "src/{$studlyName}ServiceProvider.php");
     }
 
     protected function createPackageModel(string $path, string $studlyName, string $namespace): void
@@ -152,8 +153,7 @@ class GeneratePackageCommand extends Command
             $stub
         );
 
-        $this->files->put("{$path}/src/{$studlyName}.php", $content);
-        $this->info("Created: src/{$studlyName}.php");
+        $this->writePath("{$path}/src/{$studlyName}.php", $content, "src/{$studlyName}.php");
     }
 
     protected function createPackageService(string $path, string $studlyName, string $namespace): void
@@ -165,8 +165,7 @@ class GeneratePackageCommand extends Command
             $stub
         );
 
-        $this->files->put("{$path}/src/{$studlyName}Service.php", $content);
-        $this->info("Created: src/{$studlyName}Service.php");
+        $this->writePath("{$path}/src/{$studlyName}Service.php", $content, "src/{$studlyName}Service.php");
     }
 
     protected function createPackageReadme(string $path, string $packageName, string $studlyName, string $vendor): void
@@ -178,7 +177,6 @@ class GeneratePackageCommand extends Command
             $stub
         );
 
-        $this->files->put("{$path}/README.md", $content);
-        $this->info('Created: README.md');
+        $this->writePath("{$path}/README.md", $content, 'README.md');
     }
 }

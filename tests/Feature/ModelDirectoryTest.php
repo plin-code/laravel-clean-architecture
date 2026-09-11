@@ -82,16 +82,18 @@ describe('Configurable model directory', function () {
             ->assertExitCode(0);
 
         // Standalone commands run afterwards against the same, already
-        // generated domain, the way a real project would use them.
+        // generated domain, the way a real project would use them. Their
+        // targets already exist (make-domain generated them above), so
+        // --force is required for these to overwrite instead of failing.
         $this->artisan('clean-arch:make-action', ['name' => 'Custom', 'domain' => 'Article'])->assertExitCode(0);
-        $this->artisan('clean-arch:make-observer', ['name' => 'Article', 'domain' => 'Article'])->assertExitCode(0);
-        $this->artisan('clean-arch:make-mail', ['name' => 'Article'])->assertExitCode(0);
-        $this->artisan('clean-arch:make-notification', ['name' => 'Article'])->assertExitCode(0);
-        $this->artisan('clean-arch:make-export', ['name' => 'Article'])->assertExitCode(0);
-        $this->artisan('clean-arch:make-job', ['name' => 'Article'])->assertExitCode(0);
-        $this->artisan('clean-arch:make-listener', ['name' => 'Article'])->assertExitCode(0);
-        $this->artisan('clean-arch:make-service', ['name' => 'Article'])->assertExitCode(0);
-        $this->artisan('clean-arch:make-controller', ['name' => 'Article'])->assertExitCode(0);
+        $this->artisan('clean-arch:make-observer', ['name' => 'Article', 'domain' => 'Article', '--force' => true])->assertExitCode(0);
+        $this->artisan('clean-arch:make-mail', ['name' => 'Article', '--force' => true])->assertExitCode(0);
+        $this->artisan('clean-arch:make-notification', ['name' => 'Article', '--force' => true])->assertExitCode(0);
+        $this->artisan('clean-arch:make-export', ['name' => 'Article', '--force' => true])->assertExitCode(0);
+        $this->artisan('clean-arch:make-job', ['name' => 'Article', '--force' => true])->assertExitCode(0);
+        $this->artisan('clean-arch:make-listener', ['name' => 'Article', '--force' => true])->assertExitCode(0);
+        $this->artisan('clean-arch:make-service', ['name' => 'Article', '--force' => true])->assertExitCode(0);
+        $this->artisan('clean-arch:make-controller', ['name' => 'Article', '--force' => true])->assertExitCode(0);
 
         expect(File::exists(base_path($expectedModelPath)))
             ->toBeTrue("Expected the model at {$expectedModelPath}");

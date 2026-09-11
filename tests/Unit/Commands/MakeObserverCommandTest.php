@@ -25,7 +25,9 @@ describe('MakeObserverCommand', function () {
 
     it('creates observer in correct path', function () {
         $filesystem = Mockery::mock(Filesystem::class);
-        $filesystem->shouldReceive('exists')->andReturn(true);
+        // The target file does not exist yet, so the command writes it: this
+        // is not verifying overwrite behaviour, only the resulting path.
+        $filesystem->shouldReceive('exists')->andReturnUsing(fn ($path) => str_contains($path, '.stub'));
         $filesystem->shouldReceive('get')->andReturn('<?php // {{DomainName}} {{PluralDomainName}}');
         $filesystem->shouldReceive('isDirectory')->andReturn(false);
         $filesystem->shouldReceive('makeDirectory')->once();
