@@ -17,9 +17,10 @@ return [
     'default_namespace' => 'App',
 
     /*
-    | Paths of the three layers, relative to the base path. They are used by
-    | clean-arch:install to create the structure and by clean-arch:validate to
-    | decide what to scan.
+    | Paths of the three layers, relative to the base path. clean-arch:install
+    | and the make-* commands write the generated classes there, with
+    | namespaces derived from these paths, and clean-arch:make-arch-rules
+    | decides what to scan from them.
     */
     'directories' => [
         'domain' => 'app/Domain',
