@@ -252,6 +252,51 @@ describe('Command Integration', function () {
         }
     });
 
+    it('generates classes whose parent class exists', function () {
+        $this->artisan('clean-arch:install');
+
+        $this->artisan('clean-arch:make-domain', ['name' => 'Product'])
+            ->expectsConfirmation('Would you like to generate an Observer?', 'yes')
+            ->expectsConfirmation('Would you like to generate a Listener?', 'yes')
+            ->expectsConfirmation('Would you like to generate a Job?', 'yes')
+            ->expectsConfirmation('Would you like to generate a Mail?', 'yes')
+            ->expectsConfirmation('Would you like to generate a Notification?', 'yes')
+            ->expectsConfirmation('Would you like to generate an Export?', 'yes')
+            ->assertExitCode(0);
+
+        $this->artisan('clean-arch:make-controller', ['name' => 'Product', '--web' => true])
+            ->assertExitCode(0);
+
+        $files = collect([app_path('Domain'), app_path('Application'), app_path('Infrastructure')])
+            ->flatMap(fn (string $directory): array => File::allFiles($directory))
+            ->filter(fn (SplFileInfo $file): bool => $file->getExtension() === 'php');
+
+        foreach ($files as $file) {
+            $content = File::get($file->getPathname());
+
+            if (! preg_match('/^(?:abstract )?class \w+ extends (\w+)/m', $content, $parent)) {
+                continue;
+            }
+
+            // An unqualified parent resolves through the imports, or else to the file's own namespace.
+            preg_match('/^namespace ([^;]+);/m', $content, $namespace);
+            preg_match_all('/^use ([^;\s]+)(?: as (\w+))?;/m', $content, $imports, PREG_SET_ORDER);
+
+            $class = "{$namespace[1]}\\{$parent[1]}";
+            foreach ($imports as $import) {
+                if (($import[2] ?? class_basename($import[1])) === $parent[1]) {
+                    $class = $import[1];
+                }
+            }
+
+            $exists = str_starts_with($class, 'App\\')
+                ? File::exists(app_path(str_replace('\\', '/', substr($class, strlen('App\\'))) . '.php'))
+                : class_exists($class);
+
+            expect($exists)->toBeTrue("{$file->getFilename()} extends {$class}, which does not exist");
+        }
+    });
+
     it('includes custom messages in generated requests by default', function () {
         $this->artisan('clean-arch:install');
 

@@ -8,6 +8,7 @@ All notable changes to `laravel-clean-architecture` will be documented in this f
 
 - The `make-*` commands ignored `directories` and `default_namespace`. They wrote every class under `app/Domain`, `app/Application` and `app/Infrastructure` with hardcoded `App\` namespaces, while `clean-arch:make-arch-rules` scanned the configured paths, so on a project with custom directories the generated code sat outside the checked layers and `phparkitect check` could pass without inspecting it. They now write to the configured paths, and the namespaces and imports in the generated classes are derived from the same values
 - `clean-arch:install` wrote the base classes to the configured paths but kept the default namespaces inside them. With `directories.domain` set to `app/Core/Domain`, `BaseModel.php` landed in `app/Core/Domain/Shared` declaring `namespace App\Domain\Shared`, which autoloading cannot resolve and which tripped the autoload guard of the generated `phparkitect.php`
+- Generated API and web controllers extended `Controller` without importing it. The name resolved inside their own namespace, `Http\Controllers\Api` and `UI\Web\Controllers`, where no such class exists, so loading a generated controller failed with a class not found error. Both stubs now import the base controller created by `clean-arch:install`
 
 ### Changed
 
