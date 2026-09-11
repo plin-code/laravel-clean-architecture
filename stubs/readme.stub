@@ -60,7 +60,7 @@ app/
 - `php artisan clean-arch:make-mail {name}` - Create a new mail
 - `php artisan clean-arch:make-notification {name}` - Create a new notification
 - `php artisan clean-arch:make-export {name}` - Create a new export
-- `php artisan clean-arch:validate` - Validate architecture structure
+- `php artisan clean-arch:make-arch-rules` writes `phparkitect.php`, then `vendor/bin/phparkitect check` validates the architecture
 
 ## Best Practices
 
