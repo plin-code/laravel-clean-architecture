@@ -163,6 +163,11 @@ trait BuildsArchRules
      */
     protected function allowedInfrastructureNamespaces(string $infrastructure): array
     {
+        // A disabled rule ignores the allowlist, so an invalid value must not break the other rules.
+        if (! $this->archRuleEnabled('application_no_infrastructure_imports')) {
+            return [];
+        }
+
         /** @var array<int, string> $segments */
         $segments = config('clean-architecture.validation.application_infrastructure_allowed', []);
 
@@ -170,6 +175,35 @@ trait BuildsArchRules
             fn (string $segment): string => $infrastructure . '\\' . trim(str_replace('/', '\\', $segment), '\\'),
             $segments
         ));
+    }
+
+    /**
+     * Why the allowlist cannot be used, or null when it can.
+     *
+     * Invalid entries are reported rather than dropped: skipping one silently
+     * would flag imports the user believes are allowed, and an entry that
+     * trims to nothing would exclude the whole infrastructure layer.
+     */
+    protected function allowlistError(): ?string
+    {
+        if (! $this->archRuleEnabled('application_no_infrastructure_imports')) {
+            return null;
+        }
+
+        $key     = 'validation.application_infrastructure_allowed';
+        $allowed = config("clean-architecture.{$key}", []);
+
+        if (! is_array($allowed)) {
+            return "{$key} must be a list of infrastructure namespace segments, got " . var_export($allowed, true) . '.';
+        }
+
+        foreach ($allowed as $segment) {
+            if (! is_string($segment) || trim(str_replace('/', '\\', $segment), '\\') === '') {
+                return "{$key} contains an invalid entry " . var_export($segment, true) . ', expected a non empty namespace segment such as \'Mail\'.';
+            }
+        }
+
+        return null;
     }
 
     /**

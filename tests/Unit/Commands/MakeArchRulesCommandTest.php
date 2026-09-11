@@ -54,6 +54,39 @@ describe('MakeArchRulesCommand', function () {
         expect(File::get($this->path))->toContain('Rule::allClasses()');
     });
 
+    it('rejects an invalid infrastructure allowlist without writing the config', function (mixed $allowed) {
+        config()->set('clean-architecture.validation.application_infrastructure_allowed', $allowed);
+
+        $this->artisan('clean-arch:make-arch-rules')
+            ->expectsOutputToContain('validation.application_infrastructure_allowed')
+            ->assertExitCode(1);
+
+        expect(File::exists($this->path))->toBeFalse();
+    })->with([
+        'a string'          => ['Mail'],
+        'an integer entry'  => [[42]],
+        'an empty entry'    => [['']],
+        'a separator entry' => [['\\']],
+    ]);
+
+    it('keeps an existing config untouched when the allowlist is invalid, even with force', function () {
+        File::put($this->path, '<?php // handwritten');
+        config()->set('clean-architecture.validation.application_infrastructure_allowed', ['Mail', '']);
+
+        $this->artisan('clean-arch:make-arch-rules', ['--force' => true])->assertExitCode(1);
+
+        expect(File::get($this->path))->toBe('<?php // handwritten');
+    });
+
+    it('ignores the allowlist when the application rule is disabled', function () {
+        config()->set('clean-architecture.validation.rules.application_no_infrastructure_imports', false);
+        config()->set('clean-architecture.validation.application_infrastructure_allowed', 'Mail');
+
+        $this->artisan('clean-arch:make-arch-rules')->assertExitCode(0);
+
+        expect(File::get($this->path))->not->toContain("new ResideInOneOfTheseNamespaces('App\\\\Application')");
+    });
+
     it('follows the configured directories when building the class sets', function () {
         config()->set('clean-architecture.directories.domain', 'src/Domain');
 

@@ -39,6 +39,12 @@ class MakeArchRulesCommand extends Command
     {
         $this->resolveForce();
 
+        if (($error = $this->allowlistError()) !== null) {
+            $this->error($error);
+
+            return self::FAILURE;
+        }
+
         $exitCode = $this->writeOrFail(base_path('phparkitect.php'), $this->renderConfig(), 'phparkitect.php');
 
         if ($exitCode === self::SUCCESS) {
