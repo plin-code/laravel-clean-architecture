@@ -119,7 +119,7 @@ class MakeDomainCommand extends Command
         foreach ($events as $event) {
             $stub    = $this->getStub('domain-event');
             $content = $this->replacePlaceholders($stub, $name, [
-                'EventName' => $name . $event,
+                '{{EventName}}' => $name . $event,
             ]);
 
             $this->files->put("{$eventsPath}/{$name}{$event}.php", $content);
