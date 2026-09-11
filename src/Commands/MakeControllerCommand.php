@@ -6,10 +6,12 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
+use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
 
 class MakeControllerCommand extends Command
 {
     use RendersStubs;
+    use ResolvesArchitectureDirectories;
 
     protected $signature = 'clean-arch:make-controller {name : The name of the controller}
                           {--api : Generate API controller}
@@ -57,13 +59,14 @@ class MakeControllerCommand extends Command
         $stub    = $this->getStub('controller');
         $content = $this->replacePlaceholders($stub, $name);
 
-        $controllersPath = app_path('Infrastructure/Http/Controllers/Api');
+        $directory       = $this->layerDirectory('infrastructure') . '/Http/Controllers/Api';
+        $controllersPath = base_path($directory);
         if (! $this->files->isDirectory($controllersPath)) {
             $this->files->makeDirectory($controllersPath, 0755, true);
         }
 
         $this->files->put("{$controllersPath}/{$name}Controller.php", $content);
-        $this->info("Created: Infrastructure/Http/Controllers/Api/{$name}Controller.php");
+        $this->info("Created: {$directory}/{$name}Controller.php");
     }
 
     protected function createWebController(string $name): void
@@ -71,13 +74,14 @@ class MakeControllerCommand extends Command
         $stub    = $this->getStub('web-controller');
         $content = $this->replacePlaceholders($stub, $name);
 
-        $controllersPath = app_path('Infrastructure/UI/Web/Controllers');
+        $directory       = $this->layerDirectory('infrastructure') . '/UI/Web/Controllers';
+        $controllersPath = base_path($directory);
         if (! $this->files->isDirectory($controllersPath)) {
             $this->files->makeDirectory($controllersPath, 0755, true);
         }
 
         $this->files->put("{$controllersPath}/{$name}Controller.php", $content);
-        $this->info("Created: Infrastructure/UI/Web/Controllers/{$name}Controller.php");
+        $this->info("Created: {$directory}/{$name}Controller.php");
     }
 
     protected function replacePlaceholders(string $content, string $name): string

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Application\Actions\{{PluralDomainName}};
+namespace {{ApplicationNamespace}}\Actions\{{PluralDomainName}};
 
-{{ActionBaseImport}}use App\Domain\{{PluralDomainName}}\Models\{{DomainName}};
+{{ActionBaseImport}}use {{DomainNamespace}}\{{PluralDomainName}}\Models\{{DomainName}};
 
 class {{ActionName}}{{ActionExtends}}
 {

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Domain\{{PluralDomainName}}\Models;
+namespace {{DomainNamespace}}\{{PluralDomainName}}\Models;
 
-use App\Domain\Shared\BaseModel;
-use App\Domain\{{PluralDomainName}}\Enums\{{DomainName}}Status;
-use App\Domain\{{PluralDomainName}}\Events\{{DomainName}}Created;
-use App\Domain\{{PluralDomainName}}\Events\{{DomainName}}Updated;
-use App\Domain\{{PluralDomainName}}\Events\{{DomainName}}Deleted;
+use {{DomainNamespace}}\Shared\BaseModel;
+use {{DomainNamespace}}\{{PluralDomainName}}\Enums\{{DomainName}}Status;
+use {{DomainNamespace}}\{{PluralDomainName}}\Events\{{DomainName}}Created;
+use {{DomainNamespace}}\{{PluralDomainName}}\Events\{{DomainName}}Updated;
+use {{DomainNamespace}}\{{PluralDomainName}}\Events\{{DomainName}}Deleted;
 
 class {{DomainName}} extends BaseModel
 {

@@ -6,10 +6,12 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
+use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
 
 class MakeObserverCommand extends Command
 {
     use RendersStubs;
+    use ResolvesArchitectureDirectories;
 
     protected $signature = 'clean-arch:make-observer {name : The name of the observer}
                           {domain : The domain name}
@@ -43,14 +45,15 @@ class MakeObserverCommand extends Command
         $content = $this->replacePlaceholders($stub, $name, $domain);
 
         $pluralDomain = Str::plural($domain);
-        $observerPath = app_path("Infrastructure/Observers/{$pluralDomain}");
+        $directory    = $this->layerDirectory('infrastructure') . "/Observers/{$pluralDomain}";
+        $observerPath = base_path($directory);
 
         if (! $this->files->isDirectory($observerPath)) {
             $this->files->makeDirectory($observerPath, 0755, true);
         }
 
         $this->files->put("{$observerPath}/{$name}Observer.php", $content);
-        $this->info("Created: Infrastructure/Observers/{$pluralDomain}/{$name}Observer.php");
+        $this->info("Created: {$directory}/{$name}Observer.php");
     }
 
     protected function replacePlaceholders(string $content, string $name, string $domain): string

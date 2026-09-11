@@ -6,10 +6,12 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
+use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
 
 class MakeServiceCommand extends Command
 {
     use RendersStubs;
+    use ResolvesArchitectureDirectories;
 
     protected $signature = 'clean-arch:make-service {name : The name of the service}
                            {--force : Overwrite existing files}
@@ -45,13 +47,14 @@ class MakeServiceCommand extends Command
         $stub    = $this->getStub('service');
         $content = $this->replacePlaceholders($stub, $name, $this->baseServiceReplacements($extend));
 
-        $servicesPath = app_path('Application/Services');
+        $directory    = $this->layerDirectory('application') . '/Services';
+        $servicesPath = base_path($directory);
         if (! $this->files->isDirectory($servicesPath)) {
             $this->files->makeDirectory($servicesPath, 0755, true);
         }
 
         $this->files->put("{$servicesPath}/{$name}Service.php", $content);
-        $this->info("Created: Application/Services/{$name}Service.php");
+        $this->info("Created: {$directory}/{$name}Service.php");
     }
 
     protected function replacePlaceholders(string $content, string $name, array $extra = []): string

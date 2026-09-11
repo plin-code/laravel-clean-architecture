@@ -57,7 +57,7 @@ describe('Stub Files', function () {
         $content = file_get_contents($this->stubsPath . '/action.stub');
 
         expect($content)
-            ->toContain('namespace App\Application\Actions\{{PluralDomainName}};')
+            ->toContain('namespace {{ApplicationNamespace}}\Actions\{{PluralDomainName}};')
             ->toContain('class {{ActionName}}{{ActionExtends}}')
             ->toContain('public function execute');
     });
@@ -66,7 +66,7 @@ describe('Stub Files', function () {
         $content = file_get_contents($this->stubsPath . '/action.stub');
 
         expect($content)
-            ->toContain('{{ActionBaseImport}}use App\\Domain\\')
+            ->toContain('{{ActionBaseImport}}use {{DomainNamespace}}\\')
             ->not->toContain('// {{#base_class}}');
     });
 
@@ -74,7 +74,7 @@ describe('Stub Files', function () {
         $content = file_get_contents($this->stubsPath . '/controller.stub');
 
         expect($content)
-            ->toContain('namespace App\Infrastructure\Http\Controllers\Api;')
+            ->toContain('namespace {{InfrastructureNamespace}}\Http\Controllers\Api;')
             ->toContain('class {{PluralDomainName}}Controller extends Controller');
     });
 
@@ -82,7 +82,7 @@ describe('Stub Files', function () {
         $content = file_get_contents($this->stubsPath . '/service.stub');
 
         expect($content)
-            ->toContain('namespace App\Application\Services;')
+            ->toContain('namespace {{ApplicationNamespace}}\Services;')
             ->toContain('class {{DomainName}}Service{{ServiceExtends}}');
     });
 
@@ -90,7 +90,7 @@ describe('Stub Files', function () {
         $content = file_get_contents($this->stubsPath . '/service.stub');
 
         expect($content)
-            ->toContain('{{ServiceBaseImport}}use App\\Domain\\')
+            ->toContain('{{ServiceBaseImport}}use {{DomainNamespace}}\\')
             ->not->toContain('// {{#base_class}}');
     });
 
@@ -98,7 +98,7 @@ describe('Stub Files', function () {
         $content = file_get_contents($this->stubsPath . '/domain-model.stub');
 
         expect($content)
-            ->toContain('namespace App\Domain\{{PluralDomainName}}\Models;')
+            ->toContain('namespace {{DomainNamespace}}\{{PluralDomainName}}\Models;')
             ->toContain('class {{DomainName}} extends BaseModel')
             ->toContain('protected $table = \'{{domain-table}}\';')
             ->toContain('protected $fillable')
@@ -110,7 +110,7 @@ describe('Stub Files', function () {
         $content = file_get_contents($this->stubsPath . '/request.stub');
 
         expect($content)
-            ->toContain('namespace App\Infrastructure\Http\Requests;')
+            ->toContain('namespace {{InfrastructureNamespace}}\Http\Requests;')
             ->toContain('class {{RequestName}} extends BaseRequest')
             ->toContain('public function rules(): array')
             ->toContain('public function messages(): array');
@@ -128,7 +128,7 @@ describe('Stub Files', function () {
         $content = file_get_contents($this->stubsPath . '/web-controller.stub');
 
         expect($content)
-            ->toContain('namespace App\Infrastructure\UI\Web\Controllers;')
+            ->toContain('namespace {{InfrastructureNamespace}}\UI\Web\Controllers;')
             ->toContain('class {{ControllerName}} extends Controller')
             ->toContain('public function index()')
             ->toContain('public function store(')

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Infrastructure\Http\Requests;
+namespace {{InfrastructureNamespace}}\Http\Requests;
 
-use App\Infrastructure\Http\Requests\BaseRequest;
+use {{InfrastructureNamespace}}\Http\Requests\BaseRequest;
 
 class {{RequestName}} extends BaseRequest
 {

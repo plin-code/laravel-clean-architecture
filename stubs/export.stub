@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Infrastructure\Exports;
+namespace {{InfrastructureNamespace}}\Exports;
 
-use App\Domain\{{PluralDomainName}}\Models\{{DomainName}};
+use {{DomainNamespace}}\{{PluralDomainName}}\Models\{{DomainName}};
 use Illuminate\Support\Collection;
 
 class {{DomainName}}Export

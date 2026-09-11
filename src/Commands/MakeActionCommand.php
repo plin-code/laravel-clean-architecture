@@ -6,10 +6,12 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
+use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
 
 class MakeActionCommand extends Command
 {
     use RendersStubs;
+    use ResolvesArchitectureDirectories;
 
     protected $signature = 'clean-arch:make-action {name : The name of the action}
                            {domain : The domain name}
@@ -48,14 +50,15 @@ class MakeActionCommand extends Command
         $content = $this->replacePlaceholders($stub, $name, $this->baseActionReplacements($extend), $domain);
 
         $pluralDomain = Str::plural($domain);
-        $actionsPath  = app_path("Application/Actions/{$pluralDomain}");
+        $directory    = $this->layerDirectory('application') . "/Actions/{$pluralDomain}";
+        $actionsPath  = base_path($directory);
 
         if (! $this->files->isDirectory($actionsPath)) {
             $this->files->makeDirectory($actionsPath, 0755, true);
         }
 
         $this->files->put("{$actionsPath}/{$name}Action.php", $content);
-        $this->info("Created: Application/Actions/{$pluralDomain}/{$name}Action.php");
+        $this->info("Created: {$directory}/{$name}Action.php");
     }
 
     protected function replacePlaceholders(string $content, string $name, array $extra, string $domain): string

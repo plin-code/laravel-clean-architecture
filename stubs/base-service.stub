@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Application\Services;
+namespace {{ApplicationNamespace}}\Services;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domain\{{PluralDomainName}}\Events;
+namespace {{DomainNamespace}}\{{PluralDomainName}}\Events;
 
-use App\Domain\{{PluralDomainName}}\Models\{{DomainName}};
+use {{DomainNamespace}}\{{PluralDomainName}}\Models\{{DomainName}};
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;

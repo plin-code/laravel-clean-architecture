@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Application\Jobs;
+namespace {{ApplicationNamespace}}\Jobs;
 
-use App\Domain\{{PluralDomainName}}\Models\{{DomainName}};
+use {{DomainNamespace}}\{{PluralDomainName}}\Models\{{DomainName}};
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
