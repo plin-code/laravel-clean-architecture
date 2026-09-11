@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Domain\{{PluralDomainName}}\Models\{{DomainName}};
-use App\Domain\{{PluralDomainName}}\Enums\{{DomainName}}Status;
+use {{DomainNamespace}}\{{PluralDomainName}}\Models\{{DomainName}};
+use {{DomainNamespace}}\{{PluralDomainName}}\Enums\{{DomainName}}Status;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

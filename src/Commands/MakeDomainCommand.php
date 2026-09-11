@@ -6,10 +6,12 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
+use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
 
 class MakeDomainCommand extends Command
 {
     use RendersStubs;
+    use ResolvesArchitectureDirectories;
 
     protected $signature = 'clean-arch:make-domain {name : The name of the domain}
                         {--force : Overwrite existing files}
@@ -75,14 +77,15 @@ class MakeDomainCommand extends Command
         $content = $this->replacePlaceholders($stub, $name);
 
         $pluralName = Str::plural($name);
-        $path       = app_path("Domain/{$pluralName}/Models/{$name}.php");
+        $directory  = $this->layerDirectory('domain') . "/{$pluralName}/Models";
+        $path       = base_path("{$directory}/{$name}.php");
 
         if (! $this->files->isDirectory(dirname($path))) {
             $this->files->makeDirectory(dirname($path), 0755, true);
         }
 
         $this->files->put($path, $content);
-        $this->info("Created: Domain/{$pluralName}/Models/{$name}.php");
+        $this->info("Created: {$directory}/{$name}.php");
     }
 
     protected function createDomainEnums(string $name): void
@@ -91,21 +94,23 @@ class MakeDomainCommand extends Command
         $content = $this->replacePlaceholders($stub, $name);
 
         $pluralName = Str::plural($name);
-        $enumsPath  = app_path("Domain/{$pluralName}/Enums");
+        $directory  = $this->layerDirectory('domain') . "/{$pluralName}/Enums";
+        $enumsPath  = base_path($directory);
 
         if (! $this->files->isDirectory($enumsPath)) {
             $this->files->makeDirectory($enumsPath, 0755, true);
         }
 
         $this->files->put("{$enumsPath}/{$name}Status.php", $content);
-        $this->info("Created: Domain/{$pluralName}/Enums/{$name}Status.php");
+        $this->info("Created: {$directory}/{$name}Status.php");
     }
 
     protected function createDomainEvents(string $name): void
     {
         $events     = ['Created', 'Updated', 'Deleted'];
         $pluralName = Str::plural($name);
-        $eventsPath = app_path("Domain/{$pluralName}/Events");
+        $directory  = $this->layerDirectory('domain') . "/{$pluralName}/Events";
+        $eventsPath = base_path($directory);
 
         if (! $this->files->isDirectory($eventsPath)) {
             $this->files->makeDirectory($eventsPath, 0755, true);
@@ -118,7 +123,7 @@ class MakeDomainCommand extends Command
             ]);
 
             $this->files->put("{$eventsPath}/{$name}{$event}.php", $content);
-            $this->info("Created: Domain/{$pluralName}/Events/{$name}{$event}.php");
+            $this->info("Created: {$directory}/{$name}{$event}.php");
         }
     }
 
@@ -132,7 +137,8 @@ class MakeDomainCommand extends Command
         ];
 
         $pluralName  = Str::plural($name);
-        $actionsPath = app_path("Application/Actions/{$pluralName}");
+        $directory   = $this->layerDirectory('application') . "/Actions/{$pluralName}";
+        $actionsPath = base_path($directory);
 
         if (! $this->files->isDirectory($actionsPath)) {
             $this->files->makeDirectory($actionsPath, 0755, true);
@@ -148,7 +154,7 @@ class MakeDomainCommand extends Command
             ]));
 
             $this->files->put("{$actionsPath}/{$action}{$name}Action.php", $content);
-            $this->info("Created: Application/Actions/{$pluralName}/{$action}{$name}Action.php");
+            $this->info("Created: {$directory}/{$action}{$name}Action.php");
         }
     }
 
@@ -158,13 +164,14 @@ class MakeDomainCommand extends Command
         $stub    = $this->getStub('service');
         $content = $this->replacePlaceholders($stub, $name, $this->baseServiceReplacements($extend));
 
-        $servicesPath = app_path('Application/Services');
+        $directory    = $this->layerDirectory('application') . '/Services';
+        $servicesPath = base_path($directory);
         if (! $this->files->isDirectory($servicesPath)) {
             $this->files->makeDirectory($servicesPath, 0755, true);
         }
 
         $this->files->put("{$servicesPath}/{$name}Service.php", $content);
-        $this->info("Created: Application/Services/{$name}Service.php");
+        $this->info("Created: {$directory}/{$name}Service.php");
     }
 
     protected function createController(string $name): void
@@ -173,20 +180,22 @@ class MakeDomainCommand extends Command
         $content = $this->replacePlaceholders($stub, $name);
 
         $pluralName      = Str::plural($name);
-        $controllersPath = app_path('Infrastructure/Http/Controllers/Api');
+        $directory       = $this->layerDirectory('infrastructure') . '/Http/Controllers/Api';
+        $controllersPath = base_path($directory);
 
         if (! $this->files->isDirectory($controllersPath)) {
             $this->files->makeDirectory($controllersPath, 0755, true);
         }
 
         $this->files->put("{$controllersPath}/{$pluralName}Controller.php", $content);
-        $this->info("Created: Infrastructure/Http/Controllers/Api/{$pluralName}Controller.php");
+        $this->info("Created: {$directory}/{$pluralName}Controller.php");
     }
 
     protected function createRequests(string $name): void
     {
         $requests     = ['Create', 'Update'];
-        $requestsPath = app_path('Infrastructure/Http/Requests');
+        $directory    = $this->layerDirectory('infrastructure') . '/Http/Requests';
+        $requestsPath = base_path($directory);
 
         if (! $this->files->isDirectory($requestsPath)) {
             $this->files->makeDirectory($requestsPath, 0755, true);
@@ -204,7 +213,7 @@ class MakeDomainCommand extends Command
             ]);
 
             $this->files->put("{$requestsPath}/{$request}{$name}Request.php", $content);
-            $this->info("Created: Infrastructure/Http/Requests/{$request}{$name}Request.php");
+            $this->info("Created: {$directory}/{$request}{$name}Request.php");
         }
     }
 
@@ -213,13 +222,14 @@ class MakeDomainCommand extends Command
         $stub    = $this->getStub('resource');
         $content = $this->replacePlaceholders($stub, $name);
 
-        $resourcesPath = app_path('Infrastructure/Http/Resources');
+        $directory     = $this->layerDirectory('infrastructure') . '/Http/Resources';
+        $resourcesPath = base_path($directory);
         if (! $this->files->isDirectory($resourcesPath)) {
             $this->files->makeDirectory($resourcesPath, 0755, true);
         }
 
         $this->files->put("{$resourcesPath}/{$name}Resource.php", $content);
-        $this->info("Created: Infrastructure/Http/Resources/{$name}Resource.php");
+        $this->info("Created: {$directory}/{$name}Resource.php");
     }
 
     protected function createTests(string $name): void
@@ -250,14 +260,17 @@ class MakeDomainCommand extends Command
 
     protected function addGitKeepFiles(string $name): void
     {
-        $pluralName  = Str::plural($name);
-        $directories = [
-            app_path("Domain/{$pluralName}/Models"),
-            app_path("Domain/{$pluralName}/Enums"),
-            app_path("Domain/{$pluralName}/Events"),
-            app_path("Application/Actions/{$pluralName}"),
-            app_path('Infrastructure/Http/Requests'),
-            app_path('Infrastructure/Http/Resources'),
+        $pluralName     = Str::plural($name);
+        $domain         = $this->layerDirectory('domain');
+        $application    = $this->layerDirectory('application');
+        $infrastructure = $this->layerDirectory('infrastructure');
+        $directories    = [
+            base_path("{$domain}/{$pluralName}/Models"),
+            base_path("{$domain}/{$pluralName}/Enums"),
+            base_path("{$domain}/{$pluralName}/Events"),
+            base_path("{$application}/Actions/{$pluralName}"),
+            base_path("{$infrastructure}/Http/Requests"),
+            base_path("{$infrastructure}/Http/Resources"),
         ];
 
         foreach ($directories as $directory) {
@@ -273,14 +286,15 @@ class MakeDomainCommand extends Command
         $content = $this->replacePlaceholders($stub, $name);
 
         $pluralName   = Str::plural($name);
-        $observerPath = app_path("Infrastructure/Observers/{$pluralName}");
+        $directory    = $this->layerDirectory('infrastructure') . "/Observers/{$pluralName}";
+        $observerPath = base_path($directory);
 
         if (! $this->files->isDirectory($observerPath)) {
             $this->files->makeDirectory($observerPath, 0755, true);
         }
 
         $this->files->put("{$observerPath}/{$name}Observer.php", $content);
-        $this->info("Created: Infrastructure/Observers/{$pluralName}/{$name}Observer.php");
+        $this->info("Created: {$directory}/{$name}Observer.php");
     }
 
     protected function createListener(string $name): void
@@ -288,14 +302,15 @@ class MakeDomainCommand extends Command
         $stub    = $this->getStub('listener');
         $content = $this->replacePlaceholders($stub, $name);
 
-        $listenerPath = app_path('Application/Listeners');
+        $directory    = $this->layerDirectory('application') . '/Listeners';
+        $listenerPath = base_path($directory);
 
         if (! $this->files->isDirectory($listenerPath)) {
             $this->files->makeDirectory($listenerPath, 0755, true);
         }
 
         $this->files->put("{$listenerPath}/{$name}EventListener.php", $content);
-        $this->info("Created: Application/Listeners/{$name}EventListener.php");
+        $this->info("Created: {$directory}/{$name}EventListener.php");
     }
 
     protected function createJob(string $name): void
@@ -303,14 +318,15 @@ class MakeDomainCommand extends Command
         $stub    = $this->getStub('job');
         $content = $this->replacePlaceholders($stub, $name);
 
-        $jobsPath = app_path('Application/Jobs');
+        $directory = $this->layerDirectory('application') . '/Jobs';
+        $jobsPath  = base_path($directory);
 
         if (! $this->files->isDirectory($jobsPath)) {
             $this->files->makeDirectory($jobsPath, 0755, true);
         }
 
         $this->files->put("{$jobsPath}/Process{$name}Job.php", $content);
-        $this->info("Created: Application/Jobs/Process{$name}Job.php");
+        $this->info("Created: {$directory}/Process{$name}Job.php");
     }
 
     protected function createMail(string $name): void
@@ -318,14 +334,15 @@ class MakeDomainCommand extends Command
         $stub    = $this->getStub('mail');
         $content = $this->replacePlaceholders($stub, $name);
 
-        $mailPath = app_path('Infrastructure/Mail');
+        $directory = $this->layerDirectory('infrastructure') . '/Mail';
+        $mailPath  = base_path($directory);
 
         if (! $this->files->isDirectory($mailPath)) {
             $this->files->makeDirectory($mailPath, 0755, true);
         }
 
         $this->files->put("{$mailPath}/{$name}Mail.php", $content);
-        $this->info("Created: Infrastructure/Mail/{$name}Mail.php");
+        $this->info("Created: {$directory}/{$name}Mail.php");
     }
 
     protected function createNotification(string $name): void
@@ -333,14 +350,15 @@ class MakeDomainCommand extends Command
         $stub    = $this->getStub('notification');
         $content = $this->replacePlaceholders($stub, $name);
 
-        $notificationsPath = app_path('Infrastructure/Notifications');
+        $directory         = $this->layerDirectory('infrastructure') . '/Notifications';
+        $notificationsPath = base_path($directory);
 
         if (! $this->files->isDirectory($notificationsPath)) {
             $this->files->makeDirectory($notificationsPath, 0755, true);
         }
 
         $this->files->put("{$notificationsPath}/{$name}Notification.php", $content);
-        $this->info("Created: Infrastructure/Notifications/{$name}Notification.php");
+        $this->info("Created: {$directory}/{$name}Notification.php");
     }
 
     protected function createExport(string $name): void
@@ -348,14 +366,15 @@ class MakeDomainCommand extends Command
         $stub    = $this->getStub('export');
         $content = $this->replacePlaceholders($stub, $name);
 
-        $exportsPath = app_path('Infrastructure/Exports');
+        $directory   = $this->layerDirectory('infrastructure') . '/Exports';
+        $exportsPath = base_path($directory);
 
         if (! $this->files->isDirectory($exportsPath)) {
             $this->files->makeDirectory($exportsPath, 0755, true);
         }
 
         $this->files->put("{$exportsPath}/{$name}Export.php", $content);
-        $this->info("Created: Infrastructure/Exports/{$name}Export.php");
+        $this->info("Created: {$directory}/{$name}Export.php");
     }
 
     protected function replacePlaceholders(string $content, string $name, array $extra = []): string

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Infrastructure\Notifications;
+namespace {{InfrastructureNamespace}}\Notifications;
 
-use App\Domain\{{PluralDomainName}}\Models\{{DomainName}};
+use {{DomainNamespace}}\{{PluralDomainName}}\Models\{{DomainName}};
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;

@@ -5,10 +5,12 @@ namespace PlinCode\LaravelCleanArchitecture\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
+use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
 
 class MakeJobCommand extends Command
 {
     use RendersStubs;
+    use ResolvesArchitectureDirectories;
 
     protected $signature = 'clean-arch:make-job {name : The name of the job}
                           {--force : Overwrite existing files}';
@@ -39,13 +41,14 @@ class MakeJobCommand extends Command
         $stub    = $this->getStub('job');
         $content = $this->replaceDomainPlaceholders($stub, $name);
 
-        $jobPath = app_path('Application/Jobs');
+        $directory = $this->layerDirectory('application') . '/Jobs';
+        $jobPath   = base_path($directory);
 
         if (! $this->files->isDirectory($jobPath)) {
             $this->files->makeDirectory($jobPath, 0755, true);
         }
 
         $this->files->put("{$jobPath}/{$name}Job.php", $content);
-        $this->info("Created: Application/Jobs/{$name}Job.php");
+        $this->info("Created: {$directory}/{$name}Job.php");
     }
 }

@@ -7,7 +7,8 @@ use Illuminate\Support\Str;
 /**
  * Helpers shared by commands that render stubs before writing files.
  *
- * The using class must expose a `$files` Filesystem property.
+ * The using class must expose a `$files` Filesystem property and use
+ * `ResolvesArchitectureDirectories`, which provides the layer namespaces.
  *
  * The package ships stubs with optional regions delimited by comment
  * markers, `// {{#name}}` and `// {{/name}}`. A command can keep or drop a
@@ -16,8 +17,15 @@ use Illuminate\Support\Str;
  */
 trait RendersStubs
 {
+    abstract protected function layerNamespace(string $layer): string;
+
     /**
-     * Read a stub shipped with the package.
+     * Read a stub shipped with the package, with the layer namespaces resolved.
+     *
+     * Stubs refer to the layers through `{{DomainNamespace}}`,
+     * `{{ApplicationNamespace}}` and `{{InfrastructureNamespace}}`, so the
+     * generated classes follow `directories` and `default_namespace` instead
+     * of assuming `App\Domain` and its siblings.
      *
      * @throws \Exception when the stub does not exist.
      */
@@ -29,7 +37,15 @@ trait RendersStubs
             throw new \Exception("Stub file not found: {$stubPath}");
         }
 
-        return $this->files->get($stubPath);
+        return str_replace(
+            ['{{DomainNamespace}}', '{{ApplicationNamespace}}', '{{InfrastructureNamespace}}'],
+            [
+                rtrim($this->layerNamespace('domain'), '\\'),
+                rtrim($this->layerNamespace('application'), '\\'),
+                rtrim($this->layerNamespace('infrastructure'), '\\'),
+            ],
+            $this->files->get($stubPath)
+        );
     }
 
     /**
@@ -105,7 +121,7 @@ trait RendersStubs
     protected function baseServiceReplacements(bool $extend): array
     {
         return [
-            '{{ServiceBaseImport}}' => $extend ? "use App\\Application\\Services\\BaseService;\n" : '',
+            '{{ServiceBaseImport}}' => $extend ? "use {$this->layerNamespace('application')}Services\\BaseService;\n" : '',
             '{{ServiceExtends}}'    => $extend ? ' extends BaseService' : '',
         ];
     }
@@ -118,7 +134,7 @@ trait RendersStubs
     protected function baseActionReplacements(bool $extend): array
     {
         return [
-            '{{ActionBaseImport}}' => $extend ? "use App\\Application\\Actions\\BaseAction;\n" : '',
+            '{{ActionBaseImport}}' => $extend ? "use {$this->layerNamespace('application')}Actions\\BaseAction;\n" : '',
             '{{ActionExtends}}'    => $extend ? ' extends BaseAction' : '',
         ];
     }

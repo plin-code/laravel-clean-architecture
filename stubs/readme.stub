@@ -35,7 +35,7 @@ app/
 ### 1. Domain Layer
 - Contains business logic
 - Does not depend on the Application or Infrastructure layers
-- Depends on Eloquent: models generated here extend `App\Domain\Shared\BaseModel`, which extends `Illuminate\Database\Eloquent\Model`
+- Depends on Eloquent: models generated here extend `{{DomainNamespace}}\Shared\BaseModel`, which extends `Illuminate\Database\Eloquent\Model`
 - Includes models, enums, domain events
 
 ### 2. Application Layer

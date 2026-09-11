@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Infrastructure\Mail;
+namespace {{InfrastructureNamespace}}\Mail;
 
-use App\Domain\{{PluralDomainName}}\Models\{{DomainName}};
+use {{DomainNamespace}}\{{PluralDomainName}}\Models\{{DomainName}};
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;

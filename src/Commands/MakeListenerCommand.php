@@ -5,10 +5,12 @@ namespace PlinCode\LaravelCleanArchitecture\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
+use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
 
 class MakeListenerCommand extends Command
 {
     use RendersStubs;
+    use ResolvesArchitectureDirectories;
 
     protected $signature = 'clean-arch:make-listener {name : The name of the listener}
                           {--force : Overwrite existing files}';
@@ -39,13 +41,14 @@ class MakeListenerCommand extends Command
         $stub    = $this->getStub('listener');
         $content = $this->replaceDomainPlaceholders($stub, $name);
 
-        $listenerPath = app_path('Application/Listeners');
+        $directory    = $this->layerDirectory('application') . '/Listeners';
+        $listenerPath = base_path($directory);
 
         if (! $this->files->isDirectory($listenerPath)) {
             $this->files->makeDirectory($listenerPath, 0755, true);
         }
 
         $this->files->put("{$listenerPath}/{$name}Listener.php", $content);
-        $this->info("Created: Application/Listeners/{$name}Listener.php");
+        $this->info("Created: {$directory}/{$name}Listener.php");
     }
 }

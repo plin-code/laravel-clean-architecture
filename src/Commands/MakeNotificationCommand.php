@@ -5,10 +5,12 @@ namespace PlinCode\LaravelCleanArchitecture\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
+use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
 
 class MakeNotificationCommand extends Command
 {
     use RendersStubs;
+    use ResolvesArchitectureDirectories;
 
     protected $signature = 'clean-arch:make-notification {name : The name of the notification}
                           {--force : Overwrite existing files}';
@@ -39,13 +41,14 @@ class MakeNotificationCommand extends Command
         $stub    = $this->getStub('notification');
         $content = $this->replaceDomainPlaceholders($stub, $name);
 
-        $notificationPath = app_path('Infrastructure/Notifications');
+        $directory        = $this->layerDirectory('infrastructure') . '/Notifications';
+        $notificationPath = base_path($directory);
 
         if (! $this->files->isDirectory($notificationPath)) {
             $this->files->makeDirectory($notificationPath, 0755, true);
         }
 
         $this->files->put("{$notificationPath}/{$name}Notification.php", $content);
-        $this->info("Created: Infrastructure/Notifications/{$name}Notification.php");
+        $this->info("Created: {$directory}/{$name}Notification.php");
     }
 }
