@@ -60,5 +60,17 @@ return [
         | standalone classes without a base class.
         */
         'extend_base_classes' => true,
+
+        /*
+        | Subfolder the domain model is generated under, inside each domain's
+        | directory. Defaults to 'Models', so clean-arch:make-domain writes
+        | app/Domain/Articles/Models/Article.php declaring
+        | App\Domain\Articles\Models\Article. Set it to null or an empty
+        | string to generate the model directly inside the domain directory
+        | instead, app/Domain/Articles/Article.php declaring
+        | App\Domain\Articles\Article. Any other single segment, for example
+        | 'Entities', replaces 'Models'.
+        */
+        'model_directory' => 'Models',
     ],
 ];
