@@ -52,7 +52,7 @@ class InstallCleanArchitectureCommand extends Command
         $this->createReadme();
 
         if ($this->option('user-in-domain')) {
-            $this->moveUserIntoDomain();
+            $this->installUserInDomain();
         }
 
         $this->info('✅ Clean Architecture installed successfully!');

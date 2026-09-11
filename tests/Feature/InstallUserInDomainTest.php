@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Users\Models\User;
 use Illuminate\Support\Facades\File;
 
 /**
@@ -72,6 +73,13 @@ describe('Install with --user-in-domain', function () {
 
     afterEach(function () {
         restoreSkeletonForUserInDomain($this->skeletonBackup);
+
+        File::deleteDirectory(base_path('storage/app/user-in-domain'));
+        File::deleteDirectory(base_path('vendor/user-in-domain'));
+
+        if (File::isDirectory(base_path('vendor')) && File::isEmptyDirectory(base_path('vendor'))) {
+            File::deleteDirectory(base_path('vendor'));
+        }
     });
 
     it('moves the user model into the domain', function (?array $config, string $path, string $namespace) {
@@ -92,6 +100,122 @@ describe('Install with --user-in-domain', function () {
         'no model directory'   => [['clean-architecture.generation.model_directory' => null], 'app/Domain/Users/User.php', 'App\Domain\Users'],
         'custom domain folder' => [['clean-architecture.directories.domain' => 'app/Core/Domain'], 'app/Core/Domain/Users/Models/User.php', 'App\Core\Domain\Users\Models'],
     ]);
+
+    it('builds the moved model through its factory', function () {
+        $this->artisan('clean-arch:install', ['--user-in-domain' => true])->assertExitCode(0);
+
+        // A test psr-4 autoloader standing in for the app's composer autoload.
+        $roots = [
+            'App\\'                 => app_path() . '/',
+            'Database\\Factories\\' => database_path('factories') . '/',
+        ];
+        $autoloader = function (string $class) use ($roots): void {
+            foreach ($roots as $prefix => $directory) {
+                $path = $directory . str_replace('\\', '/', substr($class, strlen($prefix))) . '.php';
+
+                if (str_starts_with($class, $prefix) && File::exists($path)) {
+                    require_once $path;
+                }
+            }
+        };
+
+        spl_autoload_register($autoloader);
+
+        try {
+            $user = User::factory()->make();
+        } finally {
+            spl_autoload_unregister($autoloader);
+        }
+
+        expect($user)->toBeInstanceOf(User::class)
+            ->and(File::get(database_path('factories/UserFactory.php')))
+            ->toContain("    protected \$model = User::class;\n\n    /**");
+    });
+
+    it('points the skeleton files at the moved model', function (string $file) {
+        $this->artisan('clean-arch:install', ['--user-in-domain' => true])
+            ->expectsOutputToContain("Updated: {$file}")
+            ->assertExitCode(0);
+
+        expect(File::get(base_path($file)))
+            ->not->toContain('App\Models\User')
+            ->toContain('App\Domain\Users\Models\User');
+    })->with([
+        'config/auth.php',
+        'database/factories/UserFactory.php',
+        'database/seeders/DatabaseSeeder.php',
+    ]);
+
+    it('updates references under tests but not under vendor or storage', function () {
+        $test = <<<'PHP'
+            <?php
+
+            use App\Models\User;
+            use App\Models\UserProfile;
+
+            it('finds the user', fn () => expect(User::class)->toBe('App\\Models\\User'));
+            PHP;
+        $outside = "<?php\n\nreturn App\\Models\\User::class;\n";
+
+        File::ensureDirectoryExists(base_path('tests/Feature'));
+        File::put(base_path('tests/Feature/UserTest.php'), $test);
+        File::ensureDirectoryExists(base_path('vendor/user-in-domain'));
+        File::put(base_path('vendor/user-in-domain/Package.php'), $outside);
+        File::ensureDirectoryExists(base_path('storage/app/user-in-domain'));
+        File::put(base_path('storage/app/user-in-domain/Cached.php'), $outside);
+
+        $this->artisan('clean-arch:install', ['--user-in-domain' => true])
+            ->expectsOutputToContain('Updated: tests/Feature/UserTest.php')
+            ->assertExitCode(0);
+
+        expect(File::get(base_path('tests/Feature/UserTest.php')))
+            ->toContain('use App\Domain\Users\Models\User;')
+            ->toContain('use App\Models\UserProfile;')
+            ->toContain("'App\\\\Domain\\\\Users\\\\Models\\\\User'")
+            ->and(File::get(base_path('vendor/user-in-domain/Package.php')))->toBe($outside)
+            ->and(File::get(base_path('storage/app/user-in-domain/Cached.php')))->toBe($outside);
+    });
+
+    it('registers the user in a morph map once', function () {
+        $this->artisan('clean-arch:install', ['--user-in-domain' => true])
+            ->expectsOutputToContain('Updated: app/Providers/AppServiceProvider.php')
+            ->assertExitCode(0);
+        $this->artisan('clean-arch:install', ['--user-in-domain' => true])->assertExitCode(0);
+
+        $provider = File::get(app_path('Providers/AppServiceProvider.php'));
+
+        expect($provider)
+            ->toContain('use App\Domain\Users\Models\User;')
+            ->toContain('use Illuminate\Database\Eloquent\Relations\Relation;')
+            ->toContain("'user' => User::class")
+            ->and(substr_count($provider, 'Relation::morphMap('))->toBe(1);
+
+        token_get_all($provider, TOKEN_PARSE);
+    });
+
+    it('renames the broadcast channel and warns about frontend listeners', function () {
+        File::put(base_path('routes/channels.php'), <<<'PHP'
+            <?php
+
+            use Illuminate\Support\Facades\Broadcast;
+
+            Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
+                return (int) $user->id === (int) $id;
+            });
+            PHP);
+        $script = "Echo.private(`App.Models.User.\${userId}`).notification(console.log);\n";
+        File::ensureDirectoryExists(base_path('resources/js'));
+        File::put(base_path('resources/js/echo.js'), $script);
+
+        $this->artisan('clean-arch:install', ['--user-in-domain' => true])
+            ->expectsOutputToContain('Updated: routes/channels.php')
+            ->expectsOutputToContain('resources/js/echo.js')
+            ->assertExitCode(0);
+
+        expect(File::get(base_path('routes/channels.php')))
+            ->toContain("Broadcast::channel('App.Domain.Users.Models.User.{id}'")
+            ->and(File::get(base_path('resources/js/echo.js')))->toBe($script);
+    });
 
     it('leaves the user model alone without the option', function () {
         $model = File::get(app_path('Models/User.php'));
