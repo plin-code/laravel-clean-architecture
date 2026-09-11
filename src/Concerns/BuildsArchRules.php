@@ -48,7 +48,7 @@ trait BuildsArchRules
             ],
             'application_no_infrastructure_imports' => [
                 $application,
-                "new NotDependsOnTheseNamespaces([{$this->archLiteral($infrastructure)}])",
+                $this->applicationInfrastructureExpression($infrastructure),
                 'the application layer must not depend on the infrastructure layer',
             ],
             'no_observers_in_domain' => [
@@ -131,6 +131,45 @@ trait BuildsArchRules
                     );
                 }
             PHP;
+    }
+
+    /**
+     * The dependency expression of the application rule, with the allowed
+     * infrastructure namespaces passed as phparkitect's exclude list.
+     *
+     * The second argument is only written when the allowlist has entries, so
+     * projects that do not use it keep the exact file they had before.
+     */
+    protected function applicationInfrastructureExpression(string $infrastructure): string
+    {
+        $allowed = $this->allowedInfrastructureNamespaces($infrastructure);
+
+        if ($allowed === []) {
+            return "new NotDependsOnTheseNamespaces([{$this->archLiteral($infrastructure)}])";
+        }
+
+        $exclude = implode(', ', array_map($this->archLiteral(...), $allowed));
+
+        return "new NotDependsOnTheseNamespaces([{$this->archLiteral($infrastructure)}], [{$exclude}])";
+    }
+
+    /**
+     * Full namespaces the application layer may import from the infrastructure
+     * layer. The config lists segments relative to that layer, so 'Mail' keeps
+     * pointing at the right place when the directories or the root namespace
+     * change.
+     *
+     * @return array<int, string>
+     */
+    protected function allowedInfrastructureNamespaces(string $infrastructure): array
+    {
+        /** @var array<int, string> $segments */
+        $segments = config('clean-architecture.validation.application_infrastructure_allowed', []);
+
+        return array_values(array_map(
+            fn (string $segment): string => $infrastructure . '\\' . trim(str_replace('/', '\\', $segment), '\\'),
+            $segments
+        ));
     }
 
     /**
