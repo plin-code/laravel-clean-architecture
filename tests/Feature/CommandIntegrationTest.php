@@ -89,7 +89,7 @@ describe('Command Integration', function () {
         $this->artisan('clean-arch:make-controller', ['name' => 'Test', '--api' => true])
             ->assertExitCode(0);
 
-        expect(File::exists(app_path('Infrastructure/Http/Controllers/Api/TestController.php')))->toBeTrue();
+        expect(File::exists(app_path('Infrastructure/Http/Controllers/Api/TestsController.php')))->toBeTrue();
     });
 
     it('runs make-controller command with web flag', function () {
@@ -103,7 +103,7 @@ describe('Command Integration', function () {
         $this->artisan('clean-arch:make-controller', ['name' => 'Default'])
             ->assertExitCode(0);
 
-        expect(File::exists(app_path('Infrastructure/Http/Controllers/Api/DefaultController.php')))->toBeTrue();
+        expect(File::exists(app_path('Infrastructure/Http/Controllers/Api/DefaultsController.php')))->toBeTrue();
     });
 
     it('runs make-observer command', function () {
@@ -117,14 +117,14 @@ describe('Command Integration', function () {
         $this->artisan('clean-arch:make-listener', ['name' => 'User'])
             ->assertExitCode(0);
 
-        expect(File::exists(app_path('Application/Listeners/UserListener.php')))->toBeTrue();
+        expect(File::exists(app_path('Application/Listeners/UserEventListener.php')))->toBeTrue();
     });
 
     it('runs make-job command', function () {
         $this->artisan('clean-arch:make-job', ['name' => 'User'])
             ->assertExitCode(0);
 
-        expect(File::exists(app_path('Application/Jobs/UserJob.php')))->toBeTrue();
+        expect(File::exists(app_path('Application/Jobs/ProcessUserJob.php')))->toBeTrue();
     });
 
     it('runs make-mail command', function () {

@@ -29,7 +29,7 @@ describe('MakeListenerCommand', function () {
         $filesystem->shouldReceive('isDirectory')->andReturn(false);
         $filesystem->shouldReceive('makeDirectory')->once();
         $filesystem->shouldReceive('put')->once()->withArgs(function ($path, $content) {
-            return str_contains($path, 'Application/Listeners/UserListener.php');
+            return str_contains($path, 'Application/Listeners/UserEventListener.php');
         });
 
         $command = new MakeListenerCommand($filesystem);
