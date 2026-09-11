@@ -19,6 +19,8 @@ class InstallCleanArchitectureCommand extends Command
 
     protected Filesystem $files;
 
+    protected bool $force = false;
+
     public function __construct(Filesystem $files)
     {
         parent::__construct();
@@ -28,6 +30,8 @@ class InstallCleanArchitectureCommand extends Command
     public function handle(): int
     {
         $this->info('🚀 Installing Clean Architecture...');
+
+        $this->force = (bool) $this->option('force');
 
         // Create directory structure
         $this->createDirectoryStructure();
@@ -107,8 +111,7 @@ class InstallCleanArchitectureCommand extends Command
             $this->files->makeDirectory(base_path($directory), 0755, true);
         }
 
-        $this->files->put(base_path("{$directory}/BaseModel.php"), $stub);
-        $this->info("Created: {$directory}/BaseModel.php");
+        $this->writeFile("{$directory}/BaseModel.php", $stub);
     }
 
     protected function createBaseController(): void
@@ -120,8 +123,7 @@ class InstallCleanArchitectureCommand extends Command
             $this->files->makeDirectory(base_path($directory), 0755, true);
         }
 
-        $this->files->put(base_path("{$directory}/Controller.php"), $stub);
-        $this->info("Created: {$directory}/Controller.php");
+        $this->writeFile("{$directory}/Controller.php", $stub);
     }
 
     protected function createBaseAction(): void
@@ -129,8 +131,7 @@ class InstallCleanArchitectureCommand extends Command
         $stub      = $this->getStub('base-action');
         $directory = $this->layerDirectory('application') . '/Actions';
 
-        $this->files->put(base_path("{$directory}/BaseAction.php"), $stub);
-        $this->info("Created: {$directory}/BaseAction.php");
+        $this->writeFile("{$directory}/BaseAction.php", $stub);
     }
 
     protected function createBaseService(): void
@@ -142,8 +143,7 @@ class InstallCleanArchitectureCommand extends Command
             $this->files->makeDirectory(base_path($directory), 0755, true);
         }
 
-        $this->files->put(base_path("{$directory}/BaseService.php"), $stub);
-        $this->info("Created: {$directory}/BaseService.php");
+        $this->writeFile("{$directory}/BaseService.php", $stub);
     }
 
     protected function createBaseRequest(): void
@@ -155,8 +155,7 @@ class InstallCleanArchitectureCommand extends Command
             $this->files->makeDirectory(base_path($directory), 0755, true);
         }
 
-        $this->files->put(base_path("{$directory}/BaseRequest.php"), $stub);
-        $this->info("Created: {$directory}/BaseRequest.php");
+        $this->writeFile("{$directory}/BaseRequest.php", $stub);
     }
 
     protected function createExceptionClasses(): void
@@ -171,8 +170,7 @@ class InstallCleanArchitectureCommand extends Command
 
         foreach ($exceptions as $className => $stub) {
             $content = $this->getStub($stub);
-            $this->files->put(base_path("{$directory}/{$className}.php"), $content);
-            $this->info("Created: {$directory}/{$className}.php");
+            $this->writeFile("{$directory}/{$className}.php", $content);
         }
     }
 
@@ -194,14 +192,37 @@ class InstallCleanArchitectureCommand extends Command
         if (! $this->files->isDirectory(config_path())) {
             $this->files->makeDirectory(config_path(), 0755, true);
         }
-        $this->files->put(config_path('clean-architecture.php'), $stub);
-        $this->info('Created: config/clean-architecture.php');
+        $this->writePath(config_path('clean-architecture.php'), $stub, 'config/clean-architecture.php');
     }
 
     protected function createReadme(): void
     {
         $stub = $this->getStub('readme');
-        $this->files->put(base_path('CLEAN_ARCHITECTURE.md'), $stub);
-        $this->info('Created: CLEAN_ARCHITECTURE.md');
+        $this->writePath(base_path('CLEAN_ARCHITECTURE.md'), $stub, 'CLEAN_ARCHITECTURE.md');
+    }
+
+    /**
+     * Write a file relative to the base path, skipping it when it already
+     * exists unless `--force` was passed.
+     */
+    protected function writeFile(string $relativePath, string $content): void
+    {
+        $this->writePath(base_path($relativePath), $content, $relativePath);
+    }
+
+    /**
+     * Write a file at an absolute path, skipping it when it already exists
+     * unless `--force` was passed.
+     */
+    protected function writePath(string $path, string $content, string $label): void
+    {
+        if ($this->files->exists($path) && ! $this->force) {
+            $this->info("Skipped: {$label} (already exists, use --force to overwrite)");
+
+            return;
+        }
+
+        $this->files->put($path, $content);
+        $this->info("Created: {$label}");
     }
 }
