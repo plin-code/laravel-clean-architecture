@@ -105,9 +105,9 @@ describe('Generated class names match their files', function () {
         $files = [
             app_path('Domain/Authors/Models/Author.php'),
             app_path('Domain/Authors/Enums/AuthorStatus.php'),
-            // Domain/Authors/Events/*.php are intentionally skipped here: they
-            // currently carry an unreplaced `{{AuthorCreated}}` style
-            // placeholder (a separate, already tracked bug fixed elsewhere).
+            app_path('Domain/Authors/Events/AuthorCreated.php'),
+            app_path('Domain/Authors/Events/AuthorUpdated.php'),
+            app_path('Domain/Authors/Events/AuthorDeleted.php'),
             app_path('Application/Actions/Authors/CreateAuthorAction.php'),
             app_path('Application/Actions/Authors/UpdateAuthorAction.php'),
             app_path('Application/Actions/Authors/DeleteAuthorAction.php'),
