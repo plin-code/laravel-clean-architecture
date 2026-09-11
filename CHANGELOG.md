@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- `generation.model_directory` sets the subfolder the domain model is generated in, `Models` by default. Set it to `null` or an empty string to generate `app/Domain/Articles/Article.php` declaring `App\Domain\Articles\Article`, or to another segment such as `Entities`. It is a config value rather than a `make-domain` flag because the model import is written by many commands (`make-action`, `make-mail`, `make-observer` and others), which have to agree on where the model lives
+
 ## [3.0.1] - 2026-09-11
 
 ### Fixed
