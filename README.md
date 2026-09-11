@@ -123,7 +123,7 @@ vendor/bin/phparkitect check
 
 ### 🛠️ Available commands
 
-- `clean-arch:install` - 🏗️ Install Clean Architecture structure
+- `clean-arch:install {--force}` - 🏗️ Install Clean Architecture structure
 - `clean-arch:make-domain {name} {--no-base}` - 🆕 Create a complete new domain
 - `clean-arch:make-action {name} {domain} {--no-base}` - ⚡ Create a new action
 - `clean-arch:make-service {name} {--no-base}` - 🔧 Create a new service
@@ -250,7 +250,7 @@ class ProductsController extends Controller
 
 ## ⚙️ Configuration
 
-`clean-arch:install` writes `config/clean-architecture.php`. You can also publish it on its own:
+`clean-arch:install` writes `config/clean-architecture.php`. It skips any file that already exists, so editing the config or a generated base class is safe to keep across reinstalls. Pass `--force` to overwrite them instead. You can also publish the config on its own:
 
 ```bash
 php artisan vendor:publish --tag=clean-architecture-config
