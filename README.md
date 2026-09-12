@@ -56,6 +56,29 @@ This command will create:
 - ⚙️ Configuration file
 - 📖 Documentation
 
+#### 👤 Moving the `User` model into the Domain
+
+```bash
+php artisan clean-arch:install --user-in-domain
+composer dump-autoload
+```
+
+Laravel keeps `User` in `app/Models`, outside the directories the generated phparkitect rules check. This option moves it into the Domain layer of a **fresh** app, following `directories.domain` and `generation.model_directory`, so with the defaults you get `app/Domain/Users/Models/User.php` declaring `App\Domain\Users\Models\User`.
+
+It also:
+- keeps `User` an `Authenticatable`, it does not extend `BaseModel` (whose `SoftDeletes` needs a `deleted_at` column the `users` table does not have)
+- adds `newFactory()` to the model and a `$model` property to `database/factories/UserFactory.php`, since the factory resolver derives both names from the old namespace
+- rewrites `App\Models\User` in the PHP files of `app/`, `config/`, `database/`, `routes/` and `tests/`, in code and inside strings, and prints every file it changed
+- registers `Relation::morphMap(['user' => User::class])` in `AppServiceProvider::boot()`, so polymorphic `*_type` columns store `user` instead of a namespace
+- renames the `App.Models.User.{id}` broadcast channel in `routes/channels.php`
+- removes `app/Models` and `app/Http` once they hold nothing but the default empty base controller
+
+It does not touch `vendor/`, `node_modules/` or `storage/`, and it does not migrate data. If `resources/js` or `resources/ts` listens on `App.Models.User.{id}`, the command warns and names the files. Those Echo listeners have to be renamed by hand.
+
+The command refuses to change anything when `app/Models` holds other models (pass `--force` to move `User` anyway) or when both the source and the destination exist. For an app that is already running in production, read [Moving `User` into the Domain in an existing app](#-moving-user-into-the-domain-in-an-existing-app) first.
+
+Laravel's own generators (`make:model`, `make:controller`, `make:request`) recreate `app/Models` and `app/Http`. After this option, use the `clean-arch:make-*` commands instead.
+
 ### 🆕 Creating a new domain
 
 ```bash
@@ -123,7 +146,7 @@ vendor/bin/phparkitect check
 
 ### 🛠️ Available commands
 
-- `clean-arch:install {--force}`: 🏗️ Install Clean Architecture structure
+- `clean-arch:install {--force} {--user-in-domain}`: 🏗️ Install Clean Architecture structure, optionally moving the `User` model into the Domain layer
 - `clean-arch:make-domain {name} {--force} {--no-base}`: 🆕 Create a complete new domain
 - `clean-arch:make-action {name} {domain} {--force} {--no-base}`: ⚡ Create a new action
 - `clean-arch:make-service {name} {--force} {--no-base}`: 🔧 Create a new service
@@ -370,6 +393,23 @@ Set it to `null` or an empty string to generate the model directly inside the do
 `clean-arch:make-domain User` then writes `app/Domain/Users/User.php`, declaring `App\Domain\Users\User`, instead of `app/Domain/Users/Models/User.php` declaring `App\Domain\Users\Models\User`.
 
 Any other single segment replaces `Models`, for example `'Entities'` produces `app/Domain/Users/Entities/User.php` declaring `App\Domain\Users\Entities\User`. Surrounding slashes are trimmed, so `'/Entities/'` behaves the same as `'Entities'`.
+
+## 👤 Moving `User` into the Domain in an existing app
+
+`clean-arch:install --user-in-domain` is written for a fresh app. On an app that already has data, queued jobs and third party packages, renaming the `User` class is a data migration as much as a code change. The table below lists what breaks and what to do about it.
+
+| What breaks | Why | Remedy |
+|---|---|---|
+| `User::factory()` | The factory name is derived from the model namespace, so the resolver looks for `Database\Factories\Domain\Users\Models\UserFactory` | Add `newFactory()` to the model, returning `\Database\Factories\UserFactory::new()`, and a `protected $model = User::class` to the factory |
+| Polymorphic `*_type` columns | Rows hold the old class name, `App\Models\User` | Register `Relation::morphMap(['user' => User::class])`, then run a migration that updates every `*_type` column holding `App\Models\User` to `user`. Do it in the same deploy as the code change |
+| Broadcast notification channel | The private channel is named after the notifiable class, `private-App.Models.User.{id}` | Rename the channel in `routes/channels.php` and in the Echo listeners, or keep the old name by returning it from `receivesBroadcastNotificationsOn()` on the model until the frontend catches up |
+| Jobs already queued | A serialized job holds the old class name and fails to unserialize | Drain the queue before deploying, or keep a class alias for one release |
+| Package config naming the model | Filament, Cashier, Sanctum, Permission and others store the FQCN in their own config or tables | Search `config/` for `App\Models\User` after the move, and check any package table that stores a model class |
+
+Two more notes:
+
+- `enforceMorphMap()` is stricter than `morphMap()`, it throws on any polymorphic model that is not mapped. It is the right call once every polymorphic model of the app is in the map, and a source of exceptions while packages such as an activity log or a media library still register their own.
+- Laravel's generators recreate `app/Models` and `app/Http`. Use the `clean-arch:make-*` commands once the move is done.
 
 ## 🛠️ Development
 

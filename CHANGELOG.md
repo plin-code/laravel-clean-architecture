@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- `clean-arch:install --user-in-domain` moves the `User` model of a fresh Laravel app into the Domain layer, at the path `directories.domain` and `generation.model_directory` describe. It adds `newFactory()` to the model and a `$model` property to `UserFactory`, rewrites `App\Models\User` in the PHP files of `app/`, `config/`, `database/`, `routes/` and `tests/`, registers a `user` morph map in `AppServiceProvider`, renames the `App.Models.User.{id}` broadcast channel, and removes `app/Models` and `app/Http` once they hold nothing but the default empty base controller. It refuses to change anything when `app/Models` holds other models or when the destination already exists. Existing apps have their own README section, the move there is a data migration as much as a code change
+
 ## [3.2.0] - 2026-09-12
 
 ### Added
