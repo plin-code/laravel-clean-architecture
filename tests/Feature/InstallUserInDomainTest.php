@@ -217,6 +217,92 @@ describe('Install with --user-in-domain', function () {
             ->and(File::get(base_path('resources/js/echo.js')))->toBe($script);
     });
 
+    it('removes app/Http and app/Models once they hold nothing of the app', function () {
+        $this->artisan('clean-arch:install', ['--user-in-domain' => true])
+            ->expectsOutputToContain('Removed: app/Http')
+            ->expectsOutputToContain('Removed: app/Models')
+            ->assertExitCode(0);
+
+        expect(File::isDirectory(app_path('Http')))->toBeFalse()
+            ->and(File::isDirectory(app_path('Models')))->toBeFalse();
+    });
+
+    it('keeps app/Http when it holds another controller', function () {
+        File::put(app_path('Http/Controllers/HomeController.php'), "<?php\n\nnamespace App\\Http\\Controllers;\n\nclass HomeController extends Controller {}\n");
+
+        $this->artisan('clean-arch:install', ['--user-in-domain' => true])
+            ->expectsOutputToContain('Kept: app/Http')
+            ->assertExitCode(0);
+
+        expect(File::exists(app_path('Http/Controllers/Controller.php')))->toBeTrue()
+            ->and(File::exists(app_path('Http/Controllers/HomeController.php')))->toBeTrue();
+    });
+
+    it('keeps the base controller when a route file names it', function () {
+        File::append(base_path('routes/web.php'), "\n// extends App\\Http\\Controllers\\Controller\n");
+
+        $this->artisan('clean-arch:install', ['--user-in-domain' => true])
+            ->expectsOutputToContain('Kept: app/Http')
+            ->assertExitCode(0);
+
+        expect(File::exists(app_path('Http/Controllers/Controller.php')))->toBeTrue();
+    });
+
+    it('refuses to move when app/Models holds other models', function () {
+        File::put(app_path('Models/Post.php'), "<?php\n\nnamespace App\\Models;\n\nclass Post {}\n");
+        $auth = File::get(config_path('auth.php'));
+
+        $this->artisan('clean-arch:install', ['--user-in-domain' => true])
+            ->expectsOutputToContain('README')
+            ->assertExitCode(1);
+
+        expect(File::exists(app_path('Models/User.php')))->toBeTrue()
+            ->and(File::isDirectory(app_path('Domain')))->toBeFalse()
+            ->and(File::get(config_path('auth.php')))->toBe($auth);
+    });
+
+    it('moves the user next to other models when forced', function () {
+        File::put(app_path('Models/Post.php'), "<?php\n\nnamespace App\\Models;\n\nclass Post {}\n");
+
+        $this->artisan('clean-arch:install', ['--user-in-domain' => true, '--force' => true])
+            ->expectsOutputToContain('Kept: app/Models')
+            ->assertExitCode(0);
+
+        expect(File::exists(app_path('Domain/Users/Models/User.php')))->toBeTrue()
+            ->and(File::exists(app_path('Models/User.php')))->toBeFalse()
+            ->and(File::exists(app_path('Models/Post.php')))->toBeTrue();
+    });
+
+    it('does nothing when the user is already in the domain', function () {
+        $this->artisan('clean-arch:install', ['--user-in-domain' => true])->assertExitCode(0);
+
+        $files = collect(['app/Domain/Users/Models/User.php', 'app/Providers/AppServiceProvider.php', 'config/auth.php', 'database/factories/UserFactory.php'])
+            ->mapWithKeys(fn (string $file): array => [$file => File::get(base_path($file))]);
+
+        $this->artisan('clean-arch:install', ['--user-in-domain' => true])
+            ->expectsOutputToContain('already')
+            ->assertExitCode(0);
+
+        foreach ($files as $file => $content) {
+            expect(File::get(base_path($file)))->toBe($content);
+        }
+    });
+
+    it('refuses to move when the destination already exists', function () {
+        File::ensureDirectoryExists(app_path('Domain/Users/Models'));
+        File::put(app_path('Domain/Users/Models/User.php'), "<?php\n\n// existing\n");
+        $auth = File::get(config_path('auth.php'));
+
+        $this->artisan('clean-arch:install', ['--user-in-domain' => true])
+            ->expectsOutputToContain('app/Domain/Users/Models/User.php')
+            ->assertExitCode(1);
+
+        expect(File::get(app_path('Domain/Users/Models/User.php')))->toBe("<?php\n\n// existing\n")
+            ->and(File::exists(app_path('Models/User.php')))->toBeTrue()
+            ->and(File::exists(app_path('Domain/Shared/BaseModel.php')))->toBeFalse()
+            ->and(File::get(config_path('auth.php')))->toBe($auth);
+    });
+
     it('leaves the user model alone without the option', function () {
         $model = File::get(app_path('Models/User.php'));
         $auth  = File::get(config_path('auth.php'));

@@ -36,6 +36,10 @@ class InstallCleanArchitectureCommand extends Command
 
         $this->resolveForce();
 
+        if ($this->option('user-in-domain') && ! $this->canInstallUserInDomain()) {
+            return self::FAILURE;
+        }
+
         // Create directory structure
         $this->createDirectoryStructure();
 

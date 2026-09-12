@@ -2,6 +2,8 @@
 
 namespace PlinCode\LaravelCleanArchitecture\Concerns;
 
+use Symfony\Component\Finder\SplFileInfo;
+
 /**
  * Move the `User` model of a fresh Laravel app into the Domain layer.
  *
@@ -24,6 +26,41 @@ trait MovesUserIntoDomain
      * @var list<string>
      */
     protected array $userFrontendDirectories = ['resources/js', 'resources/ts'];
+
+    /**
+     * Check, before anything is written, that the move is safe on this app.
+     */
+    protected function canInstallUserInDomain(): bool
+    {
+        $destination       = $this->userModelDestination();
+        $sourceExists      = $this->files->exists($this->userModelSource());
+        $destinationExists = $this->files->exists(base_path($destination));
+
+        if ($sourceExists && $destinationExists) {
+            $this->error("Both app/Models/User.php and {$destination} exist. Nothing was changed.");
+
+            return false;
+        }
+
+        if (! $sourceExists && ! $destinationExists) {
+            $this->error('app/Models/User.php not found, there is no User model to move. Nothing was changed.');
+
+            return false;
+        }
+
+        $otherModels = $sourceExists
+            ? array_filter($this->files->allFiles(app_path('Models')), fn ($file): bool => $file->getRelativePathname() !== 'User.php')
+            : [];
+
+        if ($otherModels !== [] && ! $this->force) {
+            $this->error('app/Models holds other models besides User.php, so this does not look like a fresh app. Nothing was changed.');
+            $this->line('Read "Moving User into the Domain in an existing app" in the README, or run again with --force to move User anyway.');
+
+            return false;
+        }
+
+        return true;
+    }
 
     protected function installUserInDomain(): void
     {
@@ -52,6 +89,112 @@ trait MovesUserIntoDomain
         }
 
         $this->warnAboutFrontendChannels($oldClass, $newClass);
+
+        $this->removeModelsDirectory();
+        $this->removeHttpDirectory();
+    }
+
+    protected function removeModelsDirectory(): void
+    {
+        $directory = app_path('Models');
+
+        if (! $this->files->isDirectory($directory)) {
+            return;
+        }
+
+        // Dotfiles such as .gitkeep are placeholders, not content.
+        if ($this->files->allFiles($directory) !== []) {
+            $this->info('Kept: app/Models, it still holds other files');
+
+            return;
+        }
+
+        $this->files->deleteDirectory($directory);
+        $this->info('Removed: app/Models');
+    }
+
+    /**
+     * A fresh app only has the empty abstract `Controllers/Controller.php` in
+     * `app/Http`. The directory goes only when that is all it holds and no
+     * file in `app/` or `routes/` still names the class.
+     */
+    protected function removeHttpDirectory(): void
+    {
+        $directory = app_path('Http');
+
+        if (! $this->files->isDirectory($directory)) {
+            return;
+        }
+
+        $files = $this->files->allFiles($directory);
+
+        if (count($files) !== 1 || $files[0]->getRelativePathname() !== 'Controllers/Controller.php') {
+            $this->info('Kept: app/Http, it holds more than the default base controller');
+
+            return;
+        }
+
+        $controller = $this->namespaceOf($files[0]->getContents()) . '\\Controller';
+
+        foreach ($this->filesNaming($controller, ['app', 'routes']) as $path) {
+            $this->info("Kept: app/Http, {$path} uses {$controller}");
+
+            return;
+        }
+
+        $this->files->deleteDirectory($directory);
+        $this->info('Removed: app/Http');
+    }
+
+    /**
+     * PHP files of the given directories that name the class, as written in
+     * code or escaped inside a string.
+     *
+     * @param  list<string>  $directories
+     * @return list<string> paths relative to the base path
+     */
+    protected function filesNaming(string $class, array $directories): array
+    {
+        $patterns = [$this->classNamePattern($class), $this->classNamePattern(str_replace('\\', '\\\\', $class))];
+        $matches  = [];
+
+        foreach ($this->phpFilesIn($directories) as $path => $file) {
+            foreach ($patterns as $pattern) {
+                if (preg_match($pattern, $file->getContents()) === 1) {
+                    $matches[] = $path;
+
+                    break;
+                }
+            }
+        }
+
+        return $matches;
+    }
+
+    /**
+     * PHP files of the given directories, outside any vendor or node_modules
+     * folder, keyed by their path relative to the base path.
+     *
+     * @param  list<string>  $directories
+     * @return array<string, SplFileInfo>
+     */
+    protected function phpFilesIn(array $directories): array
+    {
+        $files = [];
+
+        foreach ($directories as $directory) {
+            if (! $this->files->isDirectory(base_path($directory))) {
+                continue;
+            }
+
+            foreach ($this->files->allFiles(base_path($directory)) as $file) {
+                if ($file->getExtension() === 'php' && preg_match('#(^|/)(vendor|node_modules)/#', $file->getRelativePathname()) !== 1) {
+                    $files["{$directory}/{$file->getRelativePathname()}"] = $file;
+                }
+            }
+        }
+
+        return $files;
     }
 
     protected function userModelSource(): string
@@ -141,27 +284,17 @@ trait MovesUserIntoDomain
 
         $updated = [];
 
-        foreach ($this->userReferenceDirectories as $directory) {
-            if (! $this->files->isDirectory(base_path($directory))) {
-                continue;
+        foreach ($this->phpFilesIn($this->userReferenceDirectories) as $path => $file) {
+            $content  = $file->getContents();
+            $replaced = $content;
+
+            foreach ($patterns as $pattern => $replacement) {
+                $replaced = (string) preg_replace($pattern, addcslashes($replacement, '\\$'), $replaced);
             }
 
-            foreach ($this->files->allFiles(base_path($directory)) as $file) {
-                if ($file->getExtension() !== 'php' || preg_match('#(^|/)(vendor|node_modules)/#', $file->getRelativePathname()) === 1) {
-                    continue;
-                }
-
-                $content  = $file->getContents();
-                $replaced = $content;
-
-                foreach ($patterns as $pattern => $replacement) {
-                    $replaced = (string) preg_replace($pattern, addcslashes($replacement, '\\$'), $replaced);
-                }
-
-                if ($replaced !== $content) {
-                    $this->files->put($file->getPathname(), $replaced);
-                    $updated[] = "{$directory}/{$file->getRelativePathname()}";
-                }
+            if ($replaced !== $content) {
+                $this->files->put($file->getPathname(), $replaced);
+                $updated[] = $path;
             }
         }
 
