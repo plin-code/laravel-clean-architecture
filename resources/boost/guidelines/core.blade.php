@@ -9,12 +9,11 @@ consistent with the configured paths.
 
 - `App\Domain`: Eloquent models, enums, domain events, must not depend on
   `App\Application` or `App\Infrastructure`.
-- `App\Application`: actions and services, the use cases, must not depend on
-  `App\Infrastructure`, unless the namespace is listed in
-  `validation.application_infrastructure_allowed`.
+- `App\Application`: actions, services, jobs, listeners and console commands,
+  the use cases, must not depend on `App\Infrastructure`, unless the namespace
+  is listed in `validation.application_infrastructure_allowed`.
 - `App\Infrastructure`: controllers, requests, resources, mail, notifications,
-  jobs, listeners, observers, exports. Depends on the layers above, never the
-  other way round.
+  observers, exports. Depends on the layers above, never the other way round.
 - Observers belong to `App\Infrastructure`, not to the domain. Console commands
   and queued jobs orchestrate use cases and belong to `App\Application`.
 
@@ -38,8 +37,14 @@ php artisan clean-arch:make-export Article
 
 `clean-arch:make-domain` writes the model, the events, the actions, the
 requests, the resource, the controller, the migration and the test in one go.
-Pass `-n` to skip the base classes. Every command refuses to overwrite an
-existing file and exits 1: pass `--force` when overwriting is intended.
+Pass `--no-base` to skip the base classes.
+
+Single file commands (make-action, make-service, make-controller,
+make-observer, make-listener, make-job, make-mail, make-notification,
+make-export, make-arch-rules) refuse to overwrite an existing file and exit 1.
+`clean-arch:install`, `clean-arch:make-domain` and `clean-arch:generate-package`
+skip existing files instead, write the rest, and exit 0. Either way, pass
+`--force` to overwrite.
 
 On a fresh Laravel app, pass `--user-in-domain` to `clean-arch:install` to move
 `User` into `App\Domain` instead of leaving it under `App\Models`.
