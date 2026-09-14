@@ -24,7 +24,7 @@ consistent with the configured paths.
 php artisan clean-arch:install
 php artisan clean-arch:make-domain Article
 php artisan clean-arch:make-action PublishArticle Article
-php artisan clean-arch:make-service ArticleService
+php artisan clean-arch:make-service Article
 php artisan clean-arch:make-controller Article
 php artisan clean-arch:make-mail Article
 php artisan clean-arch:make-notification Article
@@ -37,7 +37,9 @@ php artisan clean-arch:make-export Article
 
 `clean-arch:make-domain` writes the model, the events, the actions, the
 requests, the resource, the controller, the migration and the test in one go.
-Pass `--no-base` to skip the base classes.
+Pass `--no-base` to skip the base classes. After that it asks, one confirm at a
+time, whether to also generate an observer, a listener, a job, a mail, a
+notification and an export, and `--no-interaction` declines all six.
 
 Single file commands (make-action, make-service, make-controller,
 make-observer, make-listener, make-job, make-mail, make-notification,
