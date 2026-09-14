@@ -63,6 +63,14 @@ describe('Boost guidelines', function () {
 
         expect(strlen($rendered))->toBeLessThan(6000);
     });
+
+    it('suggests laravel boost without requiring it', function () {
+        $composer = json_decode(file_get_contents(__DIR__ . '/../../composer.json'), true);
+
+        expect($composer['suggest']['laravel/boost'] ?? null)->toBeString()
+            ->and($composer['require']['laravel/boost'] ?? null)->toBeNull()
+            ->and($composer['require-dev']['laravel/boost'] ?? null)->toBeNull();
+    });
 });
 
 describe('Boost skill', function () {

@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- AI guidelines and an agent skill for Laravel Boost, shipped at the paths the Boost documentation gives package authors: `resources/boost/guidelines/core.blade.php` and `resources/boost/skills/clean-architecture-development/SKILL.md`. They describe the three layers, the dependency direction, the `clean-arch:*` commands and the phparkitect workflow, so an agent stops guessing where a class belongs. Verified against laravel/boost v2.8.1, `boost:install` reads `resources/boost/` only from first party packages, so for now an application copies these two files into its own `.ai/guidelines` and `.ai/skills`, which Boost does read; the README shows the two commands. The files stay in the package so they are picked up automatically once Boost honours the documented convention for third party packages. `laravel/boost` is only a `suggest`, it is not a dependency of this package
+
 ## [3.3.0] - 2026-09-12
 
 ### Added
