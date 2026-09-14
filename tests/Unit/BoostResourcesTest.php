@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Blade;
+use Symfony\Component\Yaml\Yaml;
 
 describe('Boost guidelines', function () {
     beforeEach(function () {
@@ -61,5 +62,46 @@ describe('Boost guidelines', function () {
         $rendered = Blade::render(file_get_contents($this->guidelines));
 
         expect(strlen($rendered))->toBeLessThan(6000);
+    });
+});
+
+describe('Boost skill', function () {
+    beforeEach(function () {
+        $this->skill = __DIR__ . '/../../resources/boost/skills/clean-architecture-development/SKILL.md';
+    });
+
+    it('ships a skill file in a folder named after the skill', function () {
+        expect(file_exists($this->skill))->toBeTrue();
+    });
+
+    it('declares the frontmatter boost requires', function () {
+        $content = file_get_contents($this->skill);
+
+        expect($content)->toStartWith("---\n");
+
+        preg_match('/^---\s*\n(.*?)\n---\s*\n/s', $content, $matches);
+
+        $frontmatter = Yaml::parse($matches[1] ?? '');
+
+        expect($frontmatter)->toBeArray()
+            ->and($frontmatter['name'] ?? null)->toBe('clean-architecture-development')
+            ->and($frontmatter['description'] ?? null)->toBeString()
+            ->and($frontmatter['description'] ?? '')->not->toBe('');
+    });
+
+    it('tells the agent when to use the skill and how to generate a domain', function () {
+        $content = file_get_contents($this->skill);
+
+        expect($content)->toContain('## When to use this skill')
+            ->toContain('clean-arch:make-domain')
+            ->toContain('clean-arch:make-arch-rules');
+    });
+
+    it('does not repeat the guidelines verbatim', function () {
+        $guidelines = Blade::render(file_get_contents(
+            __DIR__ . '/../../resources/boost/guidelines/core.blade.php'
+        ));
+
+        expect(file_get_contents($this->skill))->not->toBe($guidelines);
     });
 });
