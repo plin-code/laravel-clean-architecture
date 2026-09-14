@@ -411,6 +411,24 @@ Two more notes:
 - `enforceMorphMap()` is stricter than `morphMap()`, it throws on any polymorphic model that is not mapped. It is the right call once every polymorphic model of the app is in the map, and a source of exceptions while packages such as an activity log or a media library still register their own.
 - Laravel's generators recreate `app/Models` and `app/Http`. Use the `clean-arch:make-*` commands once the move is done.
 
+### 🤖 AI guidelines (Laravel Boost)
+
+This package ships AI guidelines and an agent skill for [Laravel Boost](https://github.com/laravel/boost), at the paths the Boost documentation gives package authors:
+
+- `resources/boost/guidelines/core.blade.php`, a short always in context brief on the three layers, the dependency direction and the `clean-arch:*` commands.
+- `resources/boost/skills/clean-architecture-development/SKILL.md`, loaded on demand, covering how to generate a domain, where each class belongs, and how to keep `phparkitect check` green.
+
+Note on the current Boost release. Verified against laravel/boost v2.8.1, `php artisan boost:install` loads `resources/boost/` only from first party packages (the `laravel/` scope plus a fixed list that covers Livewire, Inertia, Pest and PHPUnit), so it does not pick these files up yet. Until Boost reads them for any installed package, copy them into your application, where Boost does read them:
+
+```bash
+mkdir -p .ai/guidelines .ai/skills
+cp vendor/plin-code/laravel-clean-architecture/resources/boost/guidelines/core.blade.php .ai/guidelines/clean-architecture.blade.php
+cp -R vendor/plin-code/laravel-clean-architecture/resources/boost/skills/clean-architecture-development .ai/skills/
+php artisan boost:install
+```
+
+The files stay in the package so that the day Boost honours the documented convention for third party packages, `php artisan boost:install` (or `php artisan boost:update --discover` on an existing install) picks them up with nothing to copy.
+
 ## 🛠️ Development
 
 This package uses several tools to maintain code quality:
