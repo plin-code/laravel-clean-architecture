@@ -68,6 +68,7 @@ describe('Boost guidelines', function () {
         $composer = json_decode(file_get_contents(__DIR__ . '/../../composer.json'), true);
 
         expect($composer['suggest']['laravel/boost'] ?? null)->toBeString()
+            ->not->toBe('')
             ->and($composer['require']['laravel/boost'] ?? null)->toBeNull()
             ->and($composer['require-dev']['laravel/boost'] ?? null)->toBeNull();
     });

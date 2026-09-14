@@ -418,7 +418,7 @@ This package ships AI guidelines and an agent skill for [Laravel Boost](https://
 - `resources/boost/guidelines/core.blade.php`, a short always in context brief on the three layers, the dependency direction and the `clean-arch:*` commands.
 - `resources/boost/skills/clean-architecture-development/SKILL.md`, loaded on demand, covering how to generate a domain, where each class belongs, and how to keep `phparkitect check` green.
 
-Install them with `composer require laravel/boost --dev` then `php artisan boost:install`, selecting this package when Boost asks which third party guidelines and skills to install. On an app that already has Boost installed, `php artisan boost:update --discover` offers the newly detected package.
+Install Boost 2.5 or higher with `composer require laravel/boost --dev` then `php artisan boost:install`, selecting this package when Boost asks which third party guidelines and skills to install. On an app that already has Boost installed, `php artisan boost:update --discover` offers the newly detected package.
 
 ## 🛠️ Development
 
