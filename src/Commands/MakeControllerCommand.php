@@ -40,6 +40,12 @@ class MakeControllerCommand extends Command
             $isApi = true; // Default to API
         }
 
+        if (Str::contains($name, ['/', '\\'])) {
+            $this->error("Controller name must not contain '/' or '\\': {$name}. Nested controller directories are not supported.");
+
+            return self::FAILURE;
+        }
+
         $name = $this->stripSuffix($name, 'Controller');
 
         $this->resolveForce();

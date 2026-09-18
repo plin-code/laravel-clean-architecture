@@ -7,6 +7,7 @@ All notable changes to `laravel-clean-architecture` will be documented in this f
 ### Fixed
 
 - `make-mail`, `make-action` and `make-controller` appended their fixed suffix (`Mail`, `Action`, `Controller`) unconditionally, so a name that already carried it, `UserMail`, `CreateUserAction` or `SetPasswordController`, came out doubled as `UserMailMail`, `CreateUserActionAction` or `SetPasswordControllerController`. For `make-mail` the same name also feeds the imported domain model, so the doubled name broke that import too. The suffix is now appended only when the given name does not already end with it, a case sensitive comparison
+- `make-controller` crashed with an uncaught `ErrorException` on a name containing `/` or `\`, the convention Laravel's own `make:controller` accepts for a namespaced controller, because `Filesystem::put()` reached a parent directory that was never created. Nested controller names are not supported, and are now rejected up front with a clear error instead of crashing
 
 ## [3.4.0] - 2026-09-14
 
