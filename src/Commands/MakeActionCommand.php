@@ -50,6 +50,7 @@ class MakeActionCommand extends Command
 
     protected function createAction(string $name, string $domain): int
     {
+        $name    = $this->stripSuffix($name, 'Action');
         $extend  = $this->shouldExtendBaseClasses((bool) $this->option('no-base'));
         $stub    = $this->getStub('action');
         $content = $this->replacePlaceholders($stub, $name, $this->baseActionReplacements($extend), $domain);

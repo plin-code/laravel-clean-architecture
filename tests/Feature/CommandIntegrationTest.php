@@ -77,7 +77,8 @@ describe('Command Integration', function () {
         $this->artisan('clean-arch:make-action', ['name' => 'TestAction', 'domain' => 'User'])
             ->assertExitCode(0);
 
-        expect(File::exists(app_path('Application/Actions/Users/TestActionAction.php')))->toBeTrue();
+        // The name already ends with "Action", so it is not doubled up.
+        expect(File::exists(app_path('Application/Actions/Users/TestAction.php')))->toBeTrue();
     });
 
     it('runs make-service command', function () {
