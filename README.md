@@ -394,6 +394,30 @@ Set it to `null` or an empty string to generate the model directly inside the do
 
 Any other single segment replaces `Models`, for example `'Entities'` produces `app/Domain/Users/Entities/User.php` declaring `App\Domain\Users\Entities\User`. Surrounding slashes are trimmed, so `'/Entities/'` behaves the same as `'Entities'`.
 
+### ⚙️ Job prefix
+
+`generation.job_prefix` (default `'Process'`) controls the prefix `make-job` and `make-domain` put in front of the generated job, in the class name as well as in the file name. `clean-arch:make-job Article` writes `app/Application/Jobs/ProcessArticleJob.php` declaring `ProcessArticleJob`.
+
+```php
+'generation' => [
+    'job_prefix' => 'Handle',
+],
+```
+
+The same command then writes `HandleArticleJob.php`. Set it to `null` or an empty string to generate the job under its own name, `ArticleJob.php`. The prefix is also what the command strips from the name you pass, so `make-job HandleArticleJob` stays `HandleArticleJob` instead of becoming `HandleHandleArticleJobJob`.
+
+### 🌐 Web controller path
+
+`generation.web_controller_path` (default `'UI/Web/Controllers'`) controls where `make-controller --web` writes, relative to the infrastructure layer directory, and the namespace the generated controller declares. API controllers are not affected: `--api` always writes to `Http/Controllers/Api`.
+
+```php
+'generation' => [
+    'web_controller_path' => 'Http/Controllers',
+],
+```
+
+`clean-arch:make-controller Report --web` then writes `app/Infrastructure/Http/Controllers/ReportController.php` declaring `App\Infrastructure\Http\Controllers`. Backslashes and surrounding slashes are accepted, so `'Web\Controllers'` and `'/Web/Controllers/'` behave the same. Set it to `null` or an empty string to write the controller in the infrastructure layer itself.
+
 ## 👤 Moving `User` into the Domain in an existing app
 
 `clean-arch:install --user-in-domain` is written for a fresh app. On an app that already has data, queued jobs and third party packages, renaming the `User` class is a data migration as much as a code change. The table below lists what breaks and what to do about it.

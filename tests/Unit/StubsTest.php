@@ -129,7 +129,7 @@ describe('Stub Files', function () {
         $content = file_get_contents($this->stubsPath . '/web-controller.stub');
 
         expect($content)
-            ->toContain('namespace {{InfrastructureNamespace}}\UI\Web\Controllers;')
+            ->toContain('namespace {{WebControllerNamespace}};')
             ->toContain('class {{ControllerName}} extends Controller')
             ->toContain('public function index()')
             ->toContain('public function store(')

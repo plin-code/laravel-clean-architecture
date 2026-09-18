@@ -162,6 +162,20 @@ trait RendersStubs
     }
 
     /**
+     * Prefix `make-job` puts in front of the generated job, in the class name
+     * as well as in the file name.
+     *
+     * Configured through `generation.job_prefix` (default `Process`). A
+     * `null` or empty value generates the job under its own name.
+     */
+    protected function jobPrefix(): string
+    {
+        $configured = config('clean-architecture.generation.job_prefix', 'Process');
+
+        return is_string($configured) ? trim($configured) : '';
+    }
+
+    /**
      * Strip a trailing suffix a given name already carries, so a command
      * that bakes a fixed suffix into its stub or filename (`Mail`, `Action`,
      * `Controller`) does not double it up. `UserMail` stays `UserMail`

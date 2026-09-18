@@ -87,9 +87,10 @@ class MakeControllerCommand extends Command
     protected function createWebController(string $name): int
     {
         $stub    = $this->getStub('web-controller');
-        $content = $this->replacePlaceholders($stub, $name);
+        $content = $this->replacePlaceholders($stub, $name, ['{{WebControllerNamespace}}' => $this->webControllerNamespace()]);
 
-        $directory       = $this->layerDirectory('infrastructure') . '/UI/Web/Controllers';
+        $segment         = $this->webControllerSegment();
+        $directory       = rtrim($this->layerDirectory('infrastructure') . '/' . $segment, '/');
         $controllersPath = base_path($directory);
         if (! $this->files->isDirectory($controllersPath)) {
             $this->files->makeDirectory($controllersPath, 0755, true);
@@ -98,17 +99,20 @@ class MakeControllerCommand extends Command
         return $this->writeOrFail("{$controllersPath}/{$name}Controller.php", $content, "{$directory}/{$name}Controller.php");
     }
 
-    protected function replacePlaceholders(string $content, string $name): string
+    /**
+     * @param  array<string, string>  $extra
+     */
+    protected function replacePlaceholders(string $content, string $name, array $extra = []): string
     {
         $pluralName     = Str::plural($name);
         $domainVariable = Str::camel($name);
 
-        $replacements = [
+        $replacements = array_merge([
             '{{ControllerName}}'   => $name . 'Controller',
             '{{DomainName}}'       => $name,
             '{{PluralDomainName}}' => $pluralName,
             '{{domainVariable}}'   => $domainVariable,
-        ];
+        ], $extra);
 
         return str_replace(array_keys($replacements), array_values($replacements), $content);
     }
