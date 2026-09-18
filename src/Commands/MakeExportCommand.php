@@ -45,6 +45,7 @@ class MakeExportCommand extends Command
 
     protected function createExport(string $name): int
     {
+        $name    = $this->stripSuffix($name, 'Export');
         $stub    = $this->getStub('export');
         $content = $this->replaceDomainPlaceholders($stub, $name);
 

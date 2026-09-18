@@ -45,6 +45,7 @@ class MakeJobCommand extends Command
 
     protected function createJob(string $name): int
     {
+        $name    = $this->stripPrefix($this->stripSuffix($name, 'Job'), 'Process');
         $stub    = $this->getStub('job');
         $content = $this->replaceDomainPlaceholders($stub, $name);
 

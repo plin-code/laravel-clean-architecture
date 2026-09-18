@@ -178,4 +178,21 @@ trait RendersStubs
 
         return substr($name, 0, -strlen($suffix));
     }
+
+    /**
+     * Strip a leading prefix a given name already carries, so a command that
+     * bakes a fixed prefix into its stub or filename (`Process`) does not
+     * double it up. `ProcessGeocodeStore` stays `GeocodeStore` instead of
+     * becoming `ProcessProcessGeocodeStore`.
+     *
+     * Like `stripSuffix`, the comparison is case sensitive.
+     */
+    protected function stripPrefix(string $name, string $prefix): string
+    {
+        if ($name === $prefix || ! Str::startsWith($name, $prefix)) {
+            return $name;
+        }
+
+        return substr($name, strlen($prefix));
+    }
 }

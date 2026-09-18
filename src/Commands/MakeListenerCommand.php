@@ -45,6 +45,7 @@ class MakeListenerCommand extends Command
 
     protected function createListener(string $name): int
     {
+        $name    = $this->stripSuffix($this->stripSuffix($name, 'EventListener'), 'Listener');
         $stub    = $this->getStub('listener');
         $content = $this->replaceDomainPlaceholders($stub, $name);
 

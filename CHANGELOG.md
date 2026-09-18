@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+
+- The remaining six generators appended their fixed suffix unconditionally, so `make-export`, `make-job`, `make-listener`, `make-notification`, `make-observer` and `make-service` doubled a suffix the given name already carried, `StoreObserver` coming out as `StoreObserverObserver` and `ContactTopicsService` as `ContactTopicsServiceService`. They now strip it first, the same way `make-mail`, `make-action` and `make-controller` have since 3.4.1, which also keeps the imported domain model correct since the same name feeds both. `make-listener` accepts `FooListener` as well as `FooEventListener`, and `make-job` also strips a leading `Process`, so `ProcessGeocodeStore` no longer becomes `ProcessProcessGeocodeStoreJob`
+
 ## [3.4.1] - 2026-09-18
 
 ### Fixed

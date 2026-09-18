@@ -48,6 +48,7 @@ class MakeObserverCommand extends Command
 
     protected function createObserver(string $name, string $domain): int
     {
+        $name    = $this->stripSuffix($name, 'Observer');
         $stub    = $this->getStub('observer');
         $content = $this->replacePlaceholders($stub, $name, $domain);
 
