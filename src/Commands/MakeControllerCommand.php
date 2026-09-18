@@ -40,6 +40,8 @@ class MakeControllerCommand extends Command
             $isApi = true; // Default to API
         }
 
+        $name = $this->stripSuffix($name, 'Controller');
+
         $this->resolveForce();
 
         $this->info("🚀 Creating controller: {$name}");

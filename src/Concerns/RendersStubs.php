@@ -160,4 +160,22 @@ trait RendersStubs
         return (bool) config('clean-architecture.generation.extend_base_classes', true)
             && ! $noBaseOption;
     }
+
+    /**
+     * Strip a trailing suffix a given name already carries, so a command
+     * that bakes a fixed suffix into its stub or filename (`Mail`, `Action`,
+     * `Controller`) does not double it up. `UserMail` stays `UserMail`
+     * instead of becoming `UserMailMail`.
+     *
+     * The comparison is case sensitive, matching the rest of the package's
+     * naming conventions, so `usermail` is left untouched.
+     */
+    protected function stripSuffix(string $name, string $suffix): string
+    {
+        if ($name === $suffix || ! Str::endsWith($name, $suffix)) {
+            return $name;
+        }
+
+        return substr($name, 0, -strlen($suffix));
+    }
 }

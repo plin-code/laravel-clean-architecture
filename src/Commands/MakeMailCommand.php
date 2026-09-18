@@ -45,6 +45,7 @@ class MakeMailCommand extends Command
 
     protected function createMail(string $name): int
     {
+        $name    = $this->stripSuffix($name, 'Mail');
         $stub    = $this->getStub('mail');
         $content = $this->replaceDomainPlaceholders($stub, $name);
 

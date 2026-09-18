@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+
+- `make-mail`, `make-action` and `make-controller` appended their fixed suffix (`Mail`, `Action`, `Controller`) unconditionally, so a name that already carried it, `UserMail`, `CreateUserAction` or `SetPasswordController`, came out doubled as `UserMailMail`, `CreateUserActionAction` or `SetPasswordControllerController`. For `make-mail` the same name also feeds the imported domain model, so the doubled name broke that import too. The suffix is now appended only when the given name does not already end with it, a case sensitive comparison
+
 ## [3.4.0] - 2026-09-14
 
 ### Added
