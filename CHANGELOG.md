@@ -9,6 +9,10 @@ All notable changes to `laravel-clean-architecture` will be documented in this f
 - `generation.job_prefix` (default `'Process'`) controls the prefix `make-job` and `make-domain` put in front of the generated job, in the class name as well as in the file name, so a job that is not a "process something" job can be generated under its own name. An empty or `null` value drops the prefix entirely. The configured prefix is also the one stripped from the given name, so `make-job HandleArticleJob` with `'Handle'` configured stays `HandleArticleJob`
 - `generation.web_controller_path` (default `'UI/Web/Controllers'`) controls where `clean-arch:make-controller --web` writes, relative to the infrastructure layer, and the namespace the generated controller declares. Set it to `'Http/Controllers'` to keep web controllers next to the API ones. `--api` is unaffected and still writes to `Http/Controllers/Api`. Backslashes and surrounding slashes are normalised, an empty or `null` value writes in the infrastructure layer itself
 
+### Fixed
+
+- `clean-arch:make-observer {name} {domain}` wrote `{name}Observer.php` but named the class after `{domain}`, so `make-observer StoreObserver Store` generated a `StoresObserver` class inside `StoreObserver.php` and broke PSR-4 autoloading. The class now follows the given name, while the model the observer imports and type hints keeps following the domain. Output is unchanged for `make-observer Article Article`, the documented usage, where the two agree
+
 ## [3.4.2] - 2026-09-18
 
 ### Fixed
