@@ -294,7 +294,7 @@ class MakeDomainCommand extends Command
     protected function createObserver(string $name): void
     {
         $stub    = $this->getStub('observer');
-        $content = $this->replacePlaceholders($stub, $name);
+        $content = str_replace('{{ObserverName}}', $name, $this->replacePlaceholders($stub, $name));
 
         $pluralName   = Str::plural($name);
         $directory    = $this->layerDirectory('infrastructure') . "/Observers/{$pluralName}";

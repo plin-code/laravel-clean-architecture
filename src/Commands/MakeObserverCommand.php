@@ -63,14 +63,21 @@ class MakeObserverCommand extends Command
         return $this->writeOrFail("{$observerPath}/{$name}Observer.php", $content, "{$directory}/{$name}Observer.php");
     }
 
+    /**
+     * The observer class is named after `$name`, the file it is written to,
+     * while the model it observes follows `$domain`. The two agree in the
+     * documented usage, `make-observer Article Article`, and diverge when a
+     * name of its own is given, `make-observer StoreObserver Store`, which
+     * used to generate a `StoresObserver` class inside `StoreObserver.php`.
+     */
     protected function replacePlaceholders(string $content, string $name, string $domain): string
     {
         $pluralDomain   = Str::plural($domain);
         $domainVariable = Str::camel($domain);
 
         return str_replace(
-            ['{{DomainName}}', '{{PluralDomainName}}', '{{domainVariable}}'],
-            [$domain, $pluralDomain, $domainVariable],
+            ['{{ObserverName}}', '{{DomainName}}', '{{PluralDomainName}}', '{{domainVariable}}'],
+            [$name, $domain, $pluralDomain, $domainVariable],
             $content
         );
     }

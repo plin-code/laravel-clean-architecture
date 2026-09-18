@@ -4,7 +4,7 @@ namespace {{InfrastructureNamespace}}\Observers\{{PluralDomainName}};
 
 use {{DomainNamespace}}\{{PluralDomainName}}{{ModelNamespace}}\{{DomainName}};
 
-class {{DomainName}}Observer
+class {{ObserverName}}Observer
 {
     public function created({{DomainName}} ${{domainVariable}}): void
     {
