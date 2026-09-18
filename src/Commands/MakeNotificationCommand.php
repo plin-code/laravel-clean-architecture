@@ -45,6 +45,7 @@ class MakeNotificationCommand extends Command
 
     protected function createNotification(string $name): int
     {
+        $name    = $this->stripSuffix($name, 'Notification');
         $stub    = $this->getStub('notification');
         $content = $this->replaceDomainPlaceholders($stub, $name);
 

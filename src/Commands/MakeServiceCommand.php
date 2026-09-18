@@ -48,6 +48,7 @@ class MakeServiceCommand extends Command
 
     protected function createService(string $name): int
     {
+        $name    = $this->stripSuffix($name, 'Service');
         $extend  = $this->shouldExtendBaseClasses((bool) $this->option('no-base'));
         $stub    = $this->getStub('service');
         $content = $this->replacePlaceholders($stub, $name, $this->baseServiceReplacements($extend));
