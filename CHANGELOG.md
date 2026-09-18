@@ -2,7 +2,7 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
-## [Unreleased]
+## [3.5.0] - 2026-09-18
 
 ### Added
 
