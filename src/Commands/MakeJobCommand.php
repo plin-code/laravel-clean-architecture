@@ -45,9 +45,10 @@ class MakeJobCommand extends Command
 
     protected function createJob(string $name): int
     {
-        $name    = $this->stripPrefix($this->stripSuffix($name, 'Job'), 'Process');
+        $prefix  = $this->jobPrefix();
+        $name    = $this->stripPrefix($this->stripSuffix($name, 'Job'), $prefix);
         $stub    = $this->getStub('job');
-        $content = $this->replaceDomainPlaceholders($stub, $name);
+        $content = str_replace('{{JobPrefix}}', $prefix, $this->replaceDomainPlaceholders($stub, $name));
 
         $directory = $this->layerDirectory('application') . '/Jobs';
         $jobPath   = base_path($directory);
@@ -56,6 +57,6 @@ class MakeJobCommand extends Command
             $this->files->makeDirectory($jobPath, 0755, true);
         }
 
-        return $this->writeOrFail("{$jobPath}/Process{$name}Job.php", $content, "{$directory}/Process{$name}Job.php");
+        return $this->writeOrFail("{$jobPath}/{$prefix}{$name}Job.php", $content, "{$directory}/{$prefix}{$name}Job.php");
     }
 }

@@ -83,5 +83,23 @@ return [
         | 'Entities', replaces 'Models'.
         */
         'model_directory' => 'Models',
+
+        /*
+        | Prefix clean-arch:make-job puts in front of the generated job, both
+        | in the class name and in the file name. Defaults to 'Process', so
+        | make-job Article writes ProcessArticleJob.php. Set it to null or an
+        | empty string to generate ArticleJob.php instead, or to any other
+        | studly segment, for example 'Handle'.
+        */
+        'job_prefix' => 'Process',
+
+        /*
+        | Path clean-arch:make-controller --web writes to, relative to the
+        | infrastructure layer directory, and the namespace derived from it.
+        | Defaults to 'UI/Web/Controllers'. Set it to 'Http/Controllers' to
+        | keep web controllers next to the API ones, which are always
+        | generated under Http/Controllers/Api.
+        */
+        'web_controller_path' => 'UI/Web/Controllers',
     ],
 ];

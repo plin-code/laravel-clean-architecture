@@ -324,8 +324,9 @@ class MakeDomainCommand extends Command
 
     protected function createJob(string $name): void
     {
+        $prefix  = $this->jobPrefix();
         $stub    = $this->getStub('job');
-        $content = $this->replacePlaceholders($stub, $name);
+        $content = str_replace('{{JobPrefix}}', $prefix, $this->replacePlaceholders($stub, $name));
 
         $directory = $this->layerDirectory('application') . '/Jobs';
         $jobsPath  = base_path($directory);
@@ -334,7 +335,7 @@ class MakeDomainCommand extends Command
             $this->files->makeDirectory($jobsPath, 0755, true);
         }
 
-        $this->writeFile("{$directory}/Process{$name}Job.php", $content);
+        $this->writeFile("{$directory}/{$prefix}{$name}Job.php", $content);
     }
 
     protected function createMail(string $name): void

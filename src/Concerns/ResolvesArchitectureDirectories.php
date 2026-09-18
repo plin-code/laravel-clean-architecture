@@ -55,6 +55,37 @@ trait ResolvesArchitectureDirectories
     }
 
     /**
+     * Path `make-controller --web` writes to, relative to the infrastructure
+     * layer directory, without leading or trailing slashes.
+     *
+     * Configured through `generation.web_controller_path` (default
+     * `UI/Web/Controllers`). Backslashes are accepted and normalised, so
+     * `Http\\Controllers` behaves like `Http/Controllers`. A `null` or empty
+     * value writes the controllers directly in the infrastructure layer.
+     */
+    protected function webControllerSegment(): string
+    {
+        $configured = config('clean-architecture.generation.web_controller_path', 'UI/Web/Controllers');
+
+        if (! is_string($configured)) {
+            return '';
+        }
+
+        return trim(str_replace('\\', '/', $configured), '/');
+    }
+
+    /**
+     * Namespace matching `webControllerSegment()`, without a trailing separator.
+     */
+    protected function webControllerNamespace(): string
+    {
+        $base    = rtrim($this->layerNamespace('infrastructure'), '\\');
+        $segment = $this->webControllerSegment();
+
+        return $segment === '' ? $base : $base . '\\' . str_replace('/', '\\', $segment);
+    }
+
+    /**
      * Namespace of a layer, derived from its directory, with a trailing separator.
      *
      * `app/Domain` becomes `App\Domain\`, following the psr-4 mapping Laravel
