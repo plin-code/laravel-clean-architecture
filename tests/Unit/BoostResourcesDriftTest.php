@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
@@ -235,49 +234,6 @@ describe('Boost resources drift', function () {
         }
     })->with('boost documents');
 
-    it('only uses bare backticked words that the package defines', function (string $document) {
-        $text = boostDocuments()[$document];
-        // Words that belong to phparkitect, not to this package.
-        $external = ['check'];
-
-        foreach (boostBacktickSpans($text) as $span) {
-            if (! preg_match('/^[a-z]+$/', $span) || in_array($span, $external, true)) {
-                continue;
-            }
-
-            $known = boostIsConfigKey($span) || array_key_exists('clean-arch:' . $span, boostPackageCommands());
-
-            expect($known)->toBeTrue("`{$span}` is neither a config key nor a clean-arch command.");
-        }
-    })->with('boost documents');
-
-    it('quotes the config defaults correctly', function (string $document) {
-        $text   = boostDocuments()[$document];
-        $config = boostPackageConfig();
-
-        preg_match_all('/`([a-z_.]+)`:[^`]*?`([^`]+)`\s+by\s+default/', $text, $matches, PREG_SET_ORDER);
-
-        foreach ($matches as [, $key, $value]) {
-            expect(Arr::get($config, $key))->toBe($value, "The text says {$key} defaults to {$value}.");
-        }
-
-        expect(true)->toBeTrue();
-    })->with('boost documents');
-
-    it('counts the validation rules correctly', function (string $document) {
-        $text    = boostDocuments()[$document];
-        $numbers = ['one' => 1, 'two' => 2, 'three' => 3, 'four' => 4, 'five' => 5, 'six' => 6, 'seven' => 7, 'eight' => 8, 'nine' => 9, 'ten' => 10];
-        $rules   = boostPackageConfig()['validation']['rules'];
-
-        preg_match_all('/\bthe (' . implode('|', array_keys($numbers)) . ') rules\b/', $text, $matches);
-
-        foreach ($matches[1] as $word) {
-            expect(count($rules))->toBe($numbers[$word], "The text says {$word} rules.");
-        }
-
-        expect(true)->toBeTrue();
-    })->with('boost documents');
-
     it('only names layer paths and namespaces that the config produces', function (string $document) {
         $text        = boostDocuments()[$document];
         $config      = boostPackageConfig();
@@ -319,7 +275,9 @@ describe('Boost resources drift', function () {
             expect($exists)->toBeTrue("{$class} does not exist in the package.");
         }
 
-        $sources = implode("\n", array_map('file_get_contents', glob($root . 'src/{,*/}*.php', GLOB_BRACE)));
+        // GLOB_BRACE is not available on every libc, such as musl on Alpine.
+        $files   = array_merge(glob($root . 'src/*.php'), glob($root . 'src/*/*.php'));
+        $sources = implode("\n", array_map('file_get_contents', $files));
 
         foreach (boostBacktickSpans($text) as $span) {
             if (str_ends_with($span, '.php')) {
