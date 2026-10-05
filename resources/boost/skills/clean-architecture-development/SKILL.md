@@ -67,6 +67,11 @@ want.
 The domain must not import the application layer nor the infrastructure layer.
 The application layer must not import the infrastructure layer.
 
+When an action needs an outer service, or the domain needs something it does
+not own such as a feature flag, add an interface in the layer that needs it,
+implement it one layer out and bind the two in a service provider. Do not widen
+`validation.application_infrastructure_allowed` to skip the interface.
+
 ## Keeping the rules green
 
     php artisan clean-arch:make-arch-rules --force

@@ -16,6 +16,11 @@ consistent with the configured paths.
   observers, exports. Depends on the layers above, never the other way round.
 - Observers belong to `App\Infrastructure`, not to the domain. Console commands
   and queued jobs orchestrate use cases and belong to `App\Application`.
+- To cross a layer, the inner layer declares an interface and the outer layer
+  implements it, bound in a service provider: a port in `App\Application` with
+  its adapter in `App\Infrastructure`, or a contract in `App\Domain`
+  implemented in `App\Application`. A class with one implementation, used only
+  inside its own layer, needs no contract.
 
 ### Generating code
 

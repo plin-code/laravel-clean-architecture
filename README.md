@@ -237,6 +237,21 @@ This package implements Clean Architecture principles:
 - **⚡ Application Layer**: Depends only on Domain Layer
 - **🏗️ Infrastructure Layer**: Depends on Application and Domain Layers
 
+### 🔌 Crossing a layer with a contract
+
+When an inner layer needs something an outer layer provides, it declares an interface and the outer layer implements it. The binding lives in a service provider, so the inner layer only ever sees the interface.
+
+- **External service**: the interface sits in `App\Application\Contracts` (for example `PaymentGateway`), the adapter in `App\Infrastructure` (`StripePaymentGateway`). Switching provider means a new adapter and a new binding.
+- **Domain asking the outside**: the domain needs an answer it does not own, such as a feature flag. The interface sits in the domain (`App\Domain\Orders\Contracts\DiscountsGate`), the implementation in `App\Application`.
+- **Shared capability**: several models implement the same interface (`HasSlug`), so one service handles all of them.
+
+```php
+// AppServiceProvider::register()
+$this->app->bind(PaymentGateway::class, StripePaymentGateway::class);
+```
+
+A class with a single implementation, used only inside its own layer, needs no contract.
+
 ### 🗄️ The Domain layer depends on Eloquent
 
 This is a deliberate trade-off, and it is worth stating explicitly. `clean-arch:install` generates `App\Domain\Shared\BaseModel`, which extends `Illuminate\Database\Eloquent\Model`, and every model produced by `clean-arch:make-domain` extends it. The Domain layer is therefore free of Application and Infrastructure imports (that is what the generated rules enforce), but it is not free of the framework.
