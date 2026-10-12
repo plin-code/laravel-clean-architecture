@@ -18,7 +18,16 @@ consistent with the configured paths.
 - Observers belong to `App\Infrastructure`, not to the domain. Queued jobs
   orchestrate use cases and belong to `App\Application`. Console commands are
   input adapters like controllers: they belong to `App\Infrastructure` and
-  call an action, which holds the business logic.
+  call an action, which holds the business logic. Laravel only discovers
+  commands in app/Console/Commands, so register the infrastructure ones in
+  bootstrap/app.php with `->withCommands([...])`.
+- An action never receives the HTTP request. The controller passes
+  `$request->validated()`, an array, and models already resolved. A readonly
+  DTO is fine when several callers must normalise the same input.
+- Generated actions do not open a transaction. When an invariant only holds if
+  several writes, or a read and a write, happen atomically, the action opens it
+  itself, with `lockForUpdate()` when it reads before writing. Mail, events and
+  jobs go in `DB::afterCommit()`.
 - To cross a layer, the inner layer declares an interface and the outer layer
   implements it, bound in a service provider: a port in `App\Application` with
   its adapter in `App\Infrastructure`, or a contract in `App\Domain`
@@ -85,8 +94,12 @@ Read `config/clean-architecture.php` before assuming paths or namespaces:
 - `default_namespace`: the root namespace, `App` by default.
 - `generation.model_directory`: the subfolder of the domain model, `Models` by
   default. An empty value puts the model directly in the domain folder.
+- `generation.job_prefix`: the prefix of generated jobs, `Process` by default.
+- `generation.web_controller_path`: where `make-controller --web` writes,
+  `Http/Controllers/Web` by default. API controllers always go to
+  `Http/Controllers/Api`.
 - `validation.rules`: the six rules written into `phparkitect.php`, each can be
-  turned off by name.
+  turned off by name. `no_commands_in_infrastructure` is off by default.
 - `validation.application_infrastructure_allowed`: infrastructure namespaces the
   application layer may import, relative to the infrastructure layer. Empty by
   default.
