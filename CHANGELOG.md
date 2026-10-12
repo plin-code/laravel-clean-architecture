@@ -2,6 +2,20 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
+## [3.6.0] - 2026-10-12
+
+### Changed
+
+- `generation.web_controller_path` now defaults to `'Http/Controllers/Web'` instead of `'UI/Web/Controllers'`, so web controllers sit next to the API ones in `Http/Controllers/Api`, and `clean-arch:install` creates `Http/Controllers/Web` instead of `UI`. An app with a published `config/clean-architecture.php` keeps its value. An app without one that relied on the old default now generates web controllers into `Http/Controllers/Web`; publish the config and set `'UI/Web/Controllers'` to keep the old location
+- `validation.rules.no_commands_in_infrastructure` is now off by default, and `clean-arch:install` creates `Infrastructure/Console/Commands` instead of `Application/Console/Commands`. A console command is an input adapter, like an HTTP controller: it reads arguments and options, prints output and calls an action, which holds the business logic. The Boost guideline and skill now list console commands in the Infrastructure layer. An app with a published config keeps its value; an app without one loses the rule the next time it regenerates `phparkitect.php`. Laravel only auto-discovers commands in `app/Console/Commands`, so the README now shows how to register the Infrastructure ones with `withCommands()` in `bootstrap/app.php`
+
+### Fixed
+
+- `no_jobs_in_infrastructure` reported every class implementing `ShouldQueue` in the Infrastructure layer, so a queued Mailable or a queued Notification, both placed there by the package's own guidance, failed phparkitect. The rule now leaves classes extending `Illuminate\Mail\Mailable` and `Illuminate\Notifications\Notification` out, while a job implementing `ShouldQueue`, directly or through a base class, is still reported
+- The "Using in controller" example in the README and in the generated `CLEAN_ARCHITECTURE.md` passed the form request to `execute()`, which takes an array since 2.0.2, so the copied example threw a `TypeError`. It now passes `$request->validated()`; the README example no longer injects an unused service, and the generated one declares the `ProductResource` it returns instead of `JsonResponse`
+- The folder tree in the generated `CLEAN_ARCHITECTURE.md` described a `UI/` folder for web controllers regardless of `generation.web_controller_path`. It now shows `Http/Controllers/Api` and `Http/Controllers/Web` side by side, and `Console/Commands` in the Infrastructure layer
+- The 3.4.0 release renamed both `[Unreleased]` headings of this file, so the pre-2.0 notes were filed under 3.4.0. They are now headed `Pre-2.0 (2025, untagged)`, a label a release step cannot rename again, and the placeholder `1.0.0` entry, never tagged nor published, is removed
+
 ## [3.5.0] - 2026-09-18
 
 ### Added
@@ -187,7 +201,7 @@ All notable changes to `laravel-clean-architecture` will be documented in this f
 
 - `clean-arch:generate-package` updated to reflect v2 nested directory structure
 
-## [Unreleased]
+## Pre-2.0 (2025, untagged)
 
 ### Added
 - Initial release of Laravel Clean Architecture package
@@ -213,8 +227,3 @@ All notable changes to `laravel-clean-architecture` will be documented in this f
 - PHP 8.3+ compatibility
 - English validation messages and documentation
 - Comprehensive test coverage templates
-
-## [1.0.0] - 2024-12-XX
-
-### Added
-- Initial stable release 
