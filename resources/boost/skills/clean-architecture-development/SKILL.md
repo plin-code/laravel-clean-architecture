@@ -18,8 +18,11 @@ case, a controller, a mailable or a notification, or you are fixing a
 Read `config/clean-architecture.php` first. `directories` and
 `default_namespace` decide where files land and which namespaces they declare,
 `generation.model_directory` decides whether the model sits in `Models` or
-directly in the domain folder. Never hardcode `App\Domain`: derive it from the
-config.
+directly in the domain folder, `generation.job_prefix` (`Process` by default)
+prefixes generated jobs and `generation.web_controller_path`
+(`Http/Controllers/Web` by default) decides where `make-controller --web`
+writes, while API controllers always go to `Http/Controllers/Api`. Never
+hardcode `App\Domain`: derive it from the config.
 
 On a fresh Laravel app, run `php artisan clean-arch:install --user-in-domain`
 to move the User model into the Domain layer before generating anything else.
@@ -63,7 +66,19 @@ want.
   `App\Application`.
 - Controllers, console commands, requests, resources, mail, notifications,
   observers and exports: `App\Infrastructure`. A console command is an input
-  adapter like a controller, the business logic goes in an action.
+  adapter like a controller, the business logic goes in an action. Laravel
+  only discovers commands in app/Console/Commands, so register the
+  infrastructure ones in bootstrap/app.php with `->withCommands([...])`.
+
+An action never receives the HTTP request: the controller passes
+`$request->validated()`, an array, and models already resolved. A readonly DTO
+is fine when several callers must normalise the same input.
+
+Generated actions do not open a transaction. When an invariant only holds if
+several writes, or a read and a write, happen atomically, the action opens it
+itself, with `lockForUpdate()` when it reads before writing. Callers may still
+wrap it in a larger transaction. Mail, events and jobs go in
+`DB::afterCommit()`, so nothing leaves the system before the data is committed.
 
 The domain must not import the application layer nor the infrastructure layer.
 The application layer must not import the infrastructure layer.

@@ -150,7 +150,7 @@ vendor/bin/phparkitect check
 - `clean-arch:make-domain {name} {--force} {--no-base}`: 🆕 Create a complete new domain
 - `clean-arch:make-action {name} {domain} {--force} {--no-base}`: ⚡ Create a new action
 - `clean-arch:make-service {name} {--force} {--no-base}`: 🔧 Create a new service
-- `clean-arch:make-controller {name} {--force}`: 🌐 Create a new controller
+- `clean-arch:make-controller {name} {--api} {--web} {--force}`: 🌐 Create a new controller
 - `clean-arch:make-observer {name} {domain} {--force}`: 👁️ Create a new observer
 - `clean-arch:make-listener {name} {--force}`: 👂 Create a new listener
 - `clean-arch:make-job {name} {--force}`: ⏳ Create a new job
@@ -267,6 +267,10 @@ This is a deliberate trade-off, and it is worth stating explicitly. `clean-arch:
 
 If you need a persistence agnostic domain, this package is not the right starting point.
 
+### 🔒 Transactions
+
+Generated actions do not open a transaction. When a use case has an invariant that only holds if several writes, or a read and a write, happen atomically, the action opens it itself (with `lockForUpdate()` when it reads before writing). Callers may still wrap it in a larger transaction, since Laravel nests them with savepoints. Mail, events and jobs go in `DB::afterCommit()`, so nothing leaves the system before the data is committed.
+
 ## 💡 Examples
 
 ### 🛍️ Creating a Product domain
@@ -295,6 +299,8 @@ class ProductsController extends Controller
     }
 }
 ```
+
+An action never receives the HTTP request. The controller passes `$request->validated()`, an array, and models already resolved. A readonly DTO is fine when several callers must normalise the same input.
 
 ## ⚙️ Configuration
 
