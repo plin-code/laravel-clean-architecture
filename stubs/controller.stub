@@ -6,7 +6,7 @@ use {{ApplicationNamespace}}\Actions\{{PluralDomainName}}\Create{{DomainName}}Ac
 use {{ApplicationNamespace}}\Actions\{{PluralDomainName}}\Update{{DomainName}}Action;
 use {{ApplicationNamespace}}\Actions\{{PluralDomainName}}\Delete{{DomainName}}Action;
 use {{ApplicationNamespace}}\Actions\{{PluralDomainName}}\GetById{{DomainName}}Action;
-use {{ApplicationNamespace}}\Services\{{DomainName}}Service;
+use {{ApplicationNamespace}}\Actions\{{PluralDomainName}}\List{{PluralDomainName}}Action;
 use {{DomainNamespace}}\{{PluralDomainName}}{{ModelNamespace}}\{{DomainName}};
 use {{InfrastructureNamespace}}\Http\Controllers\Controller;
 use {{InfrastructureNamespace}}\Http\Requests\Create{{DomainName}}Request;
@@ -22,12 +22,12 @@ class {{PluralDomainName}}Controller extends Controller
         private Update{{DomainName}}Action $update{{DomainName}}Action,
         private Delete{{DomainName}}Action $delete{{DomainName}}Action,
         private GetById{{DomainName}}Action $get{{DomainName}}ByIdAction,
-        private {{DomainName}}Service ${{domainVariable}}Service
+        private List{{PluralDomainName}}Action $list{{PluralDomainName}}Action
     ) {}
 
     public function index(Request $request): JsonResponse
     {
-        ${{domainVariable}}s = $this->{{domainVariable}}Service->getActive{{PluralDomainName}}();
+        ${{domainVariable}}s = $this->list{{PluralDomainName}}Action->execute();
         
         return response()->json([
             'data' => {{DomainName}}Resource::collection(${{domainVariable}}s),

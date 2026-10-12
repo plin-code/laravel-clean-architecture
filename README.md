@@ -89,8 +89,7 @@ This command will generate:
 - 🏛️ Domain model with events
 - 📊 Status enums
 - 🔔 Domain events (Created, Updated, Deleted)
-- ⚡ Actions (Create, Update, Delete, GetById)
-- 🔧 Service
+- ⚡ Actions (Create, Update, Delete, GetById, List)
 - 🌐 API Controller
 - 📝 Form Requests (Create, Update)
 - 📤 API Resource
@@ -149,7 +148,7 @@ vendor/bin/phparkitect check
 - `clean-arch:install {--force} {--user-in-domain}`: 🏗️ Install Clean Architecture structure, optionally moving the `User` model into the Domain layer
 - `clean-arch:make-domain {name} {--force} {--no-base}`: 🆕 Create a complete new domain
 - `clean-arch:make-action {name} {domain} {--force} {--no-base}`: ⚡ Create a new action
-- `clean-arch:make-service {name} {--force} {--no-base}`: 🔧 Create a new service
+- `clean-arch:make-service {name} {--force} {--no-base}`: 🔧 Create an empty service, for logic shared by several actions
 - `clean-arch:make-controller {name} {--api} {--web} {--force}`: 🌐 Create a new controller
 - `clean-arch:make-observer {name} {domain} {--force}`: 👁️ Create a new observer
 - `clean-arch:make-listener {name} {--force}`: 👂 Create a new listener
@@ -217,9 +216,8 @@ app/
 │   │       ├── CreateUserAction.php
 │   │       ├── UpdateUserAction.php
 │   │       ├── DeleteUserAction.php
-│   │       └── GetByIdUserAction.php
-│   └── Services/
-│       └── UserService.php
+│   │       ├── GetByIdUserAction.php
+│   │       └── ListUsersAction.php
 └── Infrastructure/
     └── Http/
         ├── Controllers/

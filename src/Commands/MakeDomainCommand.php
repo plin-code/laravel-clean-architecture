@@ -17,7 +17,7 @@ class MakeDomainCommand extends Command
 
     protected $signature = 'clean-arch:make-domain {name : The name of the domain}
                         {--force : Overwrite existing files}
-                        {--no-base : Do not extend BaseService and BaseAction}';
+                        {--no-base : Do not extend BaseAction}';
 
     protected $description = 'Create a new domain with complete Clean Architecture structure';
 
@@ -41,7 +41,6 @@ class MakeDomainCommand extends Command
         $this->createDomainEnums($name);
         $this->createDomainEvents($name);
         $this->createActions($name);
-        $this->createService($name);
         $this->createController($name);
         $this->createRequests($name);
         $this->createResource($name);
@@ -155,21 +154,13 @@ class MakeDomainCommand extends Command
 
             $this->writeFile("{$directory}/{$action}{$name}Action.php", $content);
         }
-    }
 
-    protected function createService(string $name): void
-    {
-        $extend  = $this->shouldExtendBaseClasses((bool) $this->option('no-base'));
-        $stub    = $this->getStub('service');
-        $content = $this->replacePlaceholders($stub, $name, $this->baseServiceReplacements($extend));
+        $listAction = "List{$pluralName}Action";
+        $content    = $this->replacePlaceholders($this->getStub('list-action'), $name, array_merge($this->baseActionReplacements($extend), [
+            '{{ActionName}}' => $listAction,
+        ]));
 
-        $directory    = $this->layerDirectory('application') . '/Services';
-        $servicesPath = base_path($directory);
-        if (! $this->files->isDirectory($servicesPath)) {
-            $this->files->makeDirectory($servicesPath, 0755, true);
-        }
-
-        $this->writeFile("{$directory}/{$name}Service.php", $content);
+        $this->writeFile("{$directory}/{$listAction}.php", $content);
     }
 
     protected function createController(string $name): void

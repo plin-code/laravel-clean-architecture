@@ -18,6 +18,7 @@ describe('Stub Files', function () {
             'migration.stub',
             'request.stub',
             'service.stub',
+            'list-action.stub',
             'web-controller.stub',
             'observer.stub',
             'listener.stub',
@@ -87,11 +88,20 @@ describe('Stub Files', function () {
             ->toContain('class {{DomainName}}Service{{ServiceExtends}}');
     });
 
+    it('service stub is a skeleton without query methods', function () {
+        $content = file_get_contents($this->stubsPath . '/service.stub');
+
+        expect($content)
+            ->toContain('logic shared by several actions')
+            ->not->toContain('public function')
+            ->not->toContain('{{DomainNamespace}}');
+    });
+
     it('service stub carries the optional BaseService import placeholder', function () {
         $content = file_get_contents($this->stubsPath . '/service.stub');
 
         expect($content)
-            ->toContain('{{ServiceBaseImport}}use {{DomainNamespace}}\\')
+            ->toContain('{{ServiceBaseImport}}')
             ->not->toContain('// {{#base_class}}');
     });
 
