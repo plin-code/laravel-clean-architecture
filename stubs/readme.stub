@@ -81,9 +81,9 @@ php artisan clean-arch:make-domain Product
 ```php
 class ProductsController extends Controller
 {
-    public function store(CreateProductRequest $request): JsonResponse
+    public function store(CreateProductRequest $request): ProductResource
     {
-        $product = $this->createProductAction->execute($request);
+        $product = $this->createProductAction->execute($request->validated());
         return new ProductResource($product);
     }
 }
