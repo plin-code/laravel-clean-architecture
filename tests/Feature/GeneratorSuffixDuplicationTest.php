@@ -119,7 +119,7 @@ describe('make commands do not double an already present suffix', function () {
         expect(File::exists(app_path('Infrastructure/Notifications/InvoicePaidNotification.php')))->toBeTrue();
     });
 
-    it('does not double the Service suffix and keeps the domain import correct', function () {
+    it('does not double the Service suffix', function () {
         $this->artisan('clean-arch:make-service', ['name' => 'ContactTopicsService'])->assertExitCode(0);
 
         $path = app_path('Application/Services/ContactTopicsService.php');
@@ -128,7 +128,6 @@ describe('make commands do not double an already present suffix', function () {
 
         $content = File::get($path);
         expect($content)->toContain('class ContactTopicsService');
-        expect($content)->toContain('use App\Domain\ContactTopics\Models\ContactTopics;');
         expect($content)->not->toContain('ContactTopicsServiceService');
     });
 

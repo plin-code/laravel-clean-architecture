@@ -185,8 +185,12 @@ describe('Command Integration', function () {
         expect(File::exists(app_path('Domain/Products/Enums/ProductStatus.php')))->toBeTrue();
         expect(File::exists(app_path('Domain/Products/Events/ProductCreated.php')))->toBeTrue();
         expect(File::exists(app_path('Application/Actions/Products/CreateProductAction.php')))->toBeTrue();
-        expect(File::exists(app_path('Application/Services/ProductService.php')))->toBeTrue();
+        expect(File::exists(app_path('Application/Actions/Products/ListProductsAction.php')))->toBeTrue();
+        expect(File::exists(app_path('Application/Services/ProductService.php')))->toBeFalse();
         expect(File::exists(app_path('Infrastructure/Http/Controllers/Api/ProductsController.php')))->toBeTrue();
+        expect(File::get(app_path('Infrastructure/Http/Controllers/Api/ProductsController.php')))
+            ->toContain('$this->listProductsAction->execute()')
+            ->not->toContain('ProductService');
     });
 
     it('runs make-domain command with all prompts accepted', function () {
@@ -247,7 +251,7 @@ describe('Command Integration', function () {
             app_path('Domain/Receipts/Models/Receipt.php'),
             app_path('Application/Actions/Receipts/CreateReceiptAction.php'),
             app_path('Application/Actions/Receipts/GetByIdReceiptAction.php'),
-            app_path('Application/Services/ReceiptService.php'),
+            app_path('Application/Actions/Receipts/ListReceiptsAction.php'),
             app_path('Infrastructure/Http/Requests/CreateReceiptRequest.php'),
             app_path('Infrastructure/Http/Requests/UpdateReceiptRequest.php'),
             app_path('Infrastructure/Http/Controllers/Api/ReceiptsController.php'),
@@ -497,7 +501,7 @@ describe('Command Integration', function () {
         expect($exitCode)->toBe(0);
     });
 
-    it('generates make-domain service and action without base classes with no-base flag', function () {
+    it('generates make-domain actions without base classes with no-base flag', function () {
         $this->artisan('clean-arch:install');
 
         $this->artisan('clean-arch:make-domain', ['name' => 'Brand', '--no-base' => true])
@@ -509,25 +513,26 @@ describe('Command Integration', function () {
             ->expectsConfirmation('Would you like to generate an Export?', 'no')
             ->assertExitCode(0);
 
-        $servicePath = app_path('Application/Services/BrandService.php');
-        $actionPath  = app_path('Application/Actions/Brands/CreateBrandAction.php');
+        $listPath   = app_path('Application/Actions/Brands/ListBrandsAction.php');
+        $actionPath = app_path('Application/Actions/Brands/CreateBrandAction.php');
 
-        expect(file_exists($servicePath))->toBeTrue();
+        expect(file_exists(app_path('Application/Services/BrandService.php')))->toBeFalse();
+        expect(file_exists($listPath))->toBeTrue();
         expect(file_exists($actionPath))->toBeTrue();
 
-        $serviceContent = File::get($servicePath);
-        $actionContent  = File::get($actionPath);
+        $listContent   = File::get($listPath);
+        $actionContent = File::get($actionPath);
 
-        expect($serviceContent)
-            ->not->toContain('BaseService')
-            ->not->toContain('extends BaseService');
+        expect($listContent)
+            ->not->toContain('BaseAction')
+            ->not->toContain('extends BaseAction');
 
         expect($actionContent)
             ->not->toContain('BaseAction')
             ->not->toContain('extends BaseAction');
 
-        exec('php -l ' . escapeshellarg($servicePath) . ' 2>&1', $output, $serviceExit);
-        expect($serviceExit)->toBe(0);
+        exec('php -l ' . escapeshellarg($listPath) . ' 2>&1', $output, $listExit);
+        expect($listExit)->toBe(0);
 
         exec('php -l ' . escapeshellarg($actionPath) . ' 2>&1', $output, $actionExit);
         expect($actionExit)->toBe(0);

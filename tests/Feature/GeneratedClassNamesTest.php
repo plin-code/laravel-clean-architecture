@@ -112,7 +112,7 @@ describe('Generated class names match their files', function () {
             app_path('Application/Actions/Authors/UpdateAuthorAction.php'),
             app_path('Application/Actions/Authors/DeleteAuthorAction.php'),
             app_path('Application/Actions/Authors/GetByIdAuthorAction.php'),
-            app_path('Application/Services/AuthorService.php'),
+            app_path('Application/Actions/Authors/ListAuthorsAction.php'),
             app_path('Infrastructure/Http/Controllers/Api/AuthorsController.php'),
             app_path('Infrastructure/Http/Requests/CreateAuthorRequest.php'),
             app_path('Infrastructure/Http/Requests/UpdateAuthorRequest.php'),

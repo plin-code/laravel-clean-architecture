@@ -38,7 +38,7 @@ describe('MakeDomainCommand', function () {
         expect($definition->hasOption('no-base'))->toBeTrue();
         expect($definition->getArgument('name')->getDescription())->toBe('The name of the domain');
         expect($definition->getOption('force')->getDescription())->toBe('Overwrite existing files');
-        expect($definition->getOption('no-base')->getDescription())->toBe('Do not extend BaseService and BaseAction');
+        expect($definition->getOption('no-base')->getDescription())->toBe('Do not extend BaseAction');
     });
 
     it('shouldExtendBaseClasses returns true by default', function () {
@@ -123,25 +123,6 @@ describe('MakeDomainCommand', function () {
         $mockFilesystem = mock(Filesystem::class);
         $mockFilesystem->shouldReceive('exists')->andReturn(true);
         $mockFilesystem->shouldReceive('get')->andReturn('<?php namespace App\Application\Actions\{{PluralName}}; class {{ActionName}} {}');
-        $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
-        $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
-        $mockFilesystem->shouldReceive('put')->andReturn(true);
-
-        $reflection->getProperty('files')->setValue($this->command, $mockFilesystem);
-
-        $result = $method->invoke($this->command, 'User');
-        expect($result)->toBeNull(); // Void method returns null
-    });
-
-    it('can create service', function () {
-        $reflection = new ReflectionClass($this->command);
-        $method     = $reflection->getMethod('createService');
-        $method->setAccessible(true);
-
-        // Mock filesystem and stub
-        $mockFilesystem = mock(Filesystem::class);
-        $mockFilesystem->shouldReceive('exists')->andReturn(true);
-        $mockFilesystem->shouldReceive('get')->andReturn('<?php namespace App\Application\Services; class {{Name}}Service {}');
         $mockFilesystem->shouldReceive('isDirectory')->andReturn(false);
         $mockFilesystem->shouldReceive('makeDirectory')->andReturn(true);
         $mockFilesystem->shouldReceive('put')->andReturn(true);

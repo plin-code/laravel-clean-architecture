@@ -1,0 +1,15 @@
+<?php
+
+namespace {{ApplicationNamespace}}\Actions\{{PluralDomainName}};
+
+{{ActionBaseImport}}use {{DomainNamespace}}\{{PluralDomainName}}{{ModelNamespace}}\{{DomainName}};
+use {{DomainNamespace}}\{{PluralDomainName}}\Enums\{{DomainName}}Status;
+use Illuminate\Database\Eloquent\Collection;
+
+class {{ActionName}}{{ActionExtends}}
+{
+    public function execute(): Collection
+    {
+        return {{DomainName}}::where('status', {{DomainName}}Status::ACTIVE)->get();
+    }
+}

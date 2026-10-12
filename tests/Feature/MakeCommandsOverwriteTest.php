@@ -97,8 +97,8 @@ describe('make commands honour --force', function () {
 
         $decline($this->artisan('clean-arch:make-domain', ['name' => 'Article']))->assertExitCode(0);
 
-        $servicePath = app_path('Application/Services/ArticleService.php');
-        File::append($servicePath, "\n// custom edit made by a user\n");
+        $actionPath = app_path('Application/Actions/Articles/ListArticlesAction.php');
+        File::append($actionPath, "\n// custom edit made by a user\n");
 
         $migrationFile = collect(File::files(database_path('migrations')))
             ->first(fn ($file) => str_contains($file->getFilename(), 'create_articles_table'));
@@ -111,7 +111,7 @@ describe('make commands honour --force', function () {
             ->assertExitCode(0)
             ->expectsOutputToContain('Skipped:');
 
-        expect(File::get($servicePath))->toContain('// custom edit made by a user');
+        expect(File::get($actionPath))->toContain('// custom edit made by a user');
 
         $migrationsAfterSkip = collect(File::files(database_path('migrations')))
             ->filter(fn ($file) => str_contains($file->getFilename(), 'create_articles_table'));
@@ -122,7 +122,7 @@ describe('make commands honour --force', function () {
         $decline($this->artisan('clean-arch:make-domain', ['name' => 'Article', '--force' => true]))
             ->assertExitCode(0);
 
-        expect(File::get($servicePath))->not->toContain('// custom edit made by a user');
+        expect(File::get($actionPath))->not->toContain('// custom edit made by a user');
 
         $migrationsAfterForce = collect(File::files(database_path('migrations')))
             ->filter(fn ($file) => str_contains($file->getFilename(), 'create_articles_table'));
