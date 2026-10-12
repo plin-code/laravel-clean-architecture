@@ -72,6 +72,12 @@ describe('BuildsArchRules', function () {
             ->toContain("new IsNotA('Illuminate\\\\Contracts\\\\Queue\\\\ShouldQueue')");
     });
 
+    it('leaves queued mail and notifications out of the jobs rule', function () {
+        expect(buildArchRules()[4])
+            ->toContain("->andThat(new IsNotA('Illuminate\\\\Mail\\\\Mailable'))")
+            ->toContain("->andThat(new IsNotA('Illuminate\\\\Notifications\\\\Notification'))");
+    });
+
     it('forbids console commands in the infrastructure layer', function () {
         expect(buildArchRules()[5])
             ->toContain("new ResideInOneOfTheseNamespaces('App\\\\Infrastructure')")

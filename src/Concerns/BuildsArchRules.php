@@ -60,6 +60,8 @@ trait BuildsArchRules
                 $infrastructure,
                 "new IsNotA({$this->archLiteral('Illuminate\\Contracts\\Queue\\ShouldQueue')})",
                 'queued jobs orchestrate use cases and belong to the application layer',
+                // Queued mail and notifications implement ShouldQueue too, and they live in infrastructure.
+                ['Illuminate\\Mail\\Mailable', 'Illuminate\\Notifications\\Notification'],
             ],
             'no_commands_in_infrastructure' => [
                 $infrastructure,
@@ -70,12 +72,14 @@ trait BuildsArchRules
 
         $rules = [];
 
-        foreach ($definitions as $rule => [$namespace, $expression, $because]) {
+        foreach ($definitions as $rule => $definition) {
             if (! $this->archRuleEnabled($rule)) {
                 continue;
             }
 
-            $rules[] = $this->archRule($namespace, $expression, $because);
+            [$namespace, $expression, $because, $except] = $definition + [3 => []];
+
+            $rules[] = $this->archRule($namespace, $expression, $because, $except);
         }
 
         return $rules;
@@ -234,13 +238,21 @@ trait BuildsArchRules
 
     /**
      * One `$rules[] = Rule::allClasses()...;` statement, indented for the body
-     * of the closure in the generated file.
+     * of the closure in the generated file. Classes that are one of $except are
+     * left out of the rule.
+     *
+     * @param  array<int, string>  $except
      */
-    protected function archRule(string $namespace, string $expression, string $because): string
+    protected function archRule(string $namespace, string $expression, string $because, array $except = []): string
     {
+        $exclusions = implode('', array_map(
+            fn (string $class): string => "\n        ->andThat(new IsNotA({$this->archLiteral($class)}))",
+            $except
+        ));
+
         return <<<PHP
                 \$rules[] = Rule::allClasses()
-                    ->that(new ResideInOneOfTheseNamespaces({$this->archLiteral($namespace)}))
+                    ->that(new ResideInOneOfTheseNamespaces({$this->archLiteral($namespace)})){$exclusions}
                     ->should({$expression})
                     ->because('{$because}');
             PHP;
