@@ -326,7 +326,7 @@ Two prefixes can point to the same directory, so `"Acme\\": "app/"` sits next to
 
 ### ✅ Validation rules
 
-Every rule can be turned off by name under `validation.rules`. A rule set to `false` is left out of the config written by `clean-arch:make-arch-rules`. All of them are enabled by default, so a project without a published config file keeps the full set.
+Every rule can be turned off by name under `validation.rules`. A rule set to `false` is left out of the config written by `clean-arch:make-arch-rules`. All of them except `no_commands_in_infrastructure` are enabled by default, and a project without a published config file gets the same set.
 
 ```php
 'validation' => [
@@ -336,12 +336,12 @@ Every rule can be turned off by name under `validation.rules`. A rule set to `fa
         'application_no_infrastructure_imports' => true,
         'no_observers_in_domain' => true,
         'no_jobs_in_infrastructure' => true,
-        'no_commands_in_infrastructure' => true,
+        'no_commands_in_infrastructure' => false,
     ],
 ],
 ```
 
-`no_commands_in_infrastructure` is the most likely candidate for opting out. A console command is an input adapter, much like an HTTP controller, and keeping it in `Application` forces the Application layer to depend on `Illuminate\Console`. Turn the rule off if you prefer `Infrastructure/Console/Commands`.
+`no_commands_in_infrastructure` is off by default. A console command is an input adapter, much like an HTTP controller: it reads arguments and options, prints output and calls an action, which holds the business logic. Keeping it in `Application` would force the Application layer to depend on `Illuminate\Console`. Turn the rule on if you prefer commands in `Application/Console/Commands`.
 
 Some projects send mail and notifications straight from an action, importing `App\Infrastructure\Mail` or `App\Infrastructure\Notifications` without an interface in between. Turning `application_no_infrastructure_imports` off to accept that would also hide the imports you still want reported. List the accepted namespaces under `validation.application_infrastructure_allowed` instead:
 

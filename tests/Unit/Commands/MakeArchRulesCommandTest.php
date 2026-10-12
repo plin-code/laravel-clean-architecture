@@ -34,7 +34,8 @@ describe('MakeArchRulesCommand', function () {
         expect(File::get($this->path))
             ->toContain('throw new RuntimeException')
             ->toContain("new ResideInOneOfTheseNamespaces('App\\\\Domain')")
-            ->toContain("new IsNotA('Illuminate\\\\Console\\\\Command')")
+            ->toContain("new NotHaveNameMatching('*Observer')")
+            ->not->toContain("new IsNotA('Illuminate\\\\Console\\\\Command')")
             ->toContain("ClassSet::fromDir(__DIR__ . '/app/Domain')");
     });
 

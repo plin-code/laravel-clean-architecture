@@ -212,11 +212,12 @@ trait BuildsArchRules
 
     /**
      * A rule is enabled unless the config says otherwise, so an unpublished
-     * config still generates the full set.
+     * config still generates the default set. 'no_commands_in_infrastructure'
+     * is the exception and has to be turned on explicitly.
      */
     protected function archRuleEnabled(string $rule): bool
     {
-        return config("clean-architecture.validation.rules.{$rule}", true) !== false;
+        return config("clean-architecture.validation.rules.{$rule}", $rule !== 'no_commands_in_infrastructure') !== false;
     }
 
     /**

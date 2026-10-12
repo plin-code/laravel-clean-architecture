@@ -59,10 +59,11 @@ want.
 ## Where each class belongs
 
 - Eloquent models, enums and domain events: `App\Domain`.
-- Actions, services, jobs and listeners, plus console commands, which
-  orchestrate use cases: `App\Application`.
-- Controllers, requests, resources, mail, notifications, observers and exports:
-  `App\Infrastructure`.
+- Actions, services, jobs and listeners, which orchestrate use cases:
+  `App\Application`.
+- Controllers, console commands, requests, resources, mail, notifications,
+  observers and exports: `App\Infrastructure`. A console command is an input
+  adapter like a controller, the business logic goes in an action.
 
 The domain must not import the application layer nor the infrastructure layer.
 The application layer must not import the infrastructure layer.

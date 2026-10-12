@@ -32,11 +32,11 @@ return [
         'custom_messages' => true,
 
         /*
-        | Rules written by clean-arch:make-arch-rules into phparkitect.php. Every
-        | rule is enabled by default, set one to false to leave it out of the
-        | generated file, then regenerate it with --force. For example, teams
-        | that treat a console command as an input adapter and keep it next to
-        | the HTTP controllers can turn off 'no_commands_in_infrastructure'.
+        | Rules written by clean-arch:make-arch-rules into phparkitect.php. Set
+        | one to false to leave it out of the generated file, then regenerate it
+        | with --force. 'no_commands_in_infrastructure' is off by default: a
+        | console command is an input adapter, like an HTTP controller, so it
+        | lives in Infrastructure and calls an action for the business logic.
         */
         'rules' => [
             'domain_no_application_imports'         => true,
@@ -44,7 +44,7 @@ return [
             'application_no_infrastructure_imports' => true,
             'no_observers_in_domain'                => true,
             'no_jobs_in_infrastructure'             => true,
-            'no_commands_in_infrastructure'         => true,
+            'no_commands_in_infrastructure'         => false,
         ],
 
         /*

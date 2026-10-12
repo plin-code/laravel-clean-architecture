@@ -26,6 +26,7 @@ function fixtureDirectory(): string
 function generateFixtureConfig(): string
 {
     config()->set('clean-architecture.default_namespace', 'ArchFixture');
+    config()->set('clean-architecture.validation.rules.no_commands_in_infrastructure', true);
 
     Artisan::call('clean-arch:make-arch-rules', ['--force' => true]);
 
