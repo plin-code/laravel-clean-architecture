@@ -173,11 +173,12 @@ app/
 │   └── Console/Commands/
 └── Infrastructure/                  # Framework adapters
     ├── Http/
-    │   ├── Controllers/Api/
+    │   ├── Controllers/
+    │   │   ├── Api/
+    │   │   └── Web/
     │   ├── Middleware/
     │   ├── Requests/
     │   └── Resources/
-    ├── UI/
     ├── Mail/
     ├── Notifications/
     ├── Observers/
@@ -422,7 +423,7 @@ The same command then writes `HandleArticleJob.php`. Set it to `null` or an empt
 
 ### 🌐 Web controller path
 
-`generation.web_controller_path` (default `'UI/Web/Controllers'`) controls where `make-controller --web` writes, relative to the infrastructure layer directory, and the namespace the generated controller declares. API controllers are not affected: `--api` always writes to `Http/Controllers/Api`.
+`generation.web_controller_path` (default `'Http/Controllers/Web'`) controls where `make-controller --web` writes, relative to the infrastructure layer directory, and the namespace the generated controller declares. API controllers are not affected: `--api` always writes to `Http/Controllers/Api`.
 
 ```php
 'generation' => [

@@ -23,7 +23,7 @@ describe('make-controller rejects a nested name', function () {
             ->assertExitCode(1)
             ->expectsOutputToContain('Web/Auth/SetPasswordController');
 
-        expect(File::isDirectory(app_path('Infrastructure/UI/Web/Controllers/Web')))->toBeFalse();
+        expect(File::isDirectory(app_path('Infrastructure/Http/Controllers/Web/Web')))->toBeFalse();
     });
 
     it('fails loudly on a backslash separated name', function () {

@@ -75,7 +75,7 @@ describe('make commands honour --force', function () {
         'action'         => ['clean-arch:make-action', ['name' => 'CreateAnvil', 'domain' => 'Anvil'], 'app/Application/Actions/Anvils/CreateAnvilAction.php'],
         'service'        => ['clean-arch:make-service', ['name' => 'Anvil'], 'app/Application/Services/AnvilService.php'],
         'api controller' => ['clean-arch:make-controller', ['name' => 'Anvil', '--api' => true], 'app/Infrastructure/Http/Controllers/Api/AnvilsController.php'],
-        'web controller' => ['clean-arch:make-controller', ['name' => 'Anvil', '--web' => true], 'app/Infrastructure/UI/Web/Controllers/AnvilController.php'],
+        'web controller' => ['clean-arch:make-controller', ['name' => 'Anvil', '--web' => true], 'app/Infrastructure/Http/Controllers/Web/AnvilController.php'],
         'observer'       => ['clean-arch:make-observer', ['name' => 'Anvil', 'domain' => 'Anvil'], 'app/Infrastructure/Observers/Anvils/AnvilObserver.php'],
         'listener'       => ['clean-arch:make-listener', ['name' => 'Anvil'], 'app/Application/Listeners/AnvilEventListener.php'],
         'job'            => ['clean-arch:make-job', ['name' => 'Anvil'], 'app/Application/Jobs/ProcessAnvilJob.php'],

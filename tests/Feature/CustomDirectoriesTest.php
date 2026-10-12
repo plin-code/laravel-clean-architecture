@@ -62,7 +62,7 @@ describe('Custom layer directories', function () {
         'action'         => ['clean-arch:make-action', ['name' => 'MarkAsPaid', 'domain' => 'Invoice'], 'app/Core/Application/Actions/Invoices/MarkAsPaidAction.php', 'App\Core\Application\Actions\Invoices'],
         'service'        => ['clean-arch:make-service', ['name' => 'Invoice'], 'app/Core/Application/Services/InvoiceService.php', 'App\Core\Application\Services'],
         'api controller' => ['clean-arch:make-controller', ['name' => 'Invoice'], 'app/Core/Infrastructure/Http/Controllers/Api/InvoicesController.php', 'App\Core\Infrastructure\Http\Controllers\Api'],
-        'web controller' => ['clean-arch:make-controller', ['name' => 'Invoice', '--web' => true], 'app/Core/Infrastructure/UI/Web/Controllers/InvoiceController.php', 'App\Core\Infrastructure\UI\Web\Controllers'],
+        'web controller' => ['clean-arch:make-controller', ['name' => 'Invoice', '--web' => true], 'app/Core/Infrastructure/Http/Controllers/Web/InvoiceController.php', 'App\Core\Infrastructure\Http\Controllers\Web'],
         'observer'       => ['clean-arch:make-observer', ['name' => 'Invoice', 'domain' => 'Invoice'], 'app/Core/Infrastructure/Observers/Invoices/InvoiceObserver.php', 'App\Core\Infrastructure\Observers\Invoices'],
         'listener'       => ['clean-arch:make-listener', ['name' => 'Invoice'], 'app/Core/Application/Listeners/InvoiceEventListener.php', 'App\Core\Application\Listeners'],
         'job'            => ['clean-arch:make-job', ['name' => 'Invoice'], 'app/Core/Application/Jobs/ProcessInvoiceJob.php', 'App\Core\Application\Jobs'],

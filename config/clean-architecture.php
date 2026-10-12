@@ -95,11 +95,10 @@ return [
 
         /*
         | Path clean-arch:make-controller --web writes to, relative to the
-        | infrastructure layer directory, and the namespace derived from it.
-        | Defaults to 'UI/Web/Controllers'. Set it to 'Http/Controllers' to
-        | keep web controllers next to the API ones, which are always
-        | generated under Http/Controllers/Api.
+        | infrastructure layer directory. The generated namespace follows it.
+        | Defaults to 'Http/Controllers/Web', next to the API controllers,
+        | which are always generated under Http/Controllers/Api.
         */
-        'web_controller_path' => 'UI/Web/Controllers',
+        'web_controller_path' => 'Http/Controllers/Web',
     ],
 ];
