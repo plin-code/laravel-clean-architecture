@@ -187,6 +187,14 @@ app/
     └── Exceptions/
 ```
 
+Laravel only auto-discovers commands in `app/Console/Commands`, so register the commands of the Infrastructure layer in `bootstrap/app.php` (adjust the path if you changed `directories.infrastructure`):
+
+```php
+->withCommands([
+    __DIR__.'/../app/Infrastructure/Console/Commands',
+])
+```
+
 ### 📂 Generated structure after `clean-arch:make-domain User`
 
 The model sits in a `Models` subfolder by default. Set `generation.model_directory` to change or drop it, see [Model directory](#-model-directory).
