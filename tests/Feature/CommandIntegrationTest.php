@@ -103,7 +103,7 @@ describe('Command Integration', function () {
         $this->artisan('clean-arch:make-controller', ['name' => 'Test', '--web' => true])
             ->assertExitCode(0);
 
-        expect(File::exists(app_path('Infrastructure/UI/Web/Controllers/TestController.php')))->toBeTrue();
+        expect(File::exists(app_path('Infrastructure/Http/Controllers/Web/TestController.php')))->toBeTrue();
     });
 
     it('runs make-controller command with no flags defaults to api', function () {

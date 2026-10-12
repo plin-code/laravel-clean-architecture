@@ -81,7 +81,7 @@ describe('Generated class names match their files', function () {
         'job'                      => ['clean-arch:make-job', ['name' => 'Article'], 'app/Application/Jobs/ProcessArticleJob.php'],
         'listener'                 => ['clean-arch:make-listener', ['name' => 'Article'], 'app/Application/Listeners/ArticleEventListener.php'],
         'api controller (default)' => ['clean-arch:make-controller', ['name' => 'Report'], 'app/Infrastructure/Http/Controllers/Api/ReportsController.php'],
-        'web controller'           => ['clean-arch:make-controller', ['name' => 'Report', '--web' => true], 'app/Infrastructure/UI/Web/Controllers/ReportController.php'],
+        'web controller'           => ['clean-arch:make-controller', ['name' => 'Report', '--web' => true], 'app/Infrastructure/Http/Controllers/Web/ReportController.php'],
         'export'                   => ['clean-arch:make-export', ['name' => 'Article'], 'app/Infrastructure/Exports/ArticleExport.php'],
         'mail'                     => ['clean-arch:make-mail', ['name' => 'Article'], 'app/Infrastructure/Mail/ArticleMail.php'],
         'notification'             => ['clean-arch:make-notification', ['name' => 'Article'], 'app/Infrastructure/Notifications/ArticleNotification.php'],

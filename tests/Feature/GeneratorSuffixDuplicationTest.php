@@ -77,9 +77,9 @@ describe('make commands do not double an already present suffix', function () {
         $this->artisan('clean-arch:make-controller', ['name' => 'SetPasswordController', '--web' => true])
             ->assertExitCode(0);
 
-        $path = app_path('Infrastructure/UI/Web/Controllers/SetPasswordController.php');
+        $path = app_path('Infrastructure/Http/Controllers/Web/SetPasswordController.php');
         expect(File::exists($path))->toBeTrue();
-        expect(File::exists(app_path('Infrastructure/UI/Web/Controllers/SetPasswordControllerController.php')))->toBeFalse();
+        expect(File::exists(app_path('Infrastructure/Http/Controllers/Web/SetPasswordControllerController.php')))->toBeFalse();
         expect(File::get($path))->toContain('class SetPasswordController extends Controller');
     });
 
@@ -87,7 +87,7 @@ describe('make commands do not double an already present suffix', function () {
         $this->artisan('clean-arch:make-controller', ['name' => 'Report', '--web' => true])
             ->assertExitCode(0);
 
-        expect(File::exists(app_path('Infrastructure/UI/Web/Controllers/ReportController.php')))->toBeTrue();
+        expect(File::exists(app_path('Infrastructure/Http/Controllers/Web/ReportController.php')))->toBeTrue();
     });
     it('does not double the Export suffix', function () {
         $this->artisan('clean-arch:make-export', ['name' => 'RegistrationsExport'])->assertExitCode(0);

@@ -200,7 +200,7 @@ describe('InstallCleanArchitectureCommand', function () {
         expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Http/Middleware");
         expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Http/Requests");
         expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Http/Resources");
-        expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/UI");
+        expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Http/Controllers/Web");
         expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Mail");
         expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Notifications");
         expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Observers");

@@ -59,13 +59,13 @@ trait ResolvesArchitectureDirectories
      * layer directory, without leading or trailing slashes.
      *
      * Configured through `generation.web_controller_path` (default
-     * `UI/Web/Controllers`). Backslashes are accepted and normalised, so
+     * `Http/Controllers/Web`). Backslashes are accepted and normalised, so
      * `Http\\Controllers` behaves like `Http/Controllers`. A `null` or empty
      * value writes the controllers directly in the infrastructure layer.
      */
     protected function webControllerSegment(): string
     {
-        $configured = config('clean-architecture.generation.web_controller_path', 'UI/Web/Controllers');
+        $configured = config('clean-architecture.generation.web_controller_path', 'Http/Controllers/Web');
 
         if (! is_string($configured)) {
             return '';

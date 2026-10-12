@@ -17,11 +17,11 @@ app/
 └── Infrastructure/         # Implementation details
     ├── Http/
     │   ├── Controllers/
-    │   │   └── Api/        # API controllers
+    │   │   ├── Api/        # API controllers
+    │   │   └── Web/        # Web controllers (generation.web_controller_path)
     │   ├── Middleware/     # HTTP middleware
     │   ├── Requests/       # Form requests
     │   └── Resources/      # API resources
-    ├── {{WebControllerPath}}/ # Web controllers
     ├── Mail/               # Mail classes
     ├── Notifications/      # Notifications
     ├── Observers/          # Model observers
