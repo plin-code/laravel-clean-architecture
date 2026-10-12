@@ -2,6 +2,18 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
+## [3.7.0] - 2026-10-12
+
+### Changed
+
+- `clean-arch:make-domain` no longer writes a `{Domain}Service`. The generated service only wrapped single Eloquent calls (`getActive*`, `find*ById`, `find*ByName`, `activate*`, `deactivate*`) and the generated controller used it in `index()` alone, while `show()` already went through an action. `make-domain` now writes a `List{Plural}Action` returning the active records, and the generated controller's `index()` calls it, so every generated read goes through an action. `clean-arch:make-service` still exists and now writes an empty class: a service holds logic shared by several actions, a single query belongs in the action that needs it. Existing services are not touched
+- The Boost guideline and skill now list `generation.web_controller_path` and `generation.job_prefix`, say that `no_commands_in_infrastructure` is off by default, and explain registering Infrastructure console commands with `withCommands()`
+
+### Added
+
+- README, Boost guideline and skill: an action never receives the HTTP request, the controller passes `$request->validated()` and models already resolved, with a readonly DTO when several callers share the same input. A short section on transactions: the action that owns the invariant opens it, with `lockForUpdate()` when it reads before writing, and mail, events and jobs go in `DB::afterCommit()`
+- README: the `--api` and `--web` options of `clean-arch:make-controller`
+
 ## [3.6.0] - 2026-10-12
 
 ### Changed
