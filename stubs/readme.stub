@@ -10,7 +10,6 @@ app/
 │   ├── Actions/            # Application use cases
 │   ├── Services/           # Application services
 │   ├── Jobs/               # Asynchronous jobs
-│   ├── Console/Commands/   # Console commands
 │   └── Listeners/          # Event listeners
 ├── Domain/                 # Business logic
 │   └── Shared/             # Shared classes between domains
@@ -27,6 +26,7 @@ app/
     ├── Observers/          # Model observers
     ├── Exports/            # Excel and CSV exports
     ├── Validation/         # Custom validation rules
+    ├── Console/Commands/   # Console commands (input adapters)
     └── Exceptions/         # Custom exceptions
 ```
 

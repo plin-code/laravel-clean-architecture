@@ -81,7 +81,6 @@ class InstallCleanArchitectureCommand extends Command
             "{$application}/Services",
             "{$application}/Jobs",
             "{$application}/Listeners",
-            "{$application}/Console/Commands",
             "{$infrastructure}/Http/Controllers/Api",
             "{$infrastructure}/Http/Controllers/Web",
             "{$infrastructure}/Http/Middleware",
@@ -92,6 +91,7 @@ class InstallCleanArchitectureCommand extends Command
             "{$infrastructure}/Observers",
             "{$infrastructure}/Exports",
             "{$infrastructure}/Validation",
+            "{$infrastructure}/Console/Commands",
             "{$infrastructure}/Exceptions",
         ];
 
