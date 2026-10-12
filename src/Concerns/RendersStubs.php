@@ -21,6 +21,8 @@ trait RendersStubs
 
     abstract protected function modelDirectorySegment(): string;
 
+    abstract protected function webControllerSegment(): string;
+
     /**
      * Read a stub shipped with the package, with the layer namespaces resolved.
      *
@@ -34,6 +36,9 @@ trait RendersStubs
      * with a segment configured (`\Models`) and without one (an empty
      * string), never leaving a double or trailing backslash behind.
      *
+     * `{{WebControllerPath}}` is the configured web controller path, or `.`
+     * when web controllers sit directly in the infrastructure layer.
+     *
      * @throws \Exception when the stub does not exist.
      */
     protected function getStub(string $stub): string
@@ -45,14 +50,16 @@ trait RendersStubs
         }
 
         $modelSegment = $this->modelDirectorySegment();
+        $webSegment   = $this->webControllerSegment();
 
         return str_replace(
-            ['{{DomainNamespace}}', '{{ApplicationNamespace}}', '{{InfrastructureNamespace}}', '{{ModelNamespace}}'],
+            ['{{DomainNamespace}}', '{{ApplicationNamespace}}', '{{InfrastructureNamespace}}', '{{ModelNamespace}}', '{{WebControllerPath}}'],
             [
                 rtrim($this->layerNamespace('domain'), '\\'),
                 rtrim($this->layerNamespace('application'), '\\'),
                 rtrim($this->layerNamespace('infrastructure'), '\\'),
                 $modelSegment === '' ? '' : '\\' . $modelSegment,
+                $webSegment === '' ? '.' : $webSegment,
             ],
             $this->files->get($stubPath)
         );

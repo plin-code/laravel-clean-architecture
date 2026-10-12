@@ -59,6 +59,21 @@ describe('Configurable web controller path', function () {
         expect(File::get($path))->toContain('namespace App\Infrastructure;');
     })->with([null, '']);
 
+    it('describes the configured path in CLEAN_ARCHITECTURE.md', function (?string $configured, string $line) {
+        config()->set('clean-architecture.generation.web_controller_path', $configured);
+
+        $this->artisan('clean-arch:install', ['--force' => true])->assertExitCode(0);
+
+        $readme = File::get(base_path('CLEAN_ARCHITECTURE.md'));
+        File::delete([base_path('CLEAN_ARCHITECTURE.md'), config_path('clean-architecture.php')]);
+
+        expect($readme)->toContain($line)->not->toContain('{{WebControllerPath}}');
+    })->with([
+        'default' => ['UI/Web/Controllers', '├── UI/Web/Controllers/ # Web controllers'],
+        'custom'  => ['Http/Controllers', '├── Http/Controllers/ # Web controllers'],
+        'empty'   => [null, '├── ./ # Web controllers'],
+    ]);
+
     it('leaves the api controller path alone', function () {
         config()->set('clean-architecture.generation.web_controller_path', 'Http/Controllers');
 

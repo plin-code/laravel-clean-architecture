@@ -21,7 +21,7 @@ app/
     │   ├── Middleware/     # HTTP middleware
     │   ├── Requests/       # Form requests
     │   └── Resources/      # API resources
-    ├── UI/                 # Web controllers go in UI/Web/Controllers
+    ├── {{WebControllerPath}}/ # Web controllers
     ├── Mail/               # Mail classes
     ├── Notifications/      # Notifications
     ├── Observers/          # Model observers
