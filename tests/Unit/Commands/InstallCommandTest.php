@@ -195,7 +195,6 @@ describe('InstallCleanArchitectureCommand', function () {
         expect($createdDirs)->toContain("{$basePath}/app/Application/Services");
         expect($createdDirs)->toContain("{$basePath}/app/Application/Jobs");
         expect($createdDirs)->toContain("{$basePath}/app/Application/Listeners");
-        expect($createdDirs)->toContain("{$basePath}/app/Application/Console/Commands");
         expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Http/Controllers/Api");
         expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Http/Middleware");
         expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Http/Requests");
@@ -206,6 +205,8 @@ describe('InstallCleanArchitectureCommand', function () {
         expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Observers");
         expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Exports");
         expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Validation");
+        expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Console/Commands");
+        expect($createdDirs)->not->toContain("{$basePath}/app/Application/Console/Commands");
         expect($createdDirs)->toContain("{$basePath}/app/Infrastructure/Exceptions");
     });
 

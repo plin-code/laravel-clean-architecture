@@ -66,7 +66,7 @@ trait BuildsArchRules
             'no_commands_in_infrastructure' => [
                 $infrastructure,
                 "new IsNotA({$this->archLiteral('Illuminate\\Console\\Command')})",
-                'console commands orchestrate use cases and belong to the application layer',
+                'this project keeps console commands in the application layer',
             ],
         ];
 
@@ -217,6 +217,7 @@ trait BuildsArchRules
      */
     protected function archRuleEnabled(string $rule): bool
     {
+        // The package does not merge its config, so the opt-in rule needs its default here too.
         return config("clean-architecture.validation.rules.{$rule}", $rule !== 'no_commands_in_infrastructure') !== false;
     }
 

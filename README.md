@@ -169,8 +169,7 @@ app/
 │   ├── Actions/
 │   ├── Services/
 │   ├── Jobs/
-│   ├── Listeners/
-│   └── Console/Commands/
+│   └── Listeners/
 └── Infrastructure/                  # Framework adapters
     ├── Http/
     │   ├── Controllers/
@@ -184,6 +183,7 @@ app/
     ├── Observers/
     ├── Exports/
     ├── Validation/
+    ├── Console/Commands/
     └── Exceptions/
 ```
 
