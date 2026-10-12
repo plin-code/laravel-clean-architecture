@@ -77,7 +77,7 @@ describe('Generated phparkitect rules', function () {
             ->toContain('ArchFixture\Domain\Models\Product')
             ->toContain('should not depend on these namespaces: ArchFixture\Application')
             ->toContain('ArchFixture\Domain\Models\ProductObserver')
-            ->toContain('6 violations detected');
+            ->toContain('7 violations detected');
     });
 
     it('reports every application import of the infrastructure layer without an allowlist', function () {
@@ -97,7 +97,7 @@ describe('Generated phparkitect rules', function () {
             ->and($result['output'])
             ->toContain('ArchFixture\Application\Actions\ShowProduct has 1 violations')
             ->not->toContain('SendProductMail')
-            ->toContain('5 violations detected');
+            ->toContain('6 violations detected');
     });
 
     it('follows inheritance chains the removed validate command could not', function () {
@@ -105,6 +105,21 @@ describe('Generated phparkitect rules', function () {
 
         expect($result['output'])
             ->toContain('SyncProductsCommand should not be a Illuminate\Console\Command');
+    });
+
+    it('reports a queued job in the infrastructure layer', function () {
+        $result = runPhparkitect($this->config, fixtureDirectory() . '/autoload.php');
+
+        expect($result['output'])
+            ->toContain('ImportProductsJob should not be a Illuminate\Contracts\Queue\ShouldQueue');
+    });
+
+    it('leaves queued mail and notifications in the infrastructure layer alone', function () {
+        $result = runPhparkitect($this->config, fixtureDirectory() . '/autoload.php');
+
+        expect($result['exitCode'])->toBe(1)
+            ->and($result['output'])->not->toContain('ProductShippedMail')
+            ->and($result['output'])->not->toContain('ProductShippedNotification');
     });
 
     it('leaves a clean layer alone', function () {
