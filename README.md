@@ -272,13 +272,12 @@ php artisan clean-arch:make-domain Product
 class ProductsController extends Controller
 {
     public function __construct(
-        private CreateProductAction $createProductAction,
-        private ProductService $productService
+        private CreateProductAction $createProductAction
     ) {}
 
     public function store(CreateProductRequest $request): JsonResponse
     {
-        $product = $this->createProductAction->execute($request);
+        $product = $this->createProductAction->execute($request->validated());
         
         return response()->json([
             'data' => new ProductResource($product),
