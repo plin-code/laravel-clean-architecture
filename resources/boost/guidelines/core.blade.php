@@ -9,13 +9,16 @@ consistent with the configured paths.
 
 - `App\Domain`: Eloquent models, enums, domain events, must not depend on
   `App\Application` or `App\Infrastructure`.
-- `App\Application`: actions, services, jobs, listeners and console commands,
-  the use cases, must not depend on `App\Infrastructure`, unless the namespace
-  is listed in `validation.application_infrastructure_allowed`.
-- `App\Infrastructure`: controllers, requests, resources, mail, notifications,
-  observers, exports. Depends on the layers above, never the other way round.
-- Observers belong to `App\Infrastructure`, not to the domain. Console commands
-  and queued jobs orchestrate use cases and belong to `App\Application`.
+- `App\Application`: actions, services, jobs and listeners, the use cases,
+  must not depend on `App\Infrastructure`, unless the namespace is listed in
+  `validation.application_infrastructure_allowed`.
+- `App\Infrastructure`: controllers, console commands, requests, resources,
+  mail, notifications, observers, exports. Depends on the layers above, never
+  the other way round.
+- Observers belong to `App\Infrastructure`, not to the domain. Queued jobs
+  orchestrate use cases and belong to `App\Application`. Console commands are
+  input adapters like controllers: they belong to `App\Infrastructure` and
+  call an action, which holds the business logic.
 - To cross a layer, the inner layer declares an interface and the outer layer
   implements it, bound in a service provider: a port in `App\Application` with
   its adapter in `App\Infrastructure`, or a contract in `App\Domain`

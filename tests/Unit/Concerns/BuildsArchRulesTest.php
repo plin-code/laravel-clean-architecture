@@ -78,7 +78,16 @@ describe('BuildsArchRules', function () {
             ->toContain("->andThat(new IsNotA('Illuminate\\\\Notifications\\\\Notification'))");
     });
 
-    it('forbids console commands in the infrastructure layer', function () {
+    it('leaves the console command rule out by default', function () {
+        $rules = buildArchRules();
+
+        expect($rules)->toHaveCount(5)
+            ->and(implode("\n", $rules))->not->toContain('Illuminate\\\\Console\\\\Command');
+    });
+
+    it('forbids console commands in the infrastructure layer when enabled', function () {
+        config()->set('clean-architecture.validation.rules.no_commands_in_infrastructure', true);
+
         expect(buildArchRules()[5])
             ->toContain("new ResideInOneOfTheseNamespaces('App\\\\Infrastructure')")
             ->toContain("new IsNotA('Illuminate\\\\Console\\\\Command')");
@@ -94,12 +103,12 @@ describe('BuildsArchRules', function () {
     });
 
     it('skips a rule disabled in the config', function () {
-        config()->set('clean-architecture.validation.rules.no_commands_in_infrastructure', false);
+        config()->set('clean-architecture.validation.rules.no_observers_in_domain', false);
 
         $rules = buildArchRules();
 
-        expect($rules)->toHaveCount(5)
-            ->and(implode("\n", $rules))->not->toContain('Illuminate\\\\Console\\\\Command');
+        expect($rules)->toHaveCount(4)
+            ->and(implode("\n", $rules))->not->toContain("NotHaveNameMatching('*Observer')");
     });
 
     it('emits an autoload guard naming a framework class and an application class', function () {
@@ -173,9 +182,9 @@ describe('BuildsArchRules', function () {
 
         $after = buildArchRules();
 
-        expect($after)->toHaveCount(6);
+        expect($after)->toHaveCount(5);
 
-        foreach ([0, 1, 3, 4, 5] as $index) {
+        foreach ([0, 1, 3, 4] as $index) {
             expect($after[$index])->toBe($before[$index]);
         }
     });
