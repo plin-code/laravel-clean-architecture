@@ -57,7 +57,9 @@ requests, the resource, the controller, the migration, the factory and the test
 in one go.
 Pass `--no-base` to skip the base classes. After that it asks, one confirm at a
 time, whether to also generate an observer, a listener, a job, a mail, a
-notification and an export, and `--no-interaction` declines all six.
+notification and an export, and `--no-interaction` declines all six. It does
+not write routes: it prints the `Route::apiResource()` line to add to
+routes/api.php, which the generated test calls under `/api`.
 
 Single file commands (make-action, make-service, make-controller,
 make-observer, make-listener, make-job, make-mail, make-notification,

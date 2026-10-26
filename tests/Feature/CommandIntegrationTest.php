@@ -193,6 +193,23 @@ describe('Command Integration', function () {
             ->not->toContain('ProductService');
     });
 
+    it('prints the api route that the generated test calls', function () {
+        $this->artisan('clean-arch:install');
+
+        $this->artisan('clean-arch:make-domain', ['name' => 'Product'])
+            ->expectsConfirmation('Would you like to generate an Observer?', 'no')
+            ->expectsConfirmation('Would you like to generate a Listener?', 'no')
+            ->expectsConfirmation('Would you like to generate a Job?', 'no')
+            ->expectsConfirmation('Would you like to generate a Mail?', 'no')
+            ->expectsConfirmation('Would you like to generate a Notification?', 'no')
+            ->expectsConfirmation('Would you like to generate an Export?', 'no')
+            ->expectsOutputToContain('use App\Infrastructure\Http\Controllers\Api\ProductsController;')
+            ->expectsOutputToContain("Route::apiResource('products', ProductsController::class);")
+            ->assertExitCode(0);
+
+        expect(File::get(base_path('tests/Feature/Products/ProductsTest.php')))->toContain("'/api/products'");
+    });
+
     it('runs make-domain command with all prompts accepted', function () {
         $this->artisan('clean-arch:install');
 

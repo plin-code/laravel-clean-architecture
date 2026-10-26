@@ -99,6 +99,8 @@ This command will generate:
 
 After generating the core files, `make-domain` prompts interactively for optional components. You can choose to also generate an Observer, Listener, Job, Mail, Notification, and Export for the domain. Each prompt can be answered independently, so you only generate what your domain needs.
 
+`make-domain` does not touch your routes. When it finishes it prints the `Route::apiResource()` line for the generated controller, which the generated feature test calls under `/api`. Add it to `routes/api.php`. A fresh Laravel app has no such file: `php artisan install:api` creates it and registers it in `bootstrap/app.php`, and it also installs Sanctum.
+
 ### ✅ Architecture validation
 
 Architectural rules are enforced by [phparkitect](https://github.com/phparkitect/arkitect). The package does not depend on it and does not run it: it generates a configuration file from `config/clean-architecture.php`, and your project runs the tool.
