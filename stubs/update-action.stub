@@ -1,0 +1,17 @@
+<?php
+
+namespace {{ApplicationNamespace}}\Actions\{{PluralDomainName}};
+
+{{ActionBaseImport}}use {{DomainNamespace}}\{{PluralDomainName}}{{ModelNamespace}}\{{DomainName}};
+
+class {{ActionName}}{{ActionExtends}}
+{
+    public function execute(array $data, int $id): {{DomainName}}
+    {
+        ${{domainVariable}} = {{DomainName}}::findOrFail($id);
+
+        ${{domainVariable}}->update($data);
+
+        return ${{domainVariable}};
+    }
+}

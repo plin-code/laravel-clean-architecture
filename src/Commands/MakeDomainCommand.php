@@ -129,10 +129,10 @@ class MakeDomainCommand extends Command
     protected function createActions(string $name): void
     {
         $actions = [
-            'Create'  => 'Create' . $name . 'Request',
-            'Update'  => 'Update' . $name . 'Request',
-            'Delete'  => '',
-            'GetById' => '',
+            'Create'  => 'action',
+            'Update'  => 'update-action',
+            'Delete'  => 'delete-action',
+            'GetById' => 'get-by-id-action',
         ];
 
         $pluralName  = Str::plural($name);
@@ -145,11 +145,10 @@ class MakeDomainCommand extends Command
 
         $extend = $this->shouldExtendBaseClasses((bool) $this->option('no-base'));
 
-        foreach ($actions as $action => $requestClass) {
-            $stub    = $this->getStub('action');
+        foreach ($actions as $action => $stubName) {
+            $stub    = $this->getStub($stubName);
             $content = $this->replacePlaceholders($stub, $name, array_merge($this->baseActionReplacements($extend), [
-                '{{ActionName}}'  => $action . $name . 'Action',
-                '{{RequestName}}' => $requestClass ?: 'Request',
+                '{{ActionName}}' => $action . $name . 'Action',
             ]));
 
             $this->writeFile("{$directory}/{$action}{$name}Action.php", $content);

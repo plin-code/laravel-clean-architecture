@@ -1,0 +1,13 @@
+<?php
+
+namespace {{ApplicationNamespace}}\Actions\{{PluralDomainName}};
+
+{{ActionBaseImport}}use {{DomainNamespace}}\{{PluralDomainName}}{{ModelNamespace}}\{{DomainName}};
+
+class {{ActionName}}{{ActionExtends}}
+{
+    public function execute(int $id): void
+    {
+        {{DomainName}}::findOrFail($id)->delete();
+    }
+}
