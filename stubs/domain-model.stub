@@ -7,6 +7,7 @@ use {{DomainNamespace}}\{{PluralDomainName}}\Enums\{{DomainName}}Status;
 use {{DomainNamespace}}\{{PluralDomainName}}\Events\{{DomainName}}Created;
 use {{DomainNamespace}}\{{PluralDomainName}}\Events\{{DomainName}}Updated;
 use {{DomainNamespace}}\{{PluralDomainName}}\Events\{{DomainName}}Deleted;
+use Database\Factories\{{DomainName}}Factory;
 
 class {{DomainName}} extends BaseModel
 {
@@ -30,6 +31,15 @@ class {{DomainName}} extends BaseModel
         'deleted' => {{DomainName}}Deleted::class,
     ];
     
+    /**
+     * The factory resolver guesses the factory from the model namespace,
+     * which points under Database\Factories\Domain, so name it explicitly.
+     */
+    protected static function newFactory(): {{DomainName}}Factory
+    {
+        return {{DomainName}}Factory::new();
+    }
+
     // Business Logic Methods
     public function isActive(): bool
     {

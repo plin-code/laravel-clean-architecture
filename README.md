@@ -94,6 +94,7 @@ This command will generate:
 - 📝 Form Requests (Create, Update)
 - 📤 API Resource
 - 🗃️ Database migration
+- 🏭 Model factory in `database/factories`, which the model names in `newFactory()`
 - 🧪 Feature tests
 
 After generating the core files, `make-domain` prompts interactively for optional components. You can choose to also generate an Observer, Listener, Job, Mail, Notification, and Export for the domain. Each prompt can be answered independently, so you only generate what your domain needs.
