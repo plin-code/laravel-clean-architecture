@@ -53,7 +53,8 @@ php artisan clean-arch:make-export Article
 @endverbatim
 
 `clean-arch:make-domain` writes the model, the events, the actions, the
-requests, the resource, the controller, the migration and the test in one go.
+requests, the resource, the controller, the migration, the factory and the test
+in one go.
 Pass `--no-base` to skip the base classes. After that it asks, one confirm at a
 time, whether to also generate an observer, a listener, a job, a mail, a
 notification and an export, and `--no-interaction` declines all six.

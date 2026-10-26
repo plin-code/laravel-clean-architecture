@@ -26,6 +26,7 @@ describe('Stub Files', function () {
             'mail.stub',
             'notification.stub',
             'export.stub',
+            'factory.stub',
         ];
 
         foreach ($coreStubs as $stub) {

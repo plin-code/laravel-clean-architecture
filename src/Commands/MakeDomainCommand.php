@@ -46,6 +46,7 @@ class MakeDomainCommand extends Command
         $this->createResource($name);
         $this->createTests($name);
         $this->createMigration($name);
+        $this->createFactory($name);
 
         if ($this->confirm('Would you like to generate an Observer?', false)) {
             $this->createObserver($name);
@@ -257,6 +258,19 @@ class MakeDomainCommand extends Command
         $fileName = $existing?->getFilename() ?? date('Y_m_d_His') . "_create_{$tableName}_table.php";
 
         $this->writePath("{$migrationsPath}/{$fileName}", $content, "database/migrations/{$fileName}");
+    }
+
+    protected function createFactory(string $name): void
+    {
+        $stub    = $this->getStub('factory');
+        $content = $this->replacePlaceholders($stub, $name);
+
+        $factoriesPath = database_path('factories');
+        if (! $this->files->isDirectory($factoriesPath)) {
+            $this->files->makeDirectory($factoriesPath, 0755, true);
+        }
+
+        $this->writeFile("database/factories/{$name}Factory.php", $content);
     }
 
     protected function addGitKeepFiles(string $name): void
