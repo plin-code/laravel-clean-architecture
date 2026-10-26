@@ -38,7 +38,8 @@ to move the User model into the Domain layer before generating anything else.
    `--no-base` to skip the base classes when the project does not use them.
    After that it asks whether to also generate an observer, a listener, a job,
    a mail, a notification and an export, and `--no-interaction` declines them
-   all.
+   all. Add the `Route::apiResource()` line it prints to routes/api.php:
+   the generated test calls the routes under `/api`.
 
 2. Add the use cases that are not CRUD as actions, one class one job:
 

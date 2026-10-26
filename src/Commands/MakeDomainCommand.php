@@ -70,6 +70,8 @@ class MakeDomainCommand extends Command
 
         $this->info("Domain {$name} created successfully!");
 
+        $this->printApiRoute($name);
+
         return self::SUCCESS;
     }
 
@@ -372,6 +374,22 @@ class MakeDomainCommand extends Command
         }
 
         $this->writeFile("{$directory}/{$name}Export.php", $content);
+    }
+
+    /**
+     * The generated controller and test expect the routes, which the command
+     * does not write: `routes/api.php` exists only after `install:api`.
+     */
+    protected function printApiRoute(string $name): void
+    {
+        $controller = Str::plural($name) . 'Controller';
+
+        $this->newLine();
+        $this->line('Register the API routes in routes/api.php:');
+        $this->newLine();
+        $this->line("    use {$this->layerNamespace('infrastructure')}Http\\Controllers\\Api\\{$controller};");
+        $this->newLine();
+        $this->line("    Route::apiResource('{$this->getTableName($name)}', {$controller}::class);");
     }
 
     protected function replacePlaceholders(string $content, string $name, array $extra = []): string
