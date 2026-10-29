@@ -341,7 +341,7 @@ Two prefixes can point to the same directory, so `"Acme\\": "app/"` sits next to
 
 ### ✅ Validation rules
 
-Every rule can be turned off by name under `validation.rules`. A rule set to `false` is left out of the config written by `clean-arch:make-arch-rules`. All of them except `no_commands_in_infrastructure` are enabled by default, and a project without a published config file gets the same set.
+Every rule can be turned off by name under `validation.rules`. A rule set to `false` is left out of the config written by `clean-arch:make-arch-rules`. All of them except `no_commands_in_infrastructure` and `no_classes_outside_layers` are enabled by default, and a project without a published config file gets the same set.
 
 ```php
 'validation' => [
@@ -352,6 +352,7 @@ Every rule can be turned off by name under `validation.rules`. A rule set to `fa
         'no_observers_in_domain' => true,
         'no_jobs_in_infrastructure' => true,
         'no_commands_in_infrastructure' => false,
+        'no_classes_outside_layers' => false,
     ],
 ],
 ```
@@ -368,6 +369,27 @@ Some projects send mail and notifications straight from an action, importing `Ap
 
 Values are relative to the infrastructure layer, so they keep working with custom `directories` and `default_namespace`. With the example above an action importing `App\Infrastructure\Mail\ArticleMail` passes, while one importing `App\Infrastructure\Http\Controllers\Controller` or `App\Infrastructure\Filament\ArticleResource` is still reported. The list is empty by default, and an empty list generates exactly the same `phparkitect.php` as before. An invalid entry (not a string, or empty) makes `clean-arch:make-arch-rules` fail without writing the file. After changing the key, regenerate the file with `php artisan clean-arch:make-arch-rules --force`.
 
+#### 🧱 No classes outside the layers
+
+The other rules only read the three layer directories, so code left in `app/Http`, `app/Models`, `app/Actions` or `app/Filament` is never checked and `phparkitect check` stays green on an app that is half Laravel folders and half layers. `no_classes_outside_layers` closes that gap: every class under the root namespace has to reside in one of the three layers, or in a namespace listed under `validation.outside_layers_allowed`.
+
+```php
+'validation' => [
+    'rules' => [
+        'no_classes_outside_layers' => true,
+    ],
+    'outside_layers_allowed' => ['Providers'],
+],
+```
+
+The rule is off by default, because a Laravel app reports its whole `app/Http` and `app/Models`, and everything else it ships outside the layers, until that code has been moved.
+
+The root is the top level directory the three layers share, `app` with the defaults, and its namespace is derived like the layer namespaces, so `App` or the configured `default_namespace`. Layers nested deeper, such as `app/Core/Domain`, still have `app` as their root, so `app/Http` keeps being checked. When the layers do not share a top level directory (for example `src/Domain` next to `app/Application`), or one of them sits directly in the project root, `clean-arch:make-arch-rules` fails with a message and writes nothing. Turn the rule off for such a layout.
+
+With the rule on, the generated file scans the root directory once instead of the three layer directories. The layer rules still only apply to their own namespaces, so every class is checked once and no violation is reported twice.
+
+`validation.outside_layers_allowed` lists namespaces relative to the root namespace that may stay outside the layers. It defaults to `['Providers']`: Laravel registers service providers from `bootstrap/providers.php`, and `make:provider` and the packages that publish a provider write them to `app/Providers`. Add the folders a framework or package discovers by convention and that you keep where they are, for example `'Policies'` (policy auto discovery looks next to the models), `'Livewire'` or `'Filament'`. An invalid entry (not a string, or empty) makes `clean-arch:make-arch-rules` fail without writing the file.
+
 ### 📝 Custom validation messages
 
 `validation.custom_messages` controls whether `clean-arch:make-domain` generates the `messages()` method in the form requests it creates. It defaults to `true`.
@@ -380,7 +402,7 @@ Values are relative to the infrastructure layer, so they keep working with custo
 
 Set it to `false` and the generated `Create*Request` and `Update*Request` classes will omit the `messages()` method entirely. The default `rules()` and `authorize()` methods are unaffected, and the output remains valid PHP either way.
 
-Note the keys under `validation` serve different purposes. The `rules` subgroup and `application_infrastructure_allowed` are read by `clean-arch:make-arch-rules`, while `custom_messages` is read by `clean-arch:make-domain` at generation time. They are kept together so that a single published config file is the only place to look.
+Note the keys under `validation` serve different purposes. The `rules` subgroup, `application_infrastructure_allowed` and `outside_layers_allowed` are read by `clean-arch:make-arch-rules`, while `custom_messages` is read by `clean-arch:make-domain` at generation time. They are kept together so that a single published config file is the only place to look.
 
 ### 🏗️ Optional base classes
 

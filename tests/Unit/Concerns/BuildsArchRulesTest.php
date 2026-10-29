@@ -39,6 +39,23 @@ function buildAutoloadGuard(): string
     return $method->invoke($subject);
 }
 
+/**
+ * Call the protected class set builder on an anonymous class that uses the trait.
+ */
+function buildArchClassSets(): string
+{
+    $subject = new class
+    {
+        use BuildsArchRules;
+        use ResolvesArchitectureDirectories;
+    };
+
+    $method = new ReflectionMethod($subject, 'archClassSets');
+    $method->setAccessible(true);
+
+    return $method->invoke($subject);
+}
+
 describe('BuildsArchRules', function () {
     it('builds a dependency rule for the domain layer', function () {
         $rules = buildArchRules();
@@ -196,4 +213,71 @@ describe('BuildsArchRules', function () {
         expect(buildArchRules()[0])
             ->toContain("new ResideInOneOfTheseNamespaces('Acme\\\\Core\\\\Domain')");
     });
+
+    it('leaves the outside layers rule out by default', function () {
+        expect(implode("\n", buildArchRules()))->not->toContain("ResideInOneOfTheseNamespaces('App')");
+    });
+
+    it('keeps every class of the root namespace in a layer or an allowed namespace when enabled', function () {
+        config()->set('clean-architecture.validation.rules.no_classes_outside_layers', true);
+
+        $expected = <<<'PHP'
+                $rules[] = Rule::allClasses()
+                    ->that(new ResideInOneOfTheseNamespaces('App'))
+                    ->should(new ResideInOneOfTheseNamespaces('App\\Domain', 'App\\Application', 'App\\Infrastructure', 'App\\Providers'))
+                    ->because('every class of the application belongs to one of the three layers');
+            PHP;
+
+        expect(buildArchRules()[5])->toBe($expected);
+    });
+
+    it('resolves the allowed outside namespaces against the root namespace', function () {
+        config()->set('clean-architecture.default_namespace', 'Acme');
+        config()->set('clean-architecture.validation.rules.no_classes_outside_layers', true);
+        config()->set('clean-architecture.validation.outside_layers_allowed', ['/Providers/', 'Livewire']);
+
+        expect(buildArchRules()[5])
+            ->toContain("->that(new ResideInOneOfTheseNamespaces('Acme'))")
+            ->toContain("'Acme\\\\Providers', 'Acme\\\\Livewire'))");
+    });
+
+    it('allows nothing outside the layers with an empty allowlist', function () {
+        config()->set('clean-architecture.validation.rules.no_classes_outside_layers', true);
+        config()->set('clean-architecture.validation.outside_layers_allowed', []);
+
+        expect(buildArchRules()[5])
+            ->toContain("->should(new ResideInOneOfTheseNamespaces('App\\\\Domain', 'App\\\\Application', 'App\\\\Infrastructure'))");
+    });
+
+    it('takes the top level directory as the root when the layers are nested', function () {
+        config()->set('clean-architecture.validation.rules.no_classes_outside_layers', true);
+        config()->set('clean-architecture.directories.domain', 'app/Core/Domain');
+
+        expect(buildArchRules()[5])
+            ->toContain("->that(new ResideInOneOfTheseNamespaces('App'))")
+            ->toContain("'App\\\\Core\\\\Domain'")
+            ->and(buildArchClassSets())->toBe("    \$config->add(ClassSet::fromDir(__DIR__ . '/app'), ...\$rules);");
+    });
+
+    it('scans the root directory once instead of the layers when the outside layers rule is enabled', function () {
+        expect(substr_count(buildArchClassSets(), 'ClassSet::fromDir'))->toBe(3);
+
+        config()->set('clean-architecture.validation.rules.no_classes_outside_layers', true);
+
+        expect(buildArchClassSets())->toBe("    \$config->add(ClassSet::fromDir(__DIR__ . '/app'), ...\$rules);");
+    });
+
+    it('skips the outside layers rule when the layers share no top level directory', function (array $directories) {
+        config()->set('clean-architecture.validation.rules.no_classes_outside_layers', true);
+
+        foreach ($directories as $layer => $directory) {
+            config()->set("clean-architecture.directories.{$layer}", $directory);
+        }
+
+        expect(buildArchRules())->toHaveCount(5)
+            ->and(substr_count(buildArchClassSets(), 'ClassSet::fromDir'))->toBe(3);
+    })->with([
+        'different roots'  => [['domain' => 'src/Domain']],
+        'top level layers' => [['domain' => 'Domain', 'application' => 'Application', 'infrastructure' => 'Infrastructure']],
+    ]);
 });

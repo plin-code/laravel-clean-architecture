@@ -37,6 +37,11 @@ return [
         | with --force. 'no_commands_in_infrastructure' is off by default: a
         | console command is an input adapter, like an HTTP controller, so it
         | lives in Infrastructure and calls an action for the business logic.
+        | 'no_classes_outside_layers' is off by default too: it reports every
+        | class of the directory the layers share (app/ with the defaults)
+        | that is not in a layer, such as the app/Http and app/Models Laravel
+        | ships with, so turn it on once the app has been moved into the
+        | layers.
         */
         'rules' => [
             'domain_no_application_imports'         => true,
@@ -45,6 +50,7 @@ return [
             'no_observers_in_domain'                => true,
             'no_jobs_in_infrastructure'             => true,
             'no_commands_in_infrastructure'         => false,
+            'no_classes_outside_layers'             => false,
         ],
 
         /*
@@ -57,6 +63,16 @@ return [
         | default. Regenerate phparkitect.php with --force after changing it.
         */
         'application_infrastructure_allowed' => [],
+
+        /*
+        | Namespaces that may stay outside the layers without breaking
+        | 'no_classes_outside_layers', relative to the root namespace, so
+        | ['Providers'] allows App\Providers. Providers is listed by default
+        | because bootstrap/providers.php registers the service providers
+        | there and Laravel's generators write them there. Regenerate
+        | phparkitect.php with --force after changing it.
+        */
+        'outside_layers_allowed' => ['Providers'],
     ],
 
     /*

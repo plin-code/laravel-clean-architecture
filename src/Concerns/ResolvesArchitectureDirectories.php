@@ -94,7 +94,16 @@ trait ResolvesArchitectureDirectories
      */
     protected function layerNamespace(string $layer): string
     {
-        $segments = explode('/', $this->layerDirectory($layer));
+        return $this->directoryNamespace($this->layerDirectory($layer));
+    }
+
+    /**
+     * Namespace of a directory relative to the base path, with a trailing
+     * separator, derived the same way as the layer namespaces.
+     */
+    protected function directoryNamespace(string $directory): string
+    {
+        $segments = explode('/', trim($directory, '/'));
 
         if (strtolower((string) reset($segments)) === 'app') {
             array_shift($segments);

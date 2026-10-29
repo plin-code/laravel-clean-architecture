@@ -108,6 +108,13 @@ implement it one layer out and bind the two in a service provider. Do not widen
 Do not turn a rule off in `validation.rules` to silence a single violation: that
 hides every other violation of the same rule.
 
+When `no_classes_outside_layers` is on, a class left in app/Http, app/Models,
+app/Actions or any other folder outside the layers fails the check. Move it
+into the layer it belongs to and update its namespace and every reference.
+Only a folder that the framework or a package discovers by convention, such as
+Providers or Policies, goes in `validation.outside_layers_allowed`, relative to
+the root namespace.
+
 ## Adopting the rules on an existing codebase
 
     vendor/bin/phparkitect generate-baseline

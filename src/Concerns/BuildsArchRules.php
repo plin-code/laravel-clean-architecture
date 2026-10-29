@@ -25,6 +25,18 @@ trait BuildsArchRules
     abstract protected function layerDirectory(string $layer): string;
 
     /**
+     * Provided by ResolvesArchitectureDirectories.
+     */
+    abstract protected function directoryNamespace(string $directory): string;
+
+    /**
+     * Rules left out of the generated file unless the config turns them on.
+     *
+     * @var array<int, string>
+     */
+    protected array $optInArchRules = ['no_commands_in_infrastructure', 'no_classes_outside_layers'];
+
+    /**
      * One entry per enabled rule, each a complete `$rules[] = ...;` statement.
      *
      * @return array<int, string>
@@ -82,7 +94,78 @@ trait BuildsArchRules
             $rules[] = $this->archRule($namespace, $expression, $because, $except);
         }
 
+        $root = $this->archRootDirectory();
+
+        if ($this->archRuleEnabled('no_classes_outside_layers') && $root !== null) {
+            $rootNamespace = rtrim($this->directoryNamespace($root), '\\');
+
+            $rules[] = $this->archRule(
+                $rootNamespace,
+                $this->outsideLayersExpression($rootNamespace, [$domain, $application, $infrastructure]),
+                'every class of the application belongs to one of the three layers'
+            );
+        }
+
         return $rules;
+    }
+
+    /**
+     * The directory the three layers share, the first segment of their paths
+     * (`app` with the defaults), or null when they do not share one.
+     *
+     * Only the top level directory is used, not the closest common parent, so
+     * layers configured under `app/Core` still have `app/Http` and the other
+     * Laravel folders checked.
+     */
+    protected function archRootDirectory(): ?string
+    {
+        $roots = [];
+
+        foreach (['domain', 'application', 'infrastructure'] as $layer) {
+            $segments = explode('/', $this->layerDirectory($layer));
+
+            // A layer at the top of the project would make the base path, vendor included, the root.
+            if (count($segments) < 2) {
+                return null;
+            }
+
+            $roots[$segments[0]] = true;
+        }
+
+        return count($roots) === 1 ? (string) array_key_first($roots) : null;
+    }
+
+    /**
+     * Why 'no_classes_outside_layers' cannot be generated, or null when it can.
+     */
+    protected function rootDirectoryError(): ?string
+    {
+        if (! $this->archRuleEnabled('no_classes_outside_layers') || $this->archRootDirectory() !== null) {
+            return null;
+        }
+
+        $directories = implode(', ', array_map($this->layerDirectory(...), ['domain', 'application', 'infrastructure']));
+
+        return "validation.rules.no_classes_outside_layers needs the three layer directories inside one top level directory, such as app/, got {$directories}. "
+            . 'Move the layers under one directory or turn the rule off.';
+    }
+
+    /**
+     * The layers, followed by the allowed namespaces, as the places a class
+     * of the root namespace may reside in.
+     *
+     * @param  array<int, string>  $layers
+     */
+    protected function outsideLayersExpression(string $root, array $layers): string
+    {
+        /** @var array<int, string> $segments */
+        $segments = config('clean-architecture.validation.outside_layers_allowed', ['Providers']);
+        $allowed  = array_map(
+            fn (string $segment): string => $root . '\\' . trim(str_replace('/', '\\', $segment), '\\'),
+            $segments
+        );
+
+        return 'new ResideInOneOfTheseNamespaces(' . implode(', ', array_map($this->archLiteral(...), [...$layers, ...$allowed])) . ')';
     }
 
     /**
@@ -90,10 +173,18 @@ trait BuildsArchRules
      *
      * Scanning the layers instead of the whole application keeps projects that
      * moved the directories working, and leaves the rest of the codebase out of
-     * the scan.
+     * the scan. With 'no_classes_outside_layers' on, the directory the layers
+     * share is scanned instead, once, so no class is checked twice.
      */
     protected function archClassSets(): string
     {
+        $root = $this->archRootDirectory();
+
+        // The layers sit inside the root, so scanning it alone checks every class once.
+        if ($this->archRuleEnabled('no_classes_outside_layers') && $root !== null) {
+            return "    \$config->add(ClassSet::fromDir(__DIR__ . '/{$root}'), ...\$rules);";
+        }
+
         $calls = [];
 
         foreach (['domain', 'application', 'infrastructure'] as $layer) {
@@ -182,28 +273,35 @@ trait BuildsArchRules
     }
 
     /**
-     * Why the allowlist cannot be used, or null when it can.
+     * Why an allowlist cannot be used, or null when it can.
      *
      * Invalid entries are reported rather than dropped: skipping one silently
-     * would flag imports the user believes are allowed, and an entry that
-     * trims to nothing would exclude the whole infrastructure layer.
+     * would flag classes the user believes are allowed, and an entry that
+     * trims to nothing would allow the whole layer or root namespace.
      */
     protected function allowlistError(): ?string
     {
-        if (! $this->archRuleEnabled('application_no_infrastructure_imports')) {
-            return null;
-        }
+        $allowlists = [
+            'application_no_infrastructure_imports' => ['application_infrastructure_allowed', [], 'infrastructure namespace segments', 'Mail'],
+            'no_classes_outside_layers'             => ['outside_layers_allowed', ['Providers'], 'namespace segments relative to the root namespace', 'Providers'],
+        ];
 
-        $key     = 'validation.application_infrastructure_allowed';
-        $allowed = config("clean-architecture.{$key}", []);
+        foreach ($allowlists as $rule => [$name, $default, $description, $example]) {
+            if (! $this->archRuleEnabled($rule)) {
+                continue;
+            }
 
-        if (! is_array($allowed)) {
-            return "{$key} must be a list of infrastructure namespace segments, got " . var_export($allowed, true) . '.';
-        }
+            $key     = "validation.{$name}";
+            $allowed = config("clean-architecture.{$key}", $default);
 
-        foreach ($allowed as $segment) {
-            if (! is_string($segment) || trim(str_replace('/', '\\', $segment), '\\') === '') {
-                return "{$key} contains an invalid entry " . var_export($segment, true) . ', expected a non empty namespace segment such as \'Mail\'.';
+            if (! is_array($allowed)) {
+                return "{$key} must be a list of {$description}, got " . var_export($allowed, true) . '.';
+            }
+
+            foreach ($allowed as $segment) {
+                if (! is_string($segment) || trim(str_replace('/', '\\', $segment), '\\') === '') {
+                    return "{$key} contains an invalid entry " . var_export($segment, true) . ", expected a non empty namespace segment such as '{$example}'.";
+                }
             }
         }
 
@@ -212,13 +310,15 @@ trait BuildsArchRules
 
     /**
      * A rule is enabled unless the config says otherwise, so an unpublished
-     * config still generates the default set. 'no_commands_in_infrastructure'
-     * is the exception and has to be turned on explicitly.
+     * config still generates the default set. The rules in $optInArchRules
+     * are the exception and have to be turned on explicitly.
      */
     protected function archRuleEnabled(string $rule): bool
     {
-        // The package does not merge its config, so the opt-in rule needs its default here too.
-        return config("clean-architecture.validation.rules.{$rule}", $rule !== 'no_commands_in_infrastructure') !== false;
+        // The package does not merge its config, so the opt-in rules need their default here too.
+        $default = ! in_array($rule, $this->optInArchRules, true);
+
+        return config("clean-architecture.validation.rules.{$rule}", $default) !== false;
     }
 
     /**

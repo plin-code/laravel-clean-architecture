@@ -131,6 +131,25 @@ describe('Generated phparkitect rules', function () {
             ->and($result['output'])->not->toContain('Fatal error');
     });
 
+    it('leaves classes outside the layers alone while the rule is off', function () {
+        $result = runPhparkitect($this->config, fixtureDirectory() . '/autoload.php');
+
+        expect($result['output'])->not->toContain('LegacyController');
+    });
+
+    it('reports a class outside the layers, once, when the rule is on', function () {
+        config()->set('clean-architecture.validation.rules.no_classes_outside_layers', true);
+
+        $result = runPhparkitect(generateFixtureConfig(), fixtureDirectory() . '/autoload.php');
+
+        expect($result['exitCode'])->toBe(1)
+            ->and($result['output'])
+            ->toContain('ArchFixture\Http\Controllers\LegacyController has 1 violations')
+            ->toContain('should reside in one of these namespaces: ArchFixture\Domain, ArchFixture\Application, ArchFixture\Infrastructure, ArchFixture\Providers')
+            ->not->toContain('AppServiceProvider')
+            ->toContain('8 violations detected');
+    });
+
     it('fails loudly instead of passing silently when autoloading does not resolve', function () {
         $result = runPhparkitect($this->config, fixtureDirectory() . '/autoload-broken.php');
 

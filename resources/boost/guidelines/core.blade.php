@@ -101,8 +101,12 @@ Read `config/clean-architecture.php` before assuming paths or namespaces:
 - `generation.web_controller_path`: where `make-controller --web` writes,
   `Http/Controllers/Web` by default. API controllers always go to
   `Http/Controllers/Api`.
-- `validation.rules`: the six rules written into `phparkitect.php`, each can be
-  turned off by name. `no_commands_in_infrastructure` is off by default.
+- `validation.rules`: the seven rules written into `phparkitect.php`, each can
+  be turned off by name. `no_commands_in_infrastructure` and
+  `no_classes_outside_layers` are off by default. The latter reports every class
+  of the root namespace (app/ with the defaults) outside the three layers.
+- `validation.outside_layers_allowed`: namespaces, relative to the root
+  namespace, that may stay outside the layers. `['Providers']` by default.
 - `validation.application_infrastructure_allowed`: infrastructure namespaces the
   application layer may import, relative to the infrastructure layer. Empty by
   default.

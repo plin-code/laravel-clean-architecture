@@ -95,4 +95,51 @@ describe('MakeArchRulesCommand', function () {
 
         expect(File::get($this->path))->toContain("ClassSet::fromDir(__DIR__ . '/src/Domain')");
     });
+
+    it('writes the outside layers rule and scans the root directory when enabled', function () {
+        config()->set('clean-architecture.validation.rules.no_classes_outside_layers', true);
+
+        $this->artisan('clean-arch:make-arch-rules')->assertExitCode(0);
+
+        $contents = File::get($this->path);
+
+        expect($contents)
+            ->toContain("->that(new ResideInOneOfTheseNamespaces('App'))")
+            ->toContain("ClassSet::fromDir(__DIR__ . '/app')")
+            ->not->toContain("ClassSet::fromDir(__DIR__ . '/app/Domain')")
+            ->and(token_get_all($contents, TOKEN_PARSE))->toBeArray();
+    });
+
+    it('fails without writing when the layers share no top level directory', function () {
+        config()->set('clean-architecture.validation.rules.no_classes_outside_layers', true);
+        config()->set('clean-architecture.directories.domain', 'src/Domain');
+
+        $this->artisan('clean-arch:make-arch-rules')
+            ->expectsOutputToContain('src/Domain, app/Application, app/Infrastructure')
+            ->assertExitCode(1);
+
+        expect(File::exists($this->path))->toBeFalse();
+    });
+
+    it('rejects an invalid outside layers allowlist without writing the config', function (mixed $allowed) {
+        config()->set('clean-architecture.validation.rules.no_classes_outside_layers', true);
+        config()->set('clean-architecture.validation.outside_layers_allowed', $allowed);
+
+        $this->artisan('clean-arch:make-arch-rules')
+            ->expectsOutputToContain('validation.outside_layers_allowed')
+            ->assertExitCode(1);
+
+        expect(File::exists($this->path))->toBeFalse();
+    })->with([
+        'a string'         => ['Providers'],
+        'an empty entry'   => [['Providers', '']],
+        'an integer entry' => [[42]],
+    ]);
+
+    it('ignores the outside layers allowlist and the directories while the rule is off', function () {
+        config()->set('clean-architecture.validation.outside_layers_allowed', 'Providers');
+        config()->set('clean-architecture.directories.domain', 'src/Domain');
+
+        $this->artisan('clean-arch:make-arch-rules')->assertExitCode(0);
+    });
 });

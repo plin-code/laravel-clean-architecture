@@ -39,7 +39,7 @@ class MakeArchRulesCommand extends Command
     {
         $this->resolveForce();
 
-        if (($error = $this->allowlistError()) !== null) {
+        if (($error = $this->allowlistError() ?? $this->rootDirectoryError()) !== null) {
             $this->error($error);
 
             return self::FAILURE;
