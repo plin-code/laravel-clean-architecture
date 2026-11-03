@@ -176,6 +176,34 @@ describe('Install with --user-in-domain', function () {
             ->and(File::get(base_path('storage/app/user-in-domain/Cached.php')))->toBe($outside);
     });
 
+    it('rewrites fully qualified references but not a longer namespace ending the same way', function () {
+        $factory = <<<'PHP'
+            <?php
+
+            namespace Database\Factories;
+
+            /**
+             * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+             */
+            class PostFactory
+            {
+                protected $model = \App\Models\User::class;
+
+                protected $other = \Vendor\App\Models\User::class;
+            }
+            PHP;
+        File::put(database_path('factories/PostFactory.php'), $factory);
+
+        $this->artisan('clean-arch:install', ['--user-in-domain' => true])
+            ->expectsOutputToContain('Updated: database/factories/PostFactory.php')
+            ->assertExitCode(0);
+
+        expect(File::get(database_path('factories/PostFactory.php')))
+            ->toContain('Factory<\App\Domain\Users\Models\User>')
+            ->toContain('$model = \App\Domain\Users\Models\User::class;')
+            ->toContain('$other = \Vendor\App\Models\User::class;');
+    });
+
     it('registers the user in a morph map once', function () {
         $this->artisan('clean-arch:install', ['--user-in-domain' => true])
             ->expectsOutputToContain('Updated: app/Providers/AppServiceProvider.php')

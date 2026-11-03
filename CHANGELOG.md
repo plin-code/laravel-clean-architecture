@@ -8,6 +8,10 @@ All notable changes to `laravel-clean-architecture` will be documented in this f
 
 - `validation.rules.no_classes_outside_layers`, off by default. The generated rules only scanned the three layer directories, so code left in `app/Http`, `app/Models`, `app/Actions` and the other Laravel folders was never read and `phparkitect check` passed on an app only partly moved into the layers. With the rule on, every class under the root namespace (`App`, from `default_namespace` and the top level directory the layers share) has to reside in a layer or in a namespace listed under the new `validation.outside_layers_allowed`, which defaults to `['Providers']` since `bootstrap/providers.php` registers the service providers there. The generated file then scans the root directory once instead of the three layers, so no class is checked twice. `clean-arch:make-arch-rules` fails without writing when the rule is on and the layers do not share a top level directory, or when the allowlist holds an invalid entry
 
+### Fixed
+
+- `clean-arch:install --user-in-domain` skipped fully qualified references with a leading backslash, such as `\App\Models\User::class` or the `Factory<\App\Models\User>` docblock Laravel 11 and 12 ship in `UserFactory`, so they kept pointing at the old class. They are now rewritten, while `Vendor\App\Models\User` is still left alone. It also scans `bootstrap/` now, `bootstrap/cache` excluded
+
 ## [3.7.1] - 2026-10-26
 
 ### Fixed

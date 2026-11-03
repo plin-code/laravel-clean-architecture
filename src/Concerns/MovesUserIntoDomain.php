@@ -13,12 +13,12 @@ use Symfony\Component\Finder\SplFileInfo;
 trait MovesUserIntoDomain
 {
     /**
-     * Directories whose PHP files may name the User class, relative to the
-     * base path.
+     * Directories whose PHP files may name a moved class, relative to the
+     * base path. bootstrap/cache is skipped, Laravel rebuilds it.
      *
      * @var list<string>
      */
-    protected array $userReferenceDirectories = ['app', 'config', 'database', 'routes', 'tests'];
+    protected array $referenceDirectories = ['app', 'bootstrap', 'config', 'database', 'routes', 'tests'];
 
     /**
      * Frontend directories scanned, never modified, for broadcast channel names.
@@ -173,7 +173,7 @@ trait MovesUserIntoDomain
 
     /**
      * PHP files of the given directories, outside any vendor or node_modules
-     * folder, keyed by their path relative to the base path.
+     * folder and bootstrap/cache, keyed by their path relative to the base path.
      *
      * @param  list<string>  $directories
      * @return array<string, SplFileInfo>
@@ -188,8 +188,10 @@ trait MovesUserIntoDomain
             }
 
             foreach ($this->files->allFiles(base_path($directory)) as $file) {
-                if ($file->getExtension() === 'php' && preg_match('#(^|/)(vendor|node_modules)/#', $file->getRelativePathname()) !== 1) {
-                    $files["{$directory}/{$file->getRelativePathname()}"] = $file;
+                $path = "{$directory}/{$file->getRelativePathname()}";
+
+                if ($file->getExtension() === 'php' && preg_match('#(^|/)(vendor|node_modules)/|^bootstrap/cache/#', $path) !== 1) {
+                    $files[$path] = $file;
                 }
             }
         }
@@ -277,14 +279,24 @@ trait MovesUserIntoDomain
      */
     protected function replaceClassReferences(string $oldClass, string $newClass): array
     {
-        $patterns = [
+        return $this->replaceReferences([
             $this->classNamePattern($oldClass)                            => $newClass,
             $this->classNamePattern(str_replace('\\', '\\\\', $oldClass)) => str_replace('\\', '\\\\', $newClass),
-        ];
+        ]);
+    }
 
+    /**
+     * Apply the patterns, in order, to every PHP file of the reference
+     * directories.
+     *
+     * @param  array<string, string>  $patterns  regular expression => literal replacement
+     * @return list<string> updated paths, relative to the base path
+     */
+    protected function replaceReferences(array $patterns): array
+    {
         $updated = [];
 
-        foreach ($this->phpFilesIn($this->userReferenceDirectories) as $path => $file) {
+        foreach ($this->phpFilesIn($this->referenceDirectories) as $path => $file) {
             $content  = $file->getContents();
             $replaced = $content;
 
@@ -303,11 +315,19 @@ trait MovesUserIntoDomain
 
     /**
      * Match a class name that is not the start of a longer one, so
-     * `App\Models\User` leaves `App\Models\UserProfile` alone.
+     * `App\Models\User` leaves `App\Models\UserProfile` alone. A fully
+     * qualified `\App\Models\User` matches too, `Vendor\App\Models\User`
+     * does not.
+     *
+     * With $prefix the name is a namespace, and a following separator is
+     * allowed, so `App\Http\Controllers` also matches the start of
+     * `App\Http\Controllers\Settings\ProfileController`.
      */
-    protected function classNamePattern(string $class): string
+    protected function classNamePattern(string $class, bool $prefix = false): string
     {
-        return '/(?<![\w\\\\])' . preg_quote($class, '/') . '(?![\w\\\\])/';
+        $after = $prefix ? '(?!\w)' : '(?![\w\\\\])';
+
+        return '/(?<!\w)(?<!\w\\\\)' . preg_quote($class, '/') . $after . '/';
     }
 
     /**
