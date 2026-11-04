@@ -4,6 +4,7 @@ namespace PlinCode\LaravelCleanArchitecture\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use PlinCode\LaravelCleanArchitecture\Concerns\MigratesAppIntoLayers;
 use PlinCode\LaravelCleanArchitecture\Concerns\MovesUserIntoDomain;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
@@ -11,6 +12,7 @@ use PlinCode\LaravelCleanArchitecture\Concerns\WritesFiles;
 
 class InstallCleanArchitectureCommand extends Command
 {
+    use MigratesAppIntoLayers;
     use MovesUserIntoDomain;
     use RendersStubs;
     use ResolvesArchitectureDirectories;
@@ -18,7 +20,8 @@ class InstallCleanArchitectureCommand extends Command
 
     protected $signature = 'clean-arch:install
                           {--force : Overwrite existing files}
-                          {--user-in-domain : Move the User model into the Domain layer (fresh apps)}';
+                          {--user-in-domain : Move the User model into the Domain layer (fresh apps)}
+                          {--migrate-app : Move the code of app/Http, app/Actions and the other Laravel folders into the layers}';
 
     protected $description = 'Install Clean Architecture structure in Laravel project';
 
@@ -36,7 +39,14 @@ class InstallCleanArchitectureCommand extends Command
 
         $this->resolveForce();
 
-        if ($this->option('user-in-domain') && ! $this->canInstallUserInDomain()) {
+        $migrateApp = (bool) $this->option('migrate-app');
+        $moveUser   = $this->option('user-in-domain') || ($migrateApp && $this->shouldMoveUserWithApp());
+
+        if ($moveUser && ! $this->canInstallUserInDomain()) {
+            return self::FAILURE;
+        }
+
+        if ($migrateApp && ! $this->canMigrateApp()) {
             return self::FAILURE;
         }
 
@@ -55,8 +65,16 @@ class InstallCleanArchitectureCommand extends Command
         // Create README
         $this->createReadme();
 
-        if ($this->option('user-in-domain')) {
+        if ($migrateApp) {
+            $this->migrateApp();
+        }
+
+        if ($moveUser) {
             $this->installUserInDomain();
+        }
+
+        if ($migrateApp) {
+            $this->reportCodeOutsideLayers();
         }
 
         $this->info('✅ Clean Architecture installed successfully!');
