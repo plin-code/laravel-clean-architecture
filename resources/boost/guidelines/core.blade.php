@@ -68,8 +68,9 @@ make-export, make-arch-rules) refuse to overwrite an existing file and exit 1.
 skip existing files instead, write the rest, and exit 0. Either way, pass
 `--force` to overwrite.
 
-On a fresh Laravel app, pass `--user-in-domain` to `clean-arch:install` to move
-`User` into `App\Domain` instead of leaving it under `App\Models`.
+`clean-arch:install --migrate-app` moves app/Http, app/Actions, app/Concerns
+and the other Laravel folders into the layers and rewrites the references.
+`--user-in-domain` moves `User` alone into `App\Domain`.
 
 ### Checking the architecture
 

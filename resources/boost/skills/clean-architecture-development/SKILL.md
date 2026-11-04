@@ -27,6 +27,17 @@ hardcode `App\Domain`: derive it from the config.
 On a fresh Laravel app, run `php artisan clean-arch:install --user-in-domain`
 to move the User model into the Domain layer before generating anything else.
 
+On an app that already has code in app/Http, app/Actions, app/Concerns or the
+other Laravel folders, such as a starter kit app, run
+`php artisan clean-arch:install --migrate-app`, then `composer dump-autoload`.
+It moves those folders into the layers, rewrites the namespaces in PHP and the
+Wayfinder imports in resources/js, and lists what it left outside the layers:
+app/Providers on purpose, app/Models when it holds more than User, and folders
+discovered by convention such as app/Policies or app/Livewire. It refuses to
+change anything when a destination exists, unless `--force` is passed.
+Regenerate the Wayfinder actions afterwards with `php artisan wayfinder:generate`,
+passing the options the Vite plugin uses.
+
 ## Adding a feature
 
 1. Generate the domain once per aggregate:

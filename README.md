@@ -79,6 +79,49 @@ The command refuses to change anything when `app/Models` holds other models (pas
 
 Laravel's own generators (`make:model`, `make:controller`, `make:request`) recreate `app/Models` and `app/Http`. After this option, use the `clean-arch:make-*` commands instead.
 
+#### 🚚 Migrating an existing app into the layers
+
+```bash
+php artisan clean-arch:install --migrate-app
+composer dump-autoload
+```
+
+Without options, `clean-arch:install` creates the layers next to the folders Laravel ships with and leaves those folders alone, so an app ends up with both `app/Http/Controllers` and `app/Infrastructure/Http/Controllers`. `--migrate-app` moves the code of those folders into the layers, rewrites the namespaces and every reference, and prints each file it moved, changed or removed. It works on a fresh app, on an app created from a starter kit (the React, Vue and Livewire kits ship folders such as `app/Http/Controllers/Settings`, `app/Http/Middleware`, `app/Http/Requests/Settings`, `app/Actions/Fortify` and `app/Concerns`), and on an app where some of these folders do not exist, which are skipped.
+
+| From | To |
+|---|---|
+| `app/Http/Controllers` | `Infrastructure/Http/Controllers` |
+| `app/Http/Middleware` | `Infrastructure/Http/Middleware` |
+| `app/Http/Requests` | `Infrastructure/Http/Requests` |
+| `app/Http/Resources` | `Infrastructure/Http/Resources` |
+| `app/Console/Commands` | `Infrastructure/Console/Commands` |
+| `app/Mail`, `app/Notifications`, `app/Observers`, `app/Exports` | `Infrastructure/Mail`, `Infrastructure/Notifications`, `Infrastructure/Observers`, `Infrastructure/Exports` |
+| `app/Actions`, `app/Services`, `app/Jobs`, `app/Listeners`, `app/Concerns` | `Application/Actions`, `Application/Services`, `Application/Jobs`, `Application/Listeners`, `Application/Concerns` |
+| `app/Models/User.php` | `Domain/Users/Models/User.php`, as with `--user-in-domain`, when `User` is the only model |
+
+The destinations follow `directories`, so with `app/Core/Infrastructure` the controllers land in `app/Core/Infrastructure/Http/Controllers`. Subfolders are kept: `app/Http/Controllers/Settings/ProfileController.php` becomes `app/Infrastructure/Http/Controllers/Settings/ProfileController.php` declaring `App\Infrastructure\Http\Controllers\Settings`.
+
+It also:
+- deletes the empty abstract `Controller` Laravel ships, so its subclasses extend the base controller `clean-arch:install` writes and the app keeps a single base controller
+- rewrites the old namespaces in the PHP files of `app/`, `bootstrap/` (without `bootstrap/cache`), `config/`, `database/`, `routes/` and `tests/`, in code, inside strings and in fully qualified names
+- adds `->withCommands([...])` for moved console commands and `->withEvents(discover: [...])` for moved listeners to `bootstrap/app.php`, since Laravel only discovers them in `app/Console/Commands` and `app/Listeners`. When `bootstrap/app.php` has no `return Application::configure(...)` line, or already calls `withEvents()` (a second call would replace its discovery paths), it prints the exact lines to add instead
+- rewrites [Wayfinder](https://github.com/laravel/wayfinder) imports in `resources/js` and `resources/ts`, `@/actions/App/Http/Controllers/...` becoming `@/actions/App/Infrastructure/Http/Controllers/...`. The generated `actions`, `routes` and `wayfinder` folders are left to Wayfinder: run `php artisan wayfinder:generate --with-form` (or the next Vite build) to regenerate them
+- removes the folders it emptied, then lists every PHP file still outside the layers
+
+What stays where it is, and why:
+- `app/Providers`: `bootstrap/providers.php` registers the providers there, and `validation.outside_layers_allowed` allows it by default.
+- `app/Models` when it holds other models besides `User`: models of one namespace name each other without imports, factories and policies are found from the model namespace, and polymorphic columns store the class name. Moving them is a decision per model, so all of them stay, `User` included, and the command says so. Move them by hand (the layout `clean-arch:make-domain` generates is a reference), or move `User` alone with `--user-in-domain --force`.
+- `app/Policies`: policy auto discovery looks in `App\Policies`. Keep it, and add `'Policies'` to `validation.outside_layers_allowed`.
+- Every other folder, such as `app/Events`, `app/Enums`, `app/Rules`, `app/Livewire`, `app/View` or `app/Filament`: Livewire, Blade components and Filament find their classes by namespace or by path, so these folders are listed and left for you to decide.
+
+Before moving anything the command checks every destination. When one already exists, including the base classes `clean-arch:install` writes (`Http/Controllers/Controller.php`, `Http/Requests/BaseRequest.php`, `Actions/BaseAction.php`, `Services/BaseService.php`), it prints every conflict and exits 1 without changing a file. A base controller with code of its own is such a conflict. `--force` replaces the destination with the file of the app, and, as always with `--force`, also overwrites the files `clean-arch:install` generates. `vendor/`, `node_modules/` and `storage/` are never touched.
+
+What it does not do:
+- It does not rewrite paths written as strings, such as `app_path('Http/Controllers')` or `__DIR__.'/../app/Console/Commands'`, nor files that are not PHP outside the Wayfinder imports (Blade views, `phpunit.xml`, `phpstan.neon`).
+- It does not sort the `use` statements it rewrites. Run your formatter afterwards.
+- It does not migrate data. A job or a listener already serialized in the queue names its old class, so drain the queue before deploying, as for [moving `User`](#-moving-user-into-the-domain-in-an-existing-app).
+- It does not run `composer dump-autoload`, Wayfinder or your tests. Run them, then turn on [`no_classes_outside_layers`](#-no-classes-outside-the-layers) to keep the app inside the layers.
+
 ### 🆕 Creating a new domain
 
 ```bash
@@ -148,7 +191,7 @@ vendor/bin/phparkitect check
 
 ### 🛠️ Available commands
 
-- `clean-arch:install {--force} {--user-in-domain}`: 🏗️ Install Clean Architecture structure, optionally moving the `User` model into the Domain layer
+- `clean-arch:install {--force} {--user-in-domain} {--migrate-app}`: 🏗️ Install Clean Architecture structure, optionally moving the `User` model into the Domain layer, or the code of the Laravel folders into the layers
 - `clean-arch:make-domain {name} {--force} {--no-base}`: 🆕 Create a complete new domain
 - `clean-arch:make-action {name} {domain} {--force} {--no-base}`: ⚡ Create a new action
 - `clean-arch:make-service {name} {--force} {--no-base}`: 🔧 Create an empty service, for logic shared by several actions
@@ -382,7 +425,7 @@ The other rules only read the three layer directories, so code left in `app/Http
 ],
 ```
 
-The rule is off by default, because a Laravel app reports its whole `app/Http` and `app/Models`, and everything else it ships outside the layers, until that code has been moved.
+The rule is off by default, because a Laravel app reports its whole `app/Http` and `app/Models`, and everything else it ships outside the layers, until that code has been moved, for example with [`clean-arch:install --migrate-app`](#-migrating-an-existing-app-into-the-layers).
 
 The root is the top level directory the three layers share, `app` with the defaults, and its namespace is derived like the layer namespaces, so `App` or the configured `default_namespace`. Layers nested deeper, such as `app/Core/Domain`, still have `app` as their root, so `app/Http` keeps being checked. When the layers do not share a top level directory (for example `src/Domain` next to `app/Application`), or one of them sits directly in the project root, `clean-arch:make-arch-rules` fails with a message and writes nothing. Turn the rule off for such a layout.
 
