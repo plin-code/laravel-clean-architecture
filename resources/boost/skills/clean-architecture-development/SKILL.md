@@ -82,6 +82,26 @@ want.
   only discovers commands in app/Console/Commands, so register the
   infrastructure ones in bootstrap/app.php with `->withCommands([...])`.
 
+Three kinds of class have no `clean-arch` generator. Create them straight in
+their layer, never in a Laravel default folder to move them afterwards:
+
+- Readonly DTOs: the `DTOs` folder of the application layer, for example
+  `php artisan make:class Application/DTOs/RegistrationData`.
+- Policies of a domain model: a `Policies` folder next to the model, for
+  example `php artisan make:class Domain/Articles/Policies/ArticlePolicy`.
+  Laravel's policy discovery walks up from the model namespace and finds it
+  there, with or without the `Models` subfolder, so nothing has to be
+  registered. `make:policy` writes to app/Policies, outside the layers. A
+  policy only imports domain classes.
+- Filament panels: a panel is an input adapter like a controller, so its
+  resources, pages and widgets go in a `Filament` folder of the infrastructure
+  layer. Point `discoverResources()`, `discoverPages()` and
+  `discoverWidgets()` of the panel provider at that folder and namespace
+  before generating anything: `make:filament-resource` then writes there by
+  itself. Its resource namespace option is ignored for a namespace the
+  panel does not discover, and the command falls back to app/Filament,
+  overwriting what is there. The panel provider stays in app/Providers.
+
 An action never receives the HTTP request: the controller passes
 `$request->validated()`, an array, and models already resolved. A readonly DTO
 is fine when several callers must normalise the same input.

@@ -346,6 +346,28 @@ class ProductsController extends Controller
 
 An action never receives the HTTP request. The controller passes `$request->validated()`, an array, and models already resolved. A readonly DTO is fine when several callers must normalise the same input.
 
+### 📍 Classes without a generator
+
+DTOs, policies and Filament panels have no `clean-arch` command. Create them straight in their layer, not in a Laravel default folder to move them afterwards.
+
+| Class | Where | How |
+|---|---|---|
+| Readonly DTO | `app/Application/DTOs` | `php artisan make:class Application/DTOs/RegistrationData` |
+| Policy of a domain model | a `Policies` folder next to the model, `app/Domain/Articles/Policies` | `php artisan make:class Domain/Articles/Policies/ArticlePolicy` |
+| Filament resources, pages, widgets | `app/Infrastructure/Filament` | `make:filament-resource`, after pointing the panel at that folder |
+
+Laravel's policy discovery walks up from the model namespace, so `App\Domain\Articles\Policies\ArticlePolicy` is found for `App\Domain\Articles\Models\Article` (and for `App\Domain\Articles\Article`) without registering anything. `make:policy` writes to `app/Policies`, outside the layers. A policy only imports domain classes, so it breaks no rule.
+
+A Filament panel is an input adapter like a controller. Point the panel provider at the infrastructure layer before generating anything:
+
+```php
+->discoverResources(in: app_path('Infrastructure/Filament/Resources'), for: 'App\\Infrastructure\\Filament\\Resources')
+->discoverPages(in: app_path('Infrastructure/Filament/Pages'), for: 'App\\Infrastructure\\Filament\\Pages')
+->discoverWidgets(in: app_path('Infrastructure/Filament/Widgets'), for: 'App\\Infrastructure\\Filament\\Widgets')
+```
+
+`make:filament-resource` then writes there by itself. Its `--resource-namespace` option is ignored for a namespace the panel does not discover: the command falls back to `app/Filament` and overwrites what is there. The panel provider itself stays in `app/Providers`.
+
 ## ⚙️ Configuration
 
 `clean-arch:install` writes `config/clean-architecture.php`. It skips any file that already exists, so editing the config or a generated base class is safe to keep across reinstalls. Pass `--force` to overwrite them instead. You can also publish the config on its own:

@@ -21,6 +21,8 @@ consistent with the configured paths.
   call an action, which holds the business logic. Laravel only discovers
   commands in app/Console/Commands, so register the infrastructure ones in
   bootstrap/app.php with `->withCommands([...])`.
+- DTOs, policies and Filament panels have no generator: the skill says
+  where each one goes.
 - An action never receives the HTTP request. The controller passes
   `$request->validated()`, an array, and models already resolved. A readonly
   DTO is fine when several callers must normalise the same input.
