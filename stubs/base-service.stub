@@ -2,8 +2,10 @@
 
 namespace {{ApplicationNamespace}}\Services;
 
+use Closure;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 abstract class BaseService
 {
@@ -14,8 +16,13 @@ abstract class BaseService
 
     /**
      * Cache a result with the given key.
+     *
+     * @template TCacheValue
+     *
+     * @param  Closure(): TCacheValue  $callback
+     * @return TCacheValue
      */
-    protected function cache(string $key, callable $callback, ?int $ttl = null)
+    protected function cache(string $key, Closure $callback, ?int $ttl = null): mixed
     {
         return Cache::remember($key, $ttl ?? $this->cacheTtl, $callback);
     }
@@ -30,6 +37,8 @@ abstract class BaseService
 
     /**
      * Log service operation.
+     *
+     * @param  array<string, mixed>  $context
      */
     protected function log(string $message, array $context = []): void
     {
@@ -40,8 +49,10 @@ abstract class BaseService
 
     /**
      * Log error during service operation.
+     *
+     * @param  array<string, mixed>  $context
      */
-    protected function logError(string $message, \Throwable $exception, array $context = []): void
+    protected function logError(string $message, Throwable $exception, array $context = []): void
     {
         Log::error($message, array_merge([
             'service' => static::class,
@@ -50,4 +61,4 @@ abstract class BaseService
             'line' => $exception->getLine(),
         ], $context));
     }
-} 
+}

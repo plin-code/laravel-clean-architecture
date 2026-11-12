@@ -6,8 +6,11 @@ namespace {{ApplicationNamespace}}\Actions\{{PluralDomainName}};
 
 class {{ActionName}}{{ActionExtends}}
 {
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function execute(array $data): {{DomainName}}
     {
         return {{DomainName}}::create($data);
     }
-} 
+}

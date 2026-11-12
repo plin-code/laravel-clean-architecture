@@ -2,8 +2,8 @@
 
 namespace {{InfrastructureNamespace}}\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 abstract class BaseRequest extends FormRequest
@@ -17,13 +17,15 @@ abstract class BaseRequest extends FormRequest
             response()->json([
                 'success' => false,
                 'message' => 'Validation errors occurred',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422)
         );
     }
 
     /**
      * Get the validation rules that apply to the request.
+     *
+     * @return array<string, mixed>
      */
     abstract public function rules(): array;
 
@@ -34,4 +36,4 @@ abstract class BaseRequest extends FormRequest
     {
         // Override this method to modify data before validation
     }
-} 
+}

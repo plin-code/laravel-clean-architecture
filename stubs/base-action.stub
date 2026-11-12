@@ -3,11 +3,14 @@
 namespace {{ApplicationNamespace}}\Actions;
 
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 abstract class BaseAction
 {
     /**
      * Log action execution.
+     *
+     * @param  array<string, mixed>  $context
      */
     protected function log(string $message, array $context = []): void
     {
@@ -18,8 +21,10 @@ abstract class BaseAction
 
     /**
      * Log error during action execution.
+     *
+     * @param  array<string, mixed>  $context
      */
-    protected function logError(string $message, \Throwable $exception, array $context = []): void
+    protected function logError(string $message, Throwable $exception, array $context = []): void
     {
         Log::error($message, array_merge([
             'action' => static::class,
@@ -28,4 +33,4 @@ abstract class BaseAction
             'line' => $exception->getLine(),
         ], $context));
     }
-} 
+}

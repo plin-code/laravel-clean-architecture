@@ -3,17 +3,27 @@
 namespace {{InfrastructureNamespace}}\Exceptions;
 
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Throwable;
 
 class ValidationException extends Exception
 {
+    /** @var array<string, mixed> */
     protected array $errors;
 
-    public function __construct(string $message = "Validation failed", array $errors = [], int $code = 422, ?\Throwable $previous = null)
+    /**
+     * @param  array<string, mixed>  $errors
+     */
+    public function __construct(string $message = 'Validation failed', array $errors = [], int $code = 422, ?Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
         $this->errors = $errors;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getErrors(): array
     {
         return $this->errors;
@@ -22,13 +32,13 @@ class ValidationException extends Exception
     /**
      * Render the exception into an HTTP response.
      */
-    public function render($request)
+    public function render(Request $request): JsonResponse
     {
         return response()->json([
             'success' => false,
             'message' => $this->getMessage(),
             'errors' => $this->errors,
-            'error_type' => 'validation_exception'
+            'error_type' => 'validation_exception',
         ], $this->getCode());
     }
-} 
+}

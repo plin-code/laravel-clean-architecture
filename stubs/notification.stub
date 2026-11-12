@@ -15,6 +15,9 @@ class {{DomainName}}Notification extends Notification
         public {{DomainName}} ${{domainVariable}}
     ) {}
 
+    /**
+     * @return list<string>
+     */
     public function via(object $notifiable): array
     {
         return ['mail'];

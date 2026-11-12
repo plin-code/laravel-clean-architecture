@@ -2,13 +2,17 @@
 
 namespace {{DomainNamespace}}\Shared;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 abstract class BaseModel extends Model
 {
-    use HasFactory, SoftDeletes;
+    /** @use HasFactory<Factory<static>> */
+    use HasFactory;
+
+    use SoftDeletes;
 
     /**
      * Indicates if the model should be timestamped.
@@ -46,4 +50,4 @@ abstract class BaseModel extends Model
 
         // Add global scopes or model events here
     }
-} 
+}

@@ -3,10 +3,13 @@
 namespace {{InfrastructureNamespace}}\Exceptions;
 
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Throwable;
 
 class BusinessLogicException extends Exception
 {
-    public function __construct(string $message = "Business logic violation", int $code = 409, ?\Throwable $previous = null)
+    public function __construct(string $message = 'Business logic violation', int $code = 409, ?Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }
@@ -14,12 +17,12 @@ class BusinessLogicException extends Exception
     /**
      * Render the exception into an HTTP response.
      */
-    public function render($request)
+    public function render(Request $request): JsonResponse
     {
         return response()->json([
             'success' => false,
             'message' => $this->getMessage(),
-            'error_type' => 'business_logic_exception'
+            'error_type' => 'business_logic_exception',
         ], $this->getCode());
     }
-} 
+}

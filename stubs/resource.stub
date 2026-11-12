@@ -2,13 +2,19 @@
 
 namespace {{InfrastructureNamespace}}\Http\Resources;
 
+use {{DomainNamespace}}\{{PluralDomainName}}{{ModelNamespace}}\{{DomainName}};
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin {{DomainName}}
+ */
 class {{DomainName}}Resource extends JsonResource
 {
     /**
      * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {
@@ -27,4 +33,4 @@ class {{DomainName}}Resource extends JsonResource
             'updated_at' => $this->updated_at?->toISOString(),
         ];
     }
-} 
+}

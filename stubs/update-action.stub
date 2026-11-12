@@ -6,6 +6,9 @@ namespace {{ApplicationNamespace}}\Actions\{{PluralDomainName}};
 
 class {{ActionName}}{{ActionExtends}}
 {
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function execute(array $data, int $id): {{DomainName}}
     {
         ${{domainVariable}} = {{DomainName}}::findOrFail($id);

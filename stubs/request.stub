@@ -2,8 +2,6 @@
 
 namespace {{InfrastructureNamespace}}\Http\Requests;
 
-use {{InfrastructureNamespace}}\Http\Requests\BaseRequest;
-
 class {{RequestName}} extends BaseRequest
 {
     /**
@@ -16,6 +14,8 @@ class {{RequestName}} extends BaseRequest
 
     /**
      * Get the validation rules that apply to the request.
+     *
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
@@ -25,10 +25,12 @@ class {{RequestName}} extends BaseRequest
             'status' => 'required|string|in:active,inactive,pending',
         ];
     }
-
     // {{#custom_messages}}
+
     /**
      * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
      */
     public function messages(): array
     {
@@ -41,4 +43,4 @@ class {{RequestName}} extends BaseRequest
         ];
     }
     // {{/custom_messages}}
-} 
+}

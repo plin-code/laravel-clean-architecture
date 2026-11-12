@@ -4,6 +4,9 @@ namespace {{Namespace}};
 
 class {{StudlyName}}Service
 {
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function getAll(): array
     {
         return {{StudlyName}}::all()->toArray();
@@ -14,14 +17,21 @@ class {{StudlyName}}Service
         return {{StudlyName}}::find($id);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function create(array $data): {{StudlyName}}
     {
         return {{StudlyName}}::create($data);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function update({{StudlyName}} ${{StudlyName}}, array $data): {{StudlyName}}
     {
         ${{StudlyName}}->update($data);
+
         return ${{StudlyName}};
     }
 
@@ -29,4 +39,4 @@ class {{StudlyName}}Service
     {
         return ${{StudlyName}}->delete();
     }
-} 
+}

@@ -3,10 +3,13 @@
 namespace {{InfrastructureNamespace}}\Exceptions;
 
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Throwable;
 
 class DomainException extends Exception
 {
-    public function __construct(string $message = "Domain exception occurred", int $code = 400, ?\Throwable $previous = null)
+    public function __construct(string $message = 'Domain exception occurred', int $code = 400, ?Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }
@@ -22,12 +25,12 @@ class DomainException extends Exception
     /**
      * Render the exception into an HTTP response.
      */
-    public function render($request)
+    public function render(Request $request): JsonResponse
     {
         return response()->json([
             'success' => false,
             'message' => $this->getMessage(),
-            'error_type' => 'domain_exception'
+            'error_type' => 'domain_exception',
         ], $this->getCode());
     }
-} 
+}

@@ -7,11 +7,17 @@ use Illuminate\Support\Collection;
 
 class {{DomainName}}Export
 {
+    /**
+     * @return Collection<int, {{DomainName}}>
+     */
     public function collection(): Collection
     {
         return {{DomainName}}::all();
     }
 
+    /**
+     * @return list<string>
+     */
     public function headings(): array
     {
         return [

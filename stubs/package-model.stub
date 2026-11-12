@@ -2,11 +2,13 @@
 
 namespace {{Namespace}};
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class {{StudlyName}} extends Model
 {
+    /** @use HasFactory<Factory<self>> */
     use HasFactory;
 
     protected $fillable = [
@@ -18,4 +20,4 @@ class {{StudlyName}} extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
-} 
+}
