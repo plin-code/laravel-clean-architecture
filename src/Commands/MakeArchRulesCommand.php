@@ -48,10 +48,21 @@ class MakeArchRulesCommand extends Command
         $exitCode = $this->writeOrFail(base_path('phparkitect.php'), $this->renderConfig(), 'phparkitect.php');
 
         if ($exitCode === self::SUCCESS) {
-            $this->line('Install phparkitect with "composer require --dev phparkitect/phparkitect", then run "vendor/bin/phparkitect check".');
+            $this->line($this->phparkitectInstalled()
+                ? 'Run "vendor/bin/phparkitect check".'
+                : 'Install phparkitect with "composer require --dev phparkitect/phparkitect", then run "vendor/bin/phparkitect check".');
         }
 
         return $exitCode;
+    }
+
+    /**
+     * Whether the application has phparkitect's binary, the one the hint
+     * tells the user to run.
+     */
+    protected function phparkitectInstalled(): bool
+    {
+        return $this->files->exists(base_path('vendor/bin/phparkitect'));
     }
 
     /**

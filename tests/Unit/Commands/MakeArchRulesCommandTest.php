@@ -96,6 +96,28 @@ describe('MakeArchRulesCommand', function () {
         expect(File::get($this->path))->toContain("ClassSet::fromDir(__DIR__.'/src/Domain')");
     });
 
+    it('does not tell how to install phparkitect when the app has it', function () {
+        // The testbench app links the package vendor, where phparkitect is installed.
+        $this->artisan('clean-arch:make-arch-rules')
+            ->expectsOutput('Run "vendor/bin/phparkitect check".')
+            ->doesntExpectOutputToContain('composer require')
+            ->assertExitCode(0);
+    });
+
+    it('tells how to install phparkitect when the app does not have it', function () {
+        $app = sys_get_temp_dir() . '/clean-arch-no-phparkitect-' . uniqid();
+        File::ensureDirectoryExists($app);
+        $this->app->setBasePath($app);
+
+        try {
+            $this->artisan('clean-arch:make-arch-rules')
+                ->expectsOutput('Install phparkitect with "composer require --dev phparkitect/phparkitect", then run "vendor/bin/phparkitect check".')
+                ->assertExitCode(0);
+        } finally {
+            File::deleteDirectory($app);
+        }
+    });
+
     it('imports the classes the autoload guard checks, in pint order', function () {
         $this->artisan('clean-arch:make-arch-rules')->assertExitCode(0);
 
