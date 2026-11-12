@@ -64,6 +64,19 @@ passing the options the Vite plugin uses.
 
 4. Wire the observer in a service provider, not in the domain model.
 
+These generators assume a CRUD on a domain model. `make-domain` writes the
+whole set with fixed columns, `make-mail`, `make-notification`, `make-job`,
+`make-listener`, `make-export` and `make-controller` take the name of a domain
+and import its model, and `make-action` writes a body that creates the model.
+When the class is not that (a mail named after an event, a controller that
+renders one page, a domain that needs only its model, migration and factory),
+do not generate and then delete or rewrite: create the class straight in its
+layer with `php artisan make:class`, such as
+`php artisan make:class Infrastructure/Mail/RegistrationConfirmedMail`, and
+the migration and factory with Laravel's own generators. `make-action` is
+still worth running for the file, the namespace and the base class: replace
+its body.
+
 The single file commands (`make-action`, `make-service`, `make-controller`,
 `make-observer`, `make-listener`, `make-job`, `make-mail`, `make-notification`,
 `make-export`, `make-arch-rules`) refuse to overwrite an existing file and exit
