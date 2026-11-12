@@ -81,8 +81,8 @@ class InstallCleanArchitectureCommand extends Command
         $this->newLine();
         $this->info('Next steps:');
         $this->info('1. Run: composer dump-autoload');
-        $this->info('2. Create your first domain: php artisan clean-arch:make-domain Users');
-        $this->info('3. Check the generated README.md for documentation');
+        $this->info('2. Create your first domain: php artisan clean-arch:make-domain Product');
+        $this->info('3. Read the generated CLEAN_ARCHITECTURE.md');
 
         return self::SUCCESS;
     }

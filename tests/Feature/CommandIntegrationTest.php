@@ -49,6 +49,16 @@ describe('Command Integration', function () {
         }
     });
 
+    it('closes the install with next steps that match the generated files', function () {
+        $this->artisan('clean-arch:install')
+            ->expectsOutput('2. Create your first domain: php artisan clean-arch:make-domain Product')
+            ->expectsOutput('3. Read the generated CLEAN_ARCHITECTURE.md')
+            ->doesntExpectOutputToContain('README.md')
+            ->assertExitCode(0);
+
+        expect(File::exists(base_path('CLEAN_ARCHITECTURE.md')))->toBeTrue();
+    });
+
     it('runs install command', function () {
         $this->artisan('clean-arch:install')
             ->assertExitCode(0);
