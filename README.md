@@ -165,18 +165,20 @@ Delegating brings something the previous hand written analyser could not do: inh
 The generated file opens with a check that looks out of place until it saves you:
 
 ```php
-if (! class_exists(\Illuminate\Console\Command::class)
-    || ! class_exists(\App\Domain\Shared\BaseModel::class)) {
+use App\Domain\Shared\BaseModel;
+use Illuminate\Console\Command;
+
+if (! class_exists(Command::class) || ! class_exists(BaseModel::class)) {
     throw new RuntimeException(
         'clean-architecture: autoloading does not resolve the application classes, '
-        . 'so the reflection based rules would pass silently. Run composer dump-autoload.'
+        .'so the reflection based rules would pass silently. Run composer dump-autoload.'
     );
 }
 ```
 
 Two of the rules are reflection based. When autoloading does not resolve the classes being scanned, `is_a()` reads an unloadable class as "not a subclass", so those rules report nothing and phparkitect exits 0. In CI that is indistinguishable from a clean run. The guard turns that case into a failure with a message, and it costs nothing because it runs before the scan.
 
-The class it names is the one `clean-arch:install` generates for your domain layer. If you rename or remove it, the guard fires even with a sound autoloader. That is a false alarm, and it is the right way round to be wrong: a false alarm is loud and the message says what to look at, a silent pass is neither. Point the check at another class of yours and keep it.
+The `BaseModel` it imports is the one `clean-arch:install` generates for your domain layer. If you rename or remove it, the guard fires even with a sound autoloader. That is a false alarm, and it is the right way round to be wrong: a false alarm is loud and the message says what to look at, a silent pass is neither. Point the import at another class of yours and keep it.
 
 #### 📋 Adopting it on an existing codebase
 

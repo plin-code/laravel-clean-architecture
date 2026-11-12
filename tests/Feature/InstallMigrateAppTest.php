@@ -315,7 +315,7 @@ describe('Install with --migrate-app', function () {
 
         $result = checkMigratedAppWithOutsideLayersRule();
 
-        expect(File::get(base_path('phparkitect.php')))->toContain("ClassSet::fromDir(__DIR__ . '/app')")
+        expect(File::get(base_path('phparkitect.php')))->toContain("ClassSet::fromDir(__DIR__.'/app')")
             ->and($result['output'])->toContain('No violations detected')
             ->and($result['exitCode'])->toBe(0, $result['output']);
     });

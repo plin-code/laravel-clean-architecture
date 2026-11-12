@@ -45,7 +45,7 @@ trait WritesFiles
             return;
         }
 
-        $this->files->put($path, $content);
+        $this->files->put($path, $this->sortImports($path, $content));
         $this->info("Created: {$label}");
     }
 
@@ -68,9 +68,37 @@ trait WritesFiles
             return self::FAILURE;
         }
 
-        $this->files->put($path, $content);
+        $this->files->put($path, $this->sortImports($path, $content));
         $this->info("Created: {$label}");
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Sort the top level `use` block of a generated PHP file the way Pint's
+     * `ordered_imports` fixer does with the laravel preset: alphabetically,
+     * case insensitive, comparing namespace separators as spaces.
+     *
+     * The order depends on the rendered names (the domain plural, the
+     * configured root namespace), so a stub cannot fix it once for all.
+     * Indented `use` lines, the traits of a class, are left alone, and so
+     * is every file that is not PHP.
+     */
+    protected function sortImports(string $path, string $content): string
+    {
+        if (! str_ends_with($path, '.php')) {
+            return $content;
+        }
+
+        return preg_replace_callback('/^(?:use [^\s;]+;\n)+/m', function (array $block): string {
+            $imports = explode("\n", rtrim($block[0], "\n"));
+
+            usort($imports, fn (string $a, string $b): int => strcasecmp(
+                str_replace('\\', ' ', $a),
+                str_replace('\\', ' ', $b),
+            ));
+
+            return implode("\n", $imports) . "\n";
+        }, $content) ?? $content;
     }
 }

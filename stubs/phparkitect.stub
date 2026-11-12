@@ -17,6 +17,8 @@ use Arkitect\Expression\ForClasses\NotDependsOnTheseNamespaces;
 use Arkitect\Expression\ForClasses\NotHaveNameMatching;
 use Arkitect\Expression\ForClasses\ResideInOneOfTheseNamespaces;
 use Arkitect\Rules\Rule;
+use Illuminate\Console\Command;
+use {{DomainNamespace}}\Shared\BaseModel;
 
 return static function (Config $config): void {
 {{AutoloadGuard}}

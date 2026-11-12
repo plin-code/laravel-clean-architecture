@@ -36,7 +36,7 @@ describe('MakeArchRulesCommand', function () {
             ->toContain("new ResideInOneOfTheseNamespaces('App\\\\Domain')")
             ->toContain("new NotHaveNameMatching('*Observer')")
             ->not->toContain("new IsNotA('Illuminate\\\\Console\\\\Command')")
-            ->toContain("ClassSet::fromDir(__DIR__ . '/app/Domain')");
+            ->toContain("ClassSet::fromDir(__DIR__.'/app/Domain')");
     });
 
     it('refuses to overwrite an existing config without force', function () {
@@ -93,7 +93,24 @@ describe('MakeArchRulesCommand', function () {
 
         $this->artisan('clean-arch:make-arch-rules')->assertExitCode(0);
 
-        expect(File::get($this->path))->toContain("ClassSet::fromDir(__DIR__ . '/src/Domain')");
+        expect(File::get($this->path))->toContain("ClassSet::fromDir(__DIR__.'/src/Domain')");
+    });
+
+    it('imports the classes the autoload guard checks, in pint order', function () {
+        $this->artisan('clean-arch:make-arch-rules')->assertExitCode(0);
+
+        expect(File::get($this->path))
+            ->toContain("use App\\Domain\\Shared\\BaseModel;\nuse Arkitect\\ClassSet;")
+            ->toContain("use Arkitect\\Rules\\Rule;\nuse Illuminate\\Console\\Command;\n");
+    });
+
+    it('points the guard at the configured domain namespace', function () {
+        config()->set('clean-architecture.directories.domain', 'app/Core/Domain');
+        config()->set('clean-architecture.default_namespace', 'Acme');
+
+        $this->artisan('clean-arch:make-arch-rules')->assertExitCode(0);
+
+        expect(File::get($this->path))->toContain("use Acme\\Core\\Domain\\Shared\\BaseModel;\nuse Arkitect\\ClassSet;");
     });
 
     it('writes the outside layers rule and scans the root directory when enabled', function () {
@@ -105,8 +122,8 @@ describe('MakeArchRulesCommand', function () {
 
         expect($contents)
             ->toContain("->that(new ResideInOneOfTheseNamespaces('App'))")
-            ->toContain("ClassSet::fromDir(__DIR__ . '/app')")
-            ->not->toContain("ClassSet::fromDir(__DIR__ . '/app/Domain')")
+            ->toContain("ClassSet::fromDir(__DIR__.'/app')")
+            ->not->toContain("ClassSet::fromDir(__DIR__.'/app/Domain')")
             ->and(token_get_all($contents, TOKEN_PARSE))->toBeArray();
     });
 

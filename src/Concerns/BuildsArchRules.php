@@ -182,7 +182,7 @@ trait BuildsArchRules
 
         // The layers sit inside the root, so scanning it alone checks every class once.
         if ($this->archRuleEnabled('no_classes_outside_layers') && $root !== null) {
-            return "    \$config->add(ClassSet::fromDir(__DIR__ . '/{$root}'), ...\$rules);";
+            return "    \$config->add(ClassSet::fromDir(__DIR__.'/{$root}'), ...\$rules);";
         }
 
         $calls = [];
@@ -190,7 +190,7 @@ trait BuildsArchRules
         foreach (['domain', 'application', 'infrastructure'] as $layer) {
             $directory = $this->layerDirectory($layer);
 
-            $calls[] = "    \$config->add(ClassSet::fromDir(__DIR__ . '/{$directory}'), ...\$rules);";
+            $calls[] = "    \$config->add(ClassSet::fromDir(__DIR__.'/{$directory}'), ...\$rules);";
         }
 
         return implode("\n", $calls);
@@ -211,18 +211,15 @@ trait BuildsArchRules
      */
     protected function autoloadGuard(): string
     {
-        $target = $this->layerNamespace('domain') . 'Shared\\BaseModel';
-
-        return <<<PHP
+        return <<<'PHP'
                 // The IsNotA rules below are reflection based. With autoloading broken they
                 // report nothing and phparkitect exits 0, which is indistinguishable from a
-                // pass. Fail here instead. Change the application class named below if you
-                // renamed or removed it.
-                if (! class_exists(\\Illuminate\\Console\\Command::class)
-                    || ! class_exists(\\{$target}::class)) {
+                // pass. Fail here instead. Change the BaseModel import above if you renamed
+                // or removed that class.
+                if (! class_exists(Command::class) || ! class_exists(BaseModel::class)) {
                     throw new RuntimeException(
                         'clean-architecture: autoloading does not resolve the application classes, '
-                        . 'so the reflection based rules would pass silently. Run composer dump-autoload.'
+                        .'so the reflection based rules would pass silently. Run composer dump-autoload.'
                     );
                 }
             PHP;

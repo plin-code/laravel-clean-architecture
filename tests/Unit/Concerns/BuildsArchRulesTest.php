@@ -128,18 +128,10 @@ describe('BuildsArchRules', function () {
             ->and(implode("\n", $rules))->not->toContain("NotHaveNameMatching('*Observer')");
     });
 
-    it('emits an autoload guard naming a framework class and an application class', function () {
+    it('emits an autoload guard checking a framework class and an application class', function () {
         expect(buildAutoloadGuard())
-            ->toContain('class_exists(\\Illuminate\\Console\\Command::class)')
-            ->toContain('App\\Domain\\Shared\\BaseModel')
+            ->toContain('! class_exists(Command::class) || ! class_exists(BaseModel::class)')
             ->toContain('throw new RuntimeException');
-    });
-
-    it('points the guard at the configured domain namespace', function () {
-        config()->set('clean-architecture.directories.domain', 'app/Core/Domain');
-        config()->set('clean-architecture.default_namespace', 'Acme');
-
-        expect(buildAutoloadGuard())->toContain('Acme\\Core\\Domain\\Shared\\BaseModel');
     });
 
     it('explains in a comment why the guard exists and how to change it', function () {
@@ -256,7 +248,7 @@ describe('BuildsArchRules', function () {
         expect(buildArchRules()[5])
             ->toContain("->that(new ResideInOneOfTheseNamespaces('App'))")
             ->toContain("'App\\\\Core\\\\Domain'")
-            ->and(buildArchClassSets())->toBe("    \$config->add(ClassSet::fromDir(__DIR__ . '/app'), ...\$rules);");
+            ->and(buildArchClassSets())->toBe("    \$config->add(ClassSet::fromDir(__DIR__.'/app'), ...\$rules);");
     });
 
     it('scans the root directory once instead of the layers when the outside layers rule is enabled', function () {
@@ -264,7 +256,7 @@ describe('BuildsArchRules', function () {
 
         config()->set('clean-architecture.validation.rules.no_classes_outside_layers', true);
 
-        expect(buildArchClassSets())->toBe("    \$config->add(ClassSet::fromDir(__DIR__ . '/app'), ...\$rules);");
+        expect(buildArchClassSets())->toBe("    \$config->add(ClassSet::fromDir(__DIR__.'/app'), ...\$rules);");
     });
 
     it('skips the outside layers rule when the layers share no top level directory', function (array $directories) {
