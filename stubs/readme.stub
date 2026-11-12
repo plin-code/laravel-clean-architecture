@@ -33,17 +33,20 @@ app/
 ## Principles
 
 ### 1. Domain Layer
+
 - Contains business logic
 - Does not depend on the Application or Infrastructure layers
 - Depends on Eloquent: models generated here extend `{{DomainNamespace}}\Shared\BaseModel`, which extends `Illuminate\Database\Eloquent\Model`
 - Includes models, enums, domain events
 
 ### 2. Application Layer
+
 - Use case orchestration
 - Depends only on Domain Layer
 - Includes actions and application services
 
 ### 3. Infrastructure Layer
+
 - Implementation of technical details
 - Depends on Application and Domain Layers
 - Includes controllers, repositories, external services
@@ -54,7 +57,7 @@ app/
 - `php artisan clean-arch:make-action {name} {domain}` - Create a new action
 - `php artisan clean-arch:make-service {name}` - Create a new service
 - `php artisan clean-arch:make-controller {name}` - Create a new controller
-- `php artisan clean-arch:make-observer {name}` - Create a new observer
+- `php artisan clean-arch:make-observer {name} {domain}` - Create a new observer
 - `php artisan clean-arch:make-listener {name}` - Create a new listener
 - `php artisan clean-arch:make-job {name}` - Create a new job
 - `php artisan clean-arch:make-mail {name}` - Create a new mail
@@ -73,18 +76,21 @@ app/
 ## Examples
 
 ### Creating a new domain
+
 ```bash
 php artisan clean-arch:make-domain Product
 ```
 
 ### Using an action
+
 ```php
 class ProductsController extends Controller
 {
     public function store(CreateProductRequest $request): ProductResource
     {
         $product = $this->createProductAction->execute($request->validated());
+
         return new ProductResource($product);
     }
 }
-``` 
+```

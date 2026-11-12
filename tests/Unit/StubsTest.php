@@ -191,4 +191,41 @@ describe('Stub Files', function () {
 
         expect($config)->toContain("'model_directory' => 'Models'");
     });
+
+    it('readme stub follows the markdown layout prettier writes', function () {
+        $content = file_get_contents($this->stubsPath . '/readme.stub');
+        $lines   = explode("\n", $content);
+        $inFence = false;
+
+        expect($content)->toEndWith("```\n")->not->toEndWith("\n\n");
+
+        foreach ($lines as $index => $line) {
+            expect($line)->toBe(rtrim($line), 'Trailing whitespace on line ' . ($index + 1));
+
+            $previous = $lines[$index - 1] ?? '';
+
+            if (str_starts_with($line, '```')) {
+                if (! $inFence) {
+                    expect($previous)->toBe('', 'A code fence needs a blank line above it, line ' . ($index + 1));
+                }
+
+                $inFence = ! $inFence;
+
+                continue;
+            }
+
+            if ($inFence || $index === 0) {
+                continue;
+            }
+
+            if (str_starts_with($line, '#')) {
+                expect($previous)->toBe('', 'A heading needs a blank line above it, line ' . ($index + 1))
+                    ->and($lines[$index + 1] ?? '')->toBe('', 'A heading needs a blank line below it, line ' . ($index + 1));
+            }
+
+            if (preg_match('/^(- |\d+\. )/', $line) && ! preg_match('/^(- |\d+\. )/', $previous)) {
+                expect($previous)->toBe('', 'A list needs a blank line above it, line ' . ($index + 1));
+            }
+        }
+    });
 });
