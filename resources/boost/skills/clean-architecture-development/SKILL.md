@@ -82,7 +82,7 @@ want.
   only discovers commands in app/Console/Commands, so register the
   infrastructure ones in bootstrap/app.php with `->withCommands([...])`.
 
-Three kinds of class have no `clean-arch` generator. Create them straight in
+Four kinds of class have no `clean-arch` generator. Create them straight in
 their layer, never in a Laravel default folder to move them afterwards:
 
 - Readonly DTOs: the `DTOs` folder of the application layer, for example
@@ -93,6 +93,15 @@ their layer, never in a Laravel default folder to move them afterwards:
   there, with or without the `Models` subfolder, so nothing has to be
   registered. `make:policy` writes to app/Policies, outside the layers. A
   policy only imports domain classes.
+- Domain exceptions: an `Exceptions` folder next to the model, for example
+  `App\Domain\Articles\Exceptions\ArticleAlreadyPublishedException`, created
+  with `php artisan make:class Domain/Articles/Exceptions/ArticleAlreadyPublishedException`.
+  Make it extend PHP's `DomainException`, so the domain imports nothing from
+  the other layers, throw it from the action, and map it to an HTTP response
+  in the infrastructure layer, for example in `->withExceptions()` of
+  bootstrap/app.php. Never throw the exceptions `install` writes to
+  `App\Infrastructure\Exceptions` from an action or a model: importing them
+  breaks the layer rules.
 - Filament panels: a panel is an input adapter like a controller, so its
   resources, pages and widgets go in a `Filament` folder of the infrastructure
   layer. Point `discoverResources()`, `discoverPages()` and
@@ -152,3 +161,12 @@ the root namespace.
     vendor/bin/phparkitect check
 
 The baseline records today's violations and `check` then fails only on new ones.
+
+## Installing this skill with Boost
+
+Boost asks whether to add a newly installed package only when `boost:update`
+runs in an interactive terminal. Run without interaction, or from a Composer
+script such as `post-update-cmd`, it skips the question and leaves the package
+out. Add `plin-code/laravel-clean-architecture` to the packages list of
+boost.json, then run `php artisan boost:update` again: Boost installs the
+guideline and this skill, and records the skill name in boost.json itself.

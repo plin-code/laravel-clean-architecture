@@ -350,15 +350,18 @@ An action never receives the HTTP request. The controller passes `$request->vali
 
 ### 📍 Classes without a generator
 
-DTOs, policies and Filament panels have no `clean-arch` command. Create them straight in their layer, not in a Laravel default folder to move them afterwards.
+DTOs, policies, domain exceptions and Filament panels have no `clean-arch` command. Create them straight in their layer, not in a Laravel default folder to move them afterwards.
 
 | Class | Where | How |
 |---|---|---|
 | Readonly DTO | `app/Application/DTOs` | `php artisan make:class Application/DTOs/RegistrationData` |
 | Policy of a domain model | a `Policies` folder next to the model, `app/Domain/Articles/Policies` | `php artisan make:class Domain/Articles/Policies/ArticlePolicy` |
+| Domain exception | an `Exceptions` folder next to the model, `app/Domain/Articles/Exceptions` | `php artisan make:class Domain/Articles/Exceptions/ArticleAlreadyPublishedException` |
 | Filament resources, pages, widgets | `app/Infrastructure/Filament` | `make:filament-resource`, after pointing the panel at that folder |
 
 Laravel's policy discovery walks up from the model namespace, so `App\Domain\Articles\Policies\ArticlePolicy` is found for `App\Domain\Articles\Models\Article` (and for `App\Domain\Articles\Article`) without registering anything. `make:policy` writes to `app/Policies`, outside the layers. A policy only imports domain classes, so it breaks no rule.
+
+A domain exception, `App\Domain\Articles\Exceptions\ArticleAlreadyPublishedException`, states a broken business rule. Make it extend PHP's `DomainException` (or another SPL exception), so the domain still imports nothing from the other layers, and have an action throw it. Turning it into an HTTP response is the job of the infrastructure layer, for example with `->withExceptions()` in `bootstrap/app.php`. The `DomainException`, `BusinessLogicException` and `ValidationException` that `clean-arch:install` writes to `Infrastructure/Exceptions` cannot be thrown from an action or a model: importing them breaks `application_no_infrastructure_imports` or `domain_no_infrastructure_imports`.
 
 A Filament panel is an input adapter like a controller. Point the panel provider at the infrastructure layer before generating anything:
 
@@ -561,7 +564,17 @@ This package ships AI guidelines and an agent skill for [Laravel Boost](https://
 - `resources/boost/guidelines/core.blade.php`, a short always in context brief on the three layers, the dependency direction and the `clean-arch:*` commands.
 - `resources/boost/skills/clean-architecture-development/SKILL.md`, loaded on demand, covering how to generate a domain, where each class belongs, and how to keep `phparkitect check` green.
 
-Install Boost 2.5 or higher with `composer require laravel/boost --dev` then `php artisan boost:install`, selecting this package when Boost asks which third party guidelines and skills to install. On an app that already has Boost installed, `php artisan boost:update --discover` offers the newly detected package.
+Install Boost 2.5 or higher with `composer require laravel/boost --dev` then `php artisan boost:install`, selecting this package when Boost asks which third party guidelines and skills to install.
+
+On an app that already has Boost installed, `php artisan boost:update` offers the newly detected package only when it runs in an interactive terminal. Run without interaction, or from a Composer script such as the `post-update-cmd` the Laravel skeleton ships, it skips the question and leaves the package out, so neither the guideline nor the skill is installed. In that case add the package to `packages` in `boost.json` yourself, then run the update again:
+
+```json
+"packages": [
+    "plin-code/laravel-clean-architecture"
+]
+```
+
+Boost then installs the guideline and the `clean-architecture-development` skill, and records the skill under `skills` in `boost.json` by itself. This was checked against Boost 2.10.
 
 ## 🛠️ Development
 
