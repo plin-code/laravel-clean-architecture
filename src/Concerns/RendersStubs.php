@@ -123,16 +123,15 @@ trait RendersStubs
     /**
      * Replacements driving the optional `BaseService` extension.
      *
-     * The import placeholder carries its own newline, so dropping it leaves no
-     * blank line behind in the generated file.
+     * A service sits in the namespace of `BaseService`, so extending it needs
+     * no import.
      *
      * @return array<string, string>
      */
     protected function baseServiceReplacements(bool $extend): array
     {
         return [
-            '{{ServiceBaseImport}}' => $extend ? "use {$this->layerNamespace('application')}Services\\BaseService;\n" : '',
-            '{{ServiceExtends}}'    => $extend ? ' extends BaseService' : '',
+            '{{ServiceExtends}}' => $extend ? ' extends BaseService' : '',
         ];
     }
 

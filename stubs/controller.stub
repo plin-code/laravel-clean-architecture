@@ -7,7 +7,6 @@ use {{ApplicationNamespace}}\Actions\{{PluralDomainName}}\Update{{DomainName}}Ac
 use {{ApplicationNamespace}}\Actions\{{PluralDomainName}}\Delete{{DomainName}}Action;
 use {{ApplicationNamespace}}\Actions\{{PluralDomainName}}\GetById{{DomainName}}Action;
 use {{ApplicationNamespace}}\Actions\{{PluralDomainName}}\List{{PluralDomainName}}Action;
-use {{DomainNamespace}}\{{PluralDomainName}}{{ModelNamespace}}\{{DomainName}};
 use {{InfrastructureNamespace}}\Http\Controllers\Controller;
 use {{InfrastructureNamespace}}\Http\Requests\Create{{DomainName}}Request;
 use {{InfrastructureNamespace}}\Http\Requests\Update{{DomainName}}Request;
@@ -28,26 +27,26 @@ class {{PluralDomainName}}Controller extends Controller
     public function index(Request $request): JsonResponse
     {
         ${{domainVariable}}s = $this->list{{PluralDomainName}}Action->execute();
-        
+
         return response()->json([
             'data' => {{DomainName}}Resource::collection(${{domainVariable}}s),
-            'message' => '{{PluralDomainName}} retrieved successfully'
+            'message' => '{{PluralDomainName}} retrieved successfully',
         ]);
     }
 
     public function show(int $id): JsonResponse
     {
         ${{domainVariable}} = $this->get{{DomainName}}ByIdAction->execute($id);
-        
-        if (!${{domainVariable}}) {
+
+        if (! ${{domainVariable}}) {
             return response()->json([
-                'message' => '{{DomainName}} not found'
+                'message' => '{{DomainName}} not found',
             ], 404);
         }
-        
+
         return response()->json([
             'data' => new {{DomainName}}Resource(${{domainVariable}}),
-            'message' => '{{DomainName}} retrieved successfully'
+            'message' => '{{DomainName}} retrieved successfully',
         ]);
     }
 
@@ -57,26 +56,26 @@ class {{PluralDomainName}}Controller extends Controller
 
         return response()->json([
             'data' => new {{DomainName}}Resource(${{domainVariable}}),
-            'message' => '{{DomainName}} created successfully'
+            'message' => '{{DomainName}} created successfully',
         ], 201);
     }
 
     public function update(Update{{DomainName}}Request $request, int $id): JsonResponse
     {
         ${{domainVariable}} = $this->update{{DomainName}}Action->execute($request->validated(), $id);
-        
+
         return response()->json([
             'data' => new {{DomainName}}Resource(${{domainVariable}}),
-            'message' => '{{DomainName}} updated successfully'
+            'message' => '{{DomainName}} updated successfully',
         ]);
     }
 
     public function destroy(int $id): JsonResponse
     {
         $this->delete{{DomainName}}Action->execute($id);
-        
+
         return response()->json([
-            'message' => '{{DomainName}} deleted successfully'
+            'message' => '{{DomainName}} deleted successfully',
         ]);
     }
-} 
+}

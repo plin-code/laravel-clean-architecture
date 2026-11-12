@@ -2,7 +2,7 @@
 
 namespace {{ApplicationNamespace}}\Services;
 
-{{ServiceBaseImport}}/**
+/**
  * A service holds logic shared by several actions. A single query belongs
  * in the action that needs it, not here.
  */

@@ -101,11 +101,12 @@ describe('Stub Files', function () {
             ->not->toContain('{{DomainNamespace}}');
     });
 
-    it('service stub carries the optional BaseService import placeholder', function () {
+    it('service stub extends BaseService without importing it from its own namespace', function () {
         $content = file_get_contents($this->stubsPath . '/service.stub');
 
         expect($content)
-            ->toContain('{{ServiceBaseImport}}')
+            ->toContain('{{ServiceExtends}}')
+            ->not->toContain('use ')
             ->not->toContain('// {{#base_class}}');
     });
 

@@ -16,7 +16,7 @@ class {{ControllerName}} extends Controller
     {
         // Get {{domainVariable}} list logic here
         ${{domainVariable}}s = collect(); // Replace with actual data
-        
+
         return view('{{domainVariable}}.index', compact('{{domainVariable}}s'));
     }
 
@@ -40,7 +40,7 @@ class {{ControllerName}} extends Controller
         ]);
 
         // Create {{domainVariable}} logic here
-        
+
         return redirect()->route('{{domainVariable}}.index')
             ->with('success', '{{DomainName}} created successfully.');
     }
@@ -52,7 +52,7 @@ class {{ControllerName}} extends Controller
     {
         // Get specific {{domainVariable}} logic here
         ${{domainVariable}} = null; // Replace with actual data
-        
+
         return view('{{domainVariable}}.show', compact('{{domainVariable}}'));
     }
 
@@ -63,7 +63,7 @@ class {{ControllerName}} extends Controller
     {
         // Get specific {{domainVariable}} logic here
         ${{domainVariable}} = null; // Replace with actual data
-        
+
         return view('{{domainVariable}}.edit', compact('{{domainVariable}}'));
     }
 
@@ -79,7 +79,7 @@ class {{ControllerName}} extends Controller
         ]);
 
         // Update {{domainVariable}} logic here
-        
+
         return redirect()->route('{{domainVariable}}.index')
             ->with('success', '{{DomainName}} updated successfully.');
     }
@@ -90,8 +90,8 @@ class {{ControllerName}} extends Controller
     public function destroy(string $id): RedirectResponse
     {
         // Delete {{domainVariable}} logic here
-        
+
         return redirect()->route('{{domainVariable}}.index')
             ->with('success', '{{DomainName}} deleted successfully.');
     }
-} 
+}

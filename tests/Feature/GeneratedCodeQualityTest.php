@@ -125,6 +125,23 @@ describe('Generated code quality', function () {
         cleanQualitySample();
     });
 
+    it('passes pint with the laravel preset', function (array $config) {
+        cleanQualitySample();
+        $this->sample = generateQualitySample($config);
+
+        File::put("{$this->sample}/pint.json", json_encode(['preset' => 'laravel']));
+
+        $root   = dirname(__DIR__, 2);
+        $result = runQualityTool([
+            $root . '/vendor/bin/pint',
+            '--test',
+            '--config=' . "{$this->sample}/pint.json",
+            $this->sample,
+        ]);
+
+        expect($result['exitCode'])->toBe(0, $result['output']);
+    })->with('generator configurations');
+
     it('passes phpstan level 7 with larastan', function (array $config) {
         cleanQualitySample();
         $this->sample = generateQualitySample($config);

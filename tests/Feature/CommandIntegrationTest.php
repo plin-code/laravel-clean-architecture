@@ -448,7 +448,8 @@ describe('Command Integration', function () {
         $content = File::get($path);
 
         expect($content)
-            ->toContain('use App\Application\Services\BaseService;')
+            ->not->toContain('use App\Application\Services\BaseService;')
+            ->toContain('namespace App\Application\Services;')
             ->toContain('class ProductService extends BaseService');
     });
 

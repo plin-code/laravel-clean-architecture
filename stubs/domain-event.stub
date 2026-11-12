@@ -14,4 +14,4 @@ class {{EventName}}
     public function __construct(
         public {{DomainName}} ${{domainVariable}}
     ) {}
-} 
+}

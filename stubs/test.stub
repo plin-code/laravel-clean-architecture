@@ -22,17 +22,17 @@ class {{PluralDomainName}}Test extends TestCase
         $response = $this->postJson('/api/{{domain-table}}', $data);
 
         $response->assertStatus(201)
-                ->assertJsonStructure([
-                    'data' => [
-                        'id',
-                        'name',
-                        'description',
-                        'status',
-                        'created_at',
-                        'updated_at',
-                    ],
-                    'message'
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'name',
+                    'description',
+                    'status',
+                    'created_at',
+                    'updated_at',
+                ],
+                'message',
+            ]);
 
         $this->assertDatabaseHas('{{domain-table}}', [
             'name' => 'Test {{DomainName}}',
@@ -47,19 +47,19 @@ class {{PluralDomainName}}Test extends TestCase
         $response = $this->getJson('/api/{{domain-table}}');
 
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        '*' => [
-                            'id',
-                            'name',
-                            'description',
-                            'status',
-                            'created_at',
-                            'updated_at',
-                        ]
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'name',
+                        'description',
+                        'status',
+                        'created_at',
+                        'updated_at',
                     ],
-                    'message'
-                ]);
+                ],
+                'message',
+            ]);
     }
 
     public function test_can_get_single_{{domainVariable}}(): void
@@ -69,17 +69,17 @@ class {{PluralDomainName}}Test extends TestCase
         $response = $this->getJson("/api/{{domain-table}}/{${{domainVariable}}->id}");
 
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        'id',
-                        'name',
-                        'description',
-                        'status',
-                        'created_at',
-                        'updated_at',
-                    ],
-                    'message'
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'name',
+                    'description',
+                    'status',
+                    'created_at',
+                    'updated_at',
+                ],
+                'message',
+            ]);
     }
 
     public function test_can_update_{{domainVariable}}(): void
@@ -120,12 +120,12 @@ class {{PluralDomainName}}Test extends TestCase
     {
         $data = [
             'name' => '', // Required field
-            'status' => 'invalid_status', // Invalid enum value
+            'status' => 'invalid_status', // Invalid enum value,
         ];
 
         $response = $this->postJson('/api/{{domain-table}}', $data);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['name', 'status']);
+            ->assertJsonValidationErrors(['name', 'status']);
     }
-} 
+}
