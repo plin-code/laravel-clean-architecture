@@ -2,11 +2,11 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
-## [Unreleased]
+## [3.8.1] - 2026-11-16
 
 ### Fixed
 
-- The Boost skill gave two opposite answers on sending mail from an action: one section said to add an interface and never widen `validation.application_infrastructure_allowed`, another offered that list for mail and notifications. The interface is now the default, with a mail example, and the list is described as a choice the project has already written in its config, not a way to make a violation go away
+- The Boost skill gave two opposite answers on sending mail from an action: one section said to add an interface, another offered `validation.application_infrastructure_allowed`. The interface is now the default, with a mail example. The allow list is a choice the project has already written in its config, not a way to make a violation go away
 
 ## [3.8.0] - 2026-11-16
 
