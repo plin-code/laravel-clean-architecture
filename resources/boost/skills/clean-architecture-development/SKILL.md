@@ -151,12 +151,16 @@ implement it one layer out and bind the two in a service provider. Do not widen
 
 1. Move the class to the layer it belongs to, or put an interface in the
    application layer and the implementation in the infrastructure layer.
-2. If the import is a deliberate side effect, such as sending mail or a
-   notification straight from an action, list the namespace in
+2. Only when the project has decided that actions send mail or notifications
+   straight from the infrastructure layer, list the namespace in
    `validation.application_infrastructure_allowed` (values are relative to the
    infrastructure layer, for example `['Mail', 'Notifications']`), then
    regenerate the rules with `--force`. Everything else in the infrastructure
-   layer stays reported.
+   layer stays reported. This is a choice of the project, written in its
+   config: when the list is empty, do not add to it to make a violation go
+   away, use the interface of point 1. For a mail that is an interface in the
+   application layer, such as `RegistrationNotifier`, with the class that
+   sends the mail in the infrastructure layer.
 
 Do not turn a rule off in `validation.rules` to silence a single violation: that
 hides every other violation of the same rule.
