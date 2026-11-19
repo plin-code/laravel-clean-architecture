@@ -2,6 +2,21 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
+## [3.8.2] - 2026-11-19
+
+### Changed
+
+- The README is shorter and three guides moved to `docs/`: `migrating-an-existing-app.md` (`--user-in-domain`, `--migrate-app`, what to check on an app in production), `architecture-validation.md` (phparkitect, the autoload guard, the baseline, the validation rules) and `configuration.md` (every key of the config). The README keeps its headings, each with a summary and a link, plus a table of all config keys with their defaults
+- New README section "Generating single classes", with the file each `make-*` command writes and the naming rules: a suffix the name already carries is not doubled, `make-listener` writes `*EventListener.php`, `make-controller` generates an API controller unless `--web` is passed
+
+### Fixed
+
+- The README is checked against the code. The link to "Model directory" was broken, `clean-arch:make-domain User` was the running example although Laravel already ships that model (now `Product`), `make-controller` and `make-service` were listed among the commands reading `generation.model_directory`, `bootstrap/` was missing from the folders `--user-in-domain` rewrites, and `clean-arch:generate-package --path=` was not documented
+
+### Removed
+
+- The `clean-architecture-stubs` publish tag. The generators only read the stubs shipped in the package, so a published copy never had any effect. `vendor:publish --provider=...` now publishes the config only. If you published the stubs, you can delete `stubs/clean-architecture`
+
 ## [3.8.1] - 2026-11-16
 
 ### Fixed
