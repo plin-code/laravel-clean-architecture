@@ -34,14 +34,6 @@ A Laravel package to easily implement Clean Architecture in your projects.
 composer require plin-code/laravel-clean-architecture
 ```
 
-## ⚙️ Configuration
-
-Publish the configuration files and stubs:
-
-```bash
-php artisan vendor:publish --provider="PlinCode\LaravelCleanArchitecture\CleanArchitectureServiceProvider"
-```
-
 ## 🎯 Usage
 
 ### 🏗️ Installing Clean Architecture structure
@@ -52,9 +44,11 @@ php artisan clean-arch:install
 
 This command will create:
 - 📁 Folder structure for Domain, Application and Infrastructure layers
-- 🧩 Base classes (BaseModel, BaseAction, BaseService, etc.)
-- ⚙️ Configuration file
-- 📖 Documentation
+- 🧩 Base classes (`BaseModel`, `Controller`, `BaseRequest`, `BaseAction`, `BaseService`) and three exceptions in `Infrastructure/Exceptions`
+- ⚙️ Configuration file, `config/clean-architecture.php`
+- 📖 Documentation, `CLEAN_ARCHITECTURE.md` in the project root
+
+Files that already exist are skipped, so the command is safe to run again. Pass `--force` to overwrite them.
 
 #### 👤 Moving the `User` model into the Domain
 
@@ -68,14 +62,14 @@ Laravel keeps `User` in `app/Models`, outside the directories the generated phpa
 It also:
 - keeps `User` an `Authenticatable`, it does not extend `BaseModel` (whose `SoftDeletes` needs a `deleted_at` column the `users` table does not have)
 - adds `newFactory()` to the model and a `$model` property to `database/factories/UserFactory.php`, since the factory resolver derives both names from the old namespace
-- rewrites `App\Models\User` in the PHP files of `app/`, `config/`, `database/`, `routes/` and `tests/`, in code and inside strings, and prints every file it changed
+- rewrites `App\Models\User` in the PHP files of `app/`, `bootstrap/` (without `bootstrap/cache`), `config/`, `database/`, `routes/` and `tests/`, in code and inside strings, and prints every file it changed
 - registers `Relation::morphMap(['user' => User::class])` in `AppServiceProvider::boot()`, so polymorphic `*_type` columns store `user` instead of a namespace
 - renames the `App.Models.User.{id}` broadcast channel in `routes/channels.php`
-- removes `app/Models` and `app/Http` once they hold nothing but the default empty base controller
+- removes `app/Models` once it is empty, and `app/Http` when all it holds is the default base controller and no file in `app/` or `routes/` uses it
 
 It does not touch `vendor/`, `node_modules/` or `storage/`, and it does not migrate data. If `resources/js` or `resources/ts` listens on `App.Models.User.{id}`, the command warns and names the files. Those Echo listeners have to be renamed by hand.
 
-The command refuses to change anything when `app/Models` holds other models (pass `--force` to move `User` anyway) or when both the source and the destination exist. For an app that is already running in production, read [Moving `User` into the Domain in an existing app](#-moving-user-into-the-domain-in-an-existing-app) first.
+The command refuses to change anything when `app/Models` holds other models (pass `--force` to move `User` anyway), when both the source and the destination exist, or when neither does. For an app that is already running in production, read [Moving `User` into the Domain in an existing app](#-moving-user-into-the-domain-in-an-existing-app) first.
 
 Laravel's own generators (`make:model`, `make:controller`, `make:request`) recreate `app/Models` and `app/Http`. After this option, use the `clean-arch:make-*` commands instead.
 
@@ -125,7 +119,7 @@ What it does not do:
 ### 🆕 Creating a new domain
 
 ```bash
-php artisan clean-arch:make-domain User
+php artisan clean-arch:make-domain Product
 ```
 
 This command will generate:
@@ -144,6 +138,29 @@ After generating the core files, `make-domain` prompts interactively for optiona
 
 `make-domain` does not touch your routes. When it finishes it prints the `Route::apiResource()` line for the generated controller, which the generated feature test calls under `/api`. Add it to `routes/api.php`. A fresh Laravel app has no such file: `php artisan install:api` creates it and registers it in `bootstrap/app.php`, and it also installs Sanctum.
 
+Do not generate a `User` domain on an app that still has Laravel's own `User`: the model, the factory and the `users` migration already exist. Move that model with [`--user-in-domain`](#-moving-the-user-model-into-the-domain) instead.
+
+### 🧩 Generating single classes
+
+Each class `make-domain` writes can also be generated on its own. With the default configuration:
+
+| Command | File written |
+|---|---|
+| `clean-arch:make-action PublishArticle Article` | `app/Application/Actions/Articles/PublishArticleAction.php` |
+| `clean-arch:make-service Pricing` | `app/Application/Services/PricingService.php` |
+| `clean-arch:make-controller Article` | `app/Infrastructure/Http/Controllers/Api/ArticlesController.php` |
+| `clean-arch:make-controller Report --web` | `app/Infrastructure/Http/Controllers/Web/ReportController.php` |
+| `clean-arch:make-observer Article Article` | `app/Infrastructure/Observers/Articles/ArticleObserver.php` |
+| `clean-arch:make-listener Article` | `app/Application/Listeners/ArticleEventListener.php` |
+| `clean-arch:make-job Article` | `app/Application/Jobs/ProcessArticleJob.php` |
+| `clean-arch:make-mail Article` | `app/Infrastructure/Mail/ArticleMail.php` |
+| `clean-arch:make-notification Article` | `app/Infrastructure/Notifications/ArticleNotification.php` |
+| `clean-arch:make-export Article` | `app/Infrastructure/Exports/ArticleExport.php` |
+
+The second argument of `make-action` and `make-observer` is the domain the class belongs to. A suffix the name already carries is not doubled, so `make-mail ArticleMail` and `make-mail Article` write the same file.
+
+`make-controller` generates an API controller unless `--web` is passed, and both when `--api` and `--web` are passed together. The API controller takes the plural name, the web one keeps the name as given. A name containing `/` or `\` is rejected: nested controller directories are not supported.
+
 ### ✅ Architecture validation
 
 Architectural rules are enforced by [phparkitect](https://github.com/phparkitect/arkitect). The package does not depend on it and does not run it: it generates a configuration file from `config/clean-architecture.php`, and your project runs the tool.
@@ -158,7 +175,7 @@ vendor/bin/phparkitect check
 
 `phparkitect check` exits 1 when it finds violations, which is what you want in CI. Rules can be disabled one by one, see [Validation rules](#-validation-rules).
 
-Delegating brings something the previous hand written analyser could not do: inheritance chains are followed. A console command extending a project specific base class that itself extends `Illuminate\Console\Command` is now reported, and so is a job extending an abstract base job that implements `ShouldQueue`.
+phparkitect follows inheritance chains. A job extending an abstract base job that implements `ShouldQueue` is reported by `no_jobs_in_infrastructure`, and with `no_commands_in_infrastructure` on, so is a console command extending a project specific base class that itself extends `Illuminate\Console\Command`.
 
 #### 🛡️ The autoload guard
 
@@ -205,13 +222,14 @@ vendor/bin/phparkitect check
 - `clean-arch:make-notification {name} {--force}`: 🔔 Create a new notification
 - `clean-arch:make-export {name} {--force}`: 📤 Create a new export
 - `clean-arch:make-arch-rules {--force}`: 🛡️ Generate a phparkitect config from the configured rules
-- `clean-arch:generate-package {name} {vendor} {--force}`: 📦 Generate a new package
+- `clean-arch:generate-package {name} {vendor} {--path=} {--force}`: 📦 Generate a new package in `packages/{vendor}/{name}`, or in `--path`
 
 ### 📂 Project structure after `clean-arch:install`
 
 ```
 app/
 ├── Domain/                          # Business logic (Eloquent models, enums, events)
+│   └── Shared/                      # BaseModel
 ├── Application/                     # Use cases and orchestration
 │   ├── Actions/
 │   ├── Services/
@@ -242,41 +260,45 @@ Laravel only auto-discovers commands in `app/Console/Commands`, so register the 
 ])
 ```
 
-### 📂 Generated structure after `clean-arch:make-domain User`
+<a id="-generated-structure-after-clean-archmake-domain-user"></a>
+
+### 📂 Generated structure after `clean-arch:make-domain Product`
 
 The model sits in a `Models` subfolder by default. Set `generation.model_directory` to change or drop it, see [Model directory](#-model-directory).
 
 ```
 app/
 ├── Domain/
-│   └── Users/
+│   └── Products/
 │       ├── Models/
-│       │   └── User.php
+│       │   └── Product.php
 │       ├── Enums/
-│       │   └── UserStatus.php
+│       │   └── ProductStatus.php
 │       └── Events/
-│           ├── UserCreated.php
-│           ├── UserUpdated.php
-│           └── UserDeleted.php
+│           ├── ProductCreated.php
+│           ├── ProductUpdated.php
+│           └── ProductDeleted.php
 ├── Application/
-│   ├── Actions/
-│   │   └── Users/
-│   │       ├── CreateUserAction.php
-│   │       ├── UpdateUserAction.php
-│   │       ├── DeleteUserAction.php
-│   │       ├── GetByIdUserAction.php
-│   │       └── ListUsersAction.php
+│   └── Actions/
+│       └── Products/
+│           ├── CreateProductAction.php
+│           ├── UpdateProductAction.php
+│           ├── DeleteProductAction.php
+│           ├── GetByIdProductAction.php
+│           └── ListProductsAction.php
 └── Infrastructure/
     └── Http/
         ├── Controllers/
         │   └── Api/
-        │       └── UsersController.php
+        │       └── ProductsController.php
         ├── Requests/
-        │   ├── CreateUserRequest.php
-        │   └── UpdateUserRequest.php
+        │   ├── CreateProductRequest.php
+        │   └── UpdateProductRequest.php
         └── Resources/
-            └── UserResource.php
+            └── ProductResource.php
 ```
+
+Outside `app/`, the command writes `database/factories/ProductFactory.php`, a `create_products_table` migration and `tests/Feature/Products/ProductsTest.php`.
 
 ## 🏛️ Clean Architecture Principles
 
@@ -373,6 +395,8 @@ A Filament panel is an input adapter like a controller. Point the panel provider
 
 `make:filament-resource` then writes there by itself. Its `--resource-namespace` option is ignored for a namespace the panel does not discover: the command falls back to `app/Filament` and overwrites what is there. The panel provider itself stays in `app/Providers`.
 
+<a id="&#xFE0F;-configuration-1"></a>
+
 ## ⚙️ Configuration
 
 `clean-arch:install` writes `config/clean-architecture.php`. It skips any file that already exists, so editing the config or a generated base class is safe to keep across reinstalls. Pass `--force` to overwrite them instead. You can also publish the config on its own:
@@ -399,7 +423,7 @@ Every `make-*` command and `clean-arch:generate-package` follow the same rule fo
 
 When the config file is not published, the defaults above are used.
 
-The package does not edit your autoloader. Laravel maps `App\` to `app/` in `composer.json`, which covers every directory under `app/` as long as `default_namespace` stays `App`. Any other combination needs a PSR-4 entry of its own, otherwise the classes are generated but cannot be loaded:
+The package does not add PSR-4 entries for you. The only change `clean-arch:install` makes to `composer.json` is restoring the `"App\\": "app/"` entry when it is missing. Laravel maps `App\` to `app/` in `composer.json`, which covers every directory under `app/` as long as `default_namespace` stays `App`. Any other combination needs a PSR-4 entry of its own, otherwise the classes are generated but cannot be loaded:
 
 | Configuration | Generated namespace | Entry to add under `autoload.psr-4` |
 |---|---|---|
@@ -494,9 +518,9 @@ php artisan clean-arch:make-domain Brand --no-base
 
 The `BaseService` and `BaseAction` classes created by `clean-arch:install` remain in `Application/Services` and `Application/Actions` regardless. Only the `extends` clause and its `use` statement are omitted.
 
-### 🗂️ Model directory
+### 📂 Model directory
 
-`generation.model_directory` (default `'Models'`) controls the subfolder the domain model is generated under, inside each domain's directory. It is read by every command that writes or imports the model, `make-domain` as well as the standalone `make-action`, `make-controller`, `make-export`, `make-job`, `make-mail`, `make-notification`, `make-observer` and `make-service`, so a domain stays consistent no matter which command touches it next.
+`generation.model_directory` (default `'Models'`) controls the subfolder the domain model is generated under, inside each domain's directory. It is read by every command that writes or imports the model, `make-domain` and `clean-arch:install --user-in-domain` as well as the standalone `make-action`, `make-export`, `make-job`, `make-mail`, `make-notification` and `make-observer`, so a domain stays consistent no matter which command touches it next.
 
 ```php
 'generation' => [
@@ -512,9 +536,9 @@ Set it to `null` or an empty string to generate the model directly inside the do
 ],
 ```
 
-`clean-arch:make-domain User` then writes `app/Domain/Users/User.php`, declaring `App\Domain\Users\User`, instead of `app/Domain/Users/Models/User.php` declaring `App\Domain\Users\Models\User`.
+`clean-arch:make-domain Product` then writes `app/Domain/Products/Product.php`, declaring `App\Domain\Products\Product`, instead of `app/Domain/Products/Models/Product.php` declaring `App\Domain\Products\Models\Product`.
 
-Any other single segment replaces `Models`, for example `'Entities'` produces `app/Domain/Users/Entities/User.php` declaring `App\Domain\Users\Entities\User`. Surrounding slashes are trimmed, so `'/Entities/'` behaves the same as `'Entities'`.
+Any other single segment replaces `Models`, for example `'Entities'` produces `app/Domain/Products/Entities/Product.php` declaring `App\Domain\Products\Entities\Product`. Surrounding slashes are trimmed, so `'/Entities/'` behaves the same as `'Entities'`.
 
 ### ⚙️ Job prefix
 
@@ -557,7 +581,7 @@ Two more notes:
 - `enforceMorphMap()` is stricter than `morphMap()`, it throws on any polymorphic model that is not mapped. It is the right call once every polymorphic model of the app is in the map, and a source of exceptions while packages such as an activity log or a media library still register their own.
 - Laravel's generators recreate `app/Models` and `app/Http`. Use the `clean-arch:make-*` commands once the move is done.
 
-### 🤖 AI guidelines (Laravel Boost)
+## 🤖 AI guidelines (Laravel Boost)
 
 This package ships AI guidelines and an agent skill for [Laravel Boost](https://github.com/laravel/boost), at the paths the Boost documentation gives package authors:
 
