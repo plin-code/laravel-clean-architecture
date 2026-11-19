@@ -43,10 +43,6 @@ class CleanArchitectureServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishes([
-            __DIR__ . '/../stubs' => base_path('stubs/clean-architecture'),
-        ], 'clean-architecture-stubs');
-
-        $this->publishes([
             __DIR__ . '/../config/clean-architecture.php' => config_path('clean-architecture.php'),
         ], 'clean-architecture-config');
     }
