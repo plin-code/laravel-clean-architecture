@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-clean-architecture` will be documented in this file.
 
+## [3.8.3] - 2026-11-24
+
+### Added
+
+- The Boost skill has a new section, "The shape of a use case". The layer rules only check imports, so it names three shapes they cannot see: an action is named after a verb and a subject and exposes only `execute()`, a listener hands the event to an action without querying or writing, and a Filament action that calls an action sets both `visible()` and `authorize()`. It also names the third case for contracts: a capability several models share is an interface in the domain layer that the models implement
+
 ## [3.8.2] - 2026-11-19
 
 ### Changed
