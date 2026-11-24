@@ -141,6 +141,23 @@ When an action needs an outer service, or the domain needs something it does
 not own such as a feature flag, add an interface in the layer that needs it,
 implement it one layer out and bind the two in a service provider. Do not widen
 `validation.application_infrastructure_allowed` to skip the interface.
+A capability several models share, such as having SEO fields, is an interface
+in the domain layer that the models implement.
+
+## The shape of a use case
+
+The layer rules only check imports, so a class can sit in the right layer and
+still be in the wrong shape. Three shapes to keep:
+
+- An action is named after a verb and a subject, such as
+  `PublishArticleAction`, and `execute()` is its only public method. A second
+  public method is a second use case: write another action.
+- A listener turns an event into a call to an action. It runs no query and
+  writes nothing: the use case belongs to the action, where it can be tested
+  and called from elsewhere.
+- A Filament action that calls an action sets both `visible()` and
+  `authorize()`. `visible()` alone hides the button, while the Livewire call
+  behind it stays reachable.
 
 ## Keeping the rules green
 
