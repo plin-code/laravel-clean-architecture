@@ -94,7 +94,9 @@ describe('Command Registration', function () {
             ->toHaveKey('clean-arch:make-job')
             ->toHaveKey('clean-arch:make-mail')
             ->toHaveKey('clean-arch:make-notification')
-            ->toHaveKey('clean-arch:make-export');
+            ->toHaveKey('clean-arch:make-export')
+            ->toHaveKey('clean-arch:make-arch-rules')
+            ->toHaveKey('clean-arch:make-arch-tests');
     });
 
     it('has command instances that extend laravel command class', function () {

@@ -1,0 +1,66 @@
+<?php
+
+/**
+ * Classes declared under a folder of a layer, read from disk.
+ *
+ * The architecture tests take their classes from here instead of a list
+ * written by hand, so a new class is checked the day it is created.
+ *
+ * The paths are built from __DIR__ and not from app_path(): datasets call
+ * this while PHPUnit collects the files, before the Laravel container exists.
+ *
+ * Interfaces, traits and enums are returned too: the caller keeps the kind
+ * it checks.
+ *
+ * @param  'domain'|'application'|'infrastructure'  $layer
+ * @return list<string>
+ */
+function cleanArchClassesIn(string $layer, string $folder = ''): array
+{
+    // Written by clean-arch:make-arch-tests from config/clean-architecture.php.
+    // Regenerate this file with --force after moving a layer.
+    $layers = [
+        'domain' => ['{{DomainDirectory}}', '{{DomainNamespace}}'],
+        'application' => ['{{ApplicationDirectory}}', '{{ApplicationNamespace}}'],
+        'infrastructure' => ['{{InfrastructureDirectory}}', '{{InfrastructureNamespace}}'],
+    ];
+
+    [$directory, $namespace] = $layers[$layer];
+
+    $layerPath = dirname(__DIR__, 2).'/'.$directory;
+
+    // A layer that is not where this file expects it would leave every test
+    // with nothing to check, and a test with nothing to check passes.
+    if (! is_dir($layerPath)) {
+        throw new RuntimeException("The {$layer} layer was not found in {$directory}.");
+    }
+
+    $path = rtrim($layerPath.'/'.$folder, '/');
+
+    // An application without listeners, for example, has nothing to check.
+    if (! is_dir($path)) {
+        return [];
+    }
+
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
+    );
+
+    $classes = [];
+
+    foreach ($files as $file) {
+        if ($file->getExtension() !== 'php') {
+            continue;
+        }
+
+        $classes[] = $namespace.'\\'.str_replace(
+            [DIRECTORY_SEPARATOR, '.php'],
+            ['\\', ''],
+            substr($file->getPathname(), strlen($layerPath) + 1),
+        );
+    }
+
+    sort($classes);
+
+    return $classes;
+}
