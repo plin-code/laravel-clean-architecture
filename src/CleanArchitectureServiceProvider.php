@@ -7,6 +7,7 @@ use PlinCode\LaravelCleanArchitecture\Commands\GeneratePackageCommand;
 use PlinCode\LaravelCleanArchitecture\Commands\InstallCleanArchitectureCommand;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeActionCommand;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeArchRulesCommand;
+use PlinCode\LaravelCleanArchitecture\Commands\MakeArchTestsCommand;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeControllerCommand;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeDomainCommand;
 use PlinCode\LaravelCleanArchitecture\Commands\MakeExportCommand;
@@ -35,6 +36,7 @@ class CleanArchitectureServiceProvider extends ServiceProvider
                 MakeNotificationCommand::class,
                 MakeExportCommand::class,
                 MakeArchRulesCommand::class,
+                MakeArchTestsCommand::class,
                 GeneratePackageCommand::class,
             ]);
         }

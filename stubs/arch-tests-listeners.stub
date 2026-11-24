@@ -1,0 +1,68 @@
+<?php
+
+require_once __DIR__.'/Classes.php';
+
+/*
+|--------------------------------------------------------------------------
+| Listeners
+|--------------------------------------------------------------------------
+|
+| A listener turns an event into a call to an action. The use case, with
+| its queries and its writes, belongs to the action, where it can be tested
+| and called from elsewhere.
+|
+| A listener that holds a whole use case passes the layer rules, because it
+| sits in the right layer and imports only what it may. So this test reads
+| the tokens of each listener and looks for the method names that read from
+| or write to the database.
+|
+| It matches names, not types: a method of your own called update() is
+| reported too, and a query behind a name that is not listed is not.
+|
+*/
+
+/**
+ * Method names that run a query or persist a model, on an Eloquent model,
+ * a relation or a builder.
+ */
+$queryOrWrite = '/^(query|newQuery|where\w*|orWhere\w*|find\w*|first\w*|sole|pluck|exists|doesntExist|chunk\w*|lazy\w*|cursor|paginate|simplePaginate|save\w*|update\w*|delete\w*|forceDelete\w*|restore\w*|create\w*|insert\w*|upsert|increment\w*|decrement\w*|fill|forceFill|touch\w*|sync\w*|attach|detach|associate|dissociate)$/i';
+
+$listeners = fn (): array => array_values(array_filter(
+    cleanArchClassesIn('application', 'Listeners'),
+    'class_exists',
+));
+
+// Pest rejects an empty dataset, and an application may have no listeners yet.
+if ($listeners() === []) {
+    return;
+}
+
+it('neither queries nor writes', function (string $listener) use ($queryOrWrite) {
+    $tokens = array_values(array_filter(
+        PhpToken::tokenize((string) file_get_contents((string) (new ReflectionClass($listener))->getFileName())),
+        fn (PhpToken $token): bool => ! $token->is([T_WHITESPACE, T_COMMENT, T_DOC_COMMENT]),
+    ));
+
+    $found = [];
+
+    foreach ($tokens as $i => $token) {
+        $previous = $tokens[$i - 1] ?? null;
+        $next = $tokens[$i + 1] ?? null;
+
+        if ($token->is([T_STRING, T_NAME_FULLY_QUALIFIED])
+            && ltrim($token->text, '\\') === 'DB'
+            && $next?->is(T_DOUBLE_COLON)) {
+            $found[] = "DB:: on line {$token->line}";
+        }
+
+        // A name after -> or :: and before an opening parenthesis is a call.
+        if ($token->is(T_STRING)
+            && $previous?->is([T_OBJECT_OPERATOR, T_NULLSAFE_OBJECT_OPERATOR, T_DOUBLE_COLON])
+            && $next?->text === '('
+            && preg_match($queryOrWrite, $token->text) === 1) {
+            $found[] = "{$token->text}() on line {$token->line}";
+        }
+    }
+
+    expect($found)->toBe([], "{$listener} queries or writes (".implode(', ', $found).'): move that work into an action');
+})->with($listeners);

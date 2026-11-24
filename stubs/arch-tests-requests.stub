@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Foundation\Http\FormRequest;
+
+require_once __DIR__.'/Classes.php';
+
+/*
+|--------------------------------------------------------------------------
+| Form requests
+|--------------------------------------------------------------------------
+|
+| Laravel calls rules() only when the request has it. A form request
+| without rules() validates nothing and validated() returns an empty array,
+| with no error to say so.
+|
+| Abstract classes, such as BaseRequest, are left out.
+|
+*/
+
+$requests = fn (): array => array_values(array_filter(
+    cleanArchClassesIn('infrastructure', 'Http/Requests'),
+    fn (string $class): bool => class_exists($class)
+        && is_subclass_of($class, FormRequest::class)
+        && ! (new ReflectionClass($class))->isAbstract(),
+));
+
+// Pest rejects an empty dataset, and an application may have no form requests yet.
+if ($requests() === []) {
+    return;
+}
+
+it('defines its rules', function (string $request) {
+    expect(method_exists($request, 'rules'))->toBeTrue("{$request} has no rules(): it validates nothing");
+})->with($requests);

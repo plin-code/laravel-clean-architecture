@@ -1,0 +1,151 @@
+<?php
+
+/**
+ * Directory and namespace of each layer.
+ *
+ * Written by clean-arch:make-arch-tests from config/clean-architecture.php.
+ * Regenerate this file with --force after moving a layer.
+ *
+ * @return array{0: string, 1: string}
+ */
+function cleanArchLayer(string $layer): array
+{
+    $layers = [
+        'domain' => ['{{DomainDirectory}}', '{{DomainNamespace}}'],
+        'application' => ['{{ApplicationDirectory}}', '{{ApplicationNamespace}}'],
+        'infrastructure' => ['{{InfrastructureDirectory}}', '{{InfrastructureNamespace}}'],
+    ];
+
+    [$directory, $namespace] = $layers[$layer];
+
+    return [dirname(__DIR__, 2).'/'.$directory, $namespace];
+}
+
+/**
+ * Classes declared under a folder of a layer, read from disk.
+ *
+ * The architecture tests take their classes from here instead of a list
+ * written by hand, so a new class is checked the day it is created.
+ *
+ * The paths are built from __DIR__ and not from app_path(): datasets call
+ * this while PHPUnit collects the files, before the Laravel container exists.
+ *
+ * Interfaces, traits and enums are returned too: the caller keeps the kind
+ * it checks.
+ *
+ * @param  'domain'|'application'|'infrastructure'  $layer
+ * @return list<string>
+ */
+function cleanArchClassesIn(string $layer, string $folder = ''): array
+{
+    [$layerPath, $namespace] = cleanArchLayer($layer);
+
+    // A layer that is not where this file expects it would leave every test
+    // with nothing to check, and a test with nothing to check passes.
+    if (! is_dir($layerPath)) {
+        throw new RuntimeException("The {$layer} layer was not found in {$layerPath}.");
+    }
+
+    $path = rtrim($layerPath.'/'.$folder, '/');
+
+    // An application without listeners, for example, has nothing to check.
+    if (! is_dir($path)) {
+        return [];
+    }
+
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
+    );
+
+    $classes = [];
+
+    foreach ($files as $file) {
+        if ($file->getExtension() !== 'php') {
+            continue;
+        }
+
+        $classes[] = $namespace.'\\'.str_replace(
+            [DIRECTORY_SEPARATOR, '.php'],
+            ['\\', ''],
+            substr($file->getPathname(), strlen($layerPath) + 1),
+        );
+    }
+
+    sort($classes);
+
+    return $classes;
+}
+
+/**
+ * Class names a class of a layer refers to, read from the tokens of its
+ * file: the imports at the top and the fully qualified names in the body.
+ *
+ * The file is read, not loaded, so a class that cannot be autoloaded is
+ * still checked. A name built in a string, such as a class name read from
+ * the config, is not seen.
+ *
+ * @param  'domain'|'application'|'infrastructure'  $layer
+ * @return list<string>
+ */
+function cleanArchNamesUsedBy(string $layer, string $class): array
+{
+    [$layerPath, $namespace] = cleanArchLayer($layer);
+
+    $file = $layerPath.str_replace('\\', '/', substr($class, strlen($namespace))).'.php';
+
+    $tokens = array_values(array_filter(
+        PhpToken::tokenize((string) file_get_contents($file)),
+        fn (PhpToken $token): bool => ! $token->is([T_WHITESPACE, T_COMMENT, T_DOC_COMMENT]),
+    ));
+
+    $names = [];
+    $depth = 0;
+
+    foreach ($tokens as $i => $token) {
+        // The braces of "{$name}" in a string open with their own tokens.
+        if ($token->text === '{' || $token->is([T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES])) {
+            $depth++;
+        }
+
+        if ($token->text === '}') {
+            $depth--;
+        }
+
+        if ($token->is(T_NAME_FULLY_QUALIFIED)) {
+            $names[] = ltrim($token->text, '\\');
+        }
+
+        // A top level "use" is an import. Inside a class it is a trait, and
+        // before a parenthesis it binds the variables of a closure.
+        if (! $token->is(T_USE) || $depth !== 0 || $tokens[$i + 1]->text === '(') {
+            continue;
+        }
+
+        // "use A\{B, C};" imports A\B and A\C.
+        $group = '';
+
+        for ($j = $i + 1; $tokens[$j]->text !== ';'; $j++) {
+            if ($tokens[$j]->is(T_AS)) {
+                $j++;
+
+                continue;
+            }
+
+            if (! $tokens[$j]->is([T_STRING, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED])) {
+                continue;
+            }
+
+            $name = ltrim($tokens[$j]->text, '\\');
+
+            if ($tokens[$j + 1]->is(T_NS_SEPARATOR)) {
+                $group = $name.'\\';
+
+                continue;
+            }
+
+            $names[] = $group.$name;
+        }
+    }
+
+    return array_values(array_unique($names));
+}

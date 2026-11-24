@@ -1,0 +1,49 @@
+<?php
+
+require_once __DIR__.'/Classes.php';
+
+/*
+|--------------------------------------------------------------------------
+| Actions
+|--------------------------------------------------------------------------
+|
+| An action is one use case: a class named {Verb}{Subject}Action whose only
+| public entry point is execute(). The layer rules cannot see either of the
+| two, because a class with five public methods imports the same things.
+|
+| Abstract classes, such as BaseAction, are not use cases and are left out.
+| So is any class under Actions that is not named *Action, such as a value
+| an action takes or returns.
+|
+*/
+
+$actions = fn (): array => array_values(array_filter(
+    cleanArchClassesIn('application', 'Actions'),
+    fn (string $class): bool => str_ends_with($class, 'Action')
+        && class_exists($class)
+        && ! (new ReflectionClass($class))->isAbstract(),
+));
+
+// Pest rejects an empty dataset, and an application may have no actions yet.
+if ($actions() === []) {
+    return;
+}
+
+it('is named after a verb and a subject', function (string $action) {
+    // At least two capitalised words before the suffix: the verb, then the
+    // subject. "ExportAction" alone says nothing about the use case.
+    expect(class_basename($action))->toMatch('/^[A-Z][a-z]+[A-Z][A-Za-z0-9]*Action$/');
+})->with($actions);
+
+it('exposes execute() as its only public method', function (string $action) {
+    $publicMethods = array_values(array_filter(
+        array_map(
+            fn (ReflectionMethod $method): string => $method->getName(),
+            (new ReflectionClass($action))->getMethods(ReflectionMethod::IS_PUBLIC),
+        ),
+        fn (string $name): bool => $name !== '__construct',
+    ));
+
+    // A second public method is a second use case: it belongs to another action.
+    expect($publicMethods)->toBe(['execute'], "{$action} must expose only execute(), it exposes: ".implode(', ', $publicMethods));
+})->with($actions);

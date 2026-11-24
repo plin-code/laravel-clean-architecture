@@ -1,0 +1,106 @@
+<?php
+
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Mail\Mailable;
+use Illuminate\Notifications\Notification;
+
+require_once __DIR__.'/Classes.php';
+
+/*
+|--------------------------------------------------------------------------
+| Layers
+|--------------------------------------------------------------------------
+|
+| Dependencies point inward. The domain layer knows nothing about the other
+| two, the application layer knows the domain, and the infrastructure layer
+| knows both. Every other rule of the architecture rests on this one.
+|
+| Each test lists all the classes that break the rule, so one run shows
+| the whole work to do.
+|
+*/
+
+/**
+ * Infrastructure namespaces the application layer may import, taken from
+ * validation.application_infrastructure_allowed when this file was written.
+ *
+ * @var list<string>
+ */
+$applicationMayImport = [{{ApplicationInfrastructureAllowed}}];
+
+[, $applicationNamespace] = cleanArchLayer('application');
+[, $infrastructureNamespace] = cleanArchLayer('infrastructure');
+
+$isIn = fn (string $name, string $namespace): bool => $name === $namespace || str_starts_with($name, $namespace.'\\');
+
+/**
+ * Classes of a layer that refer to a name the callback forbids, as lines
+ * ready for the failure message.
+ *
+ * @return list<string>
+ */
+$forbiddenUses = function (string $layer, Closure $isForbidden): array {
+    $found = [];
+
+    foreach (cleanArchClassesIn($layer) as $class) {
+        foreach (cleanArchNamesUsedBy($layer, $class) as $name) {
+            if ($isForbidden($name)) {
+                $found[] = "{$class} uses {$name}";
+            }
+        }
+    }
+
+    return $found;
+};
+
+it('keeps the domain layer free of the application layer', function () use ($forbiddenUses, $isIn, $applicationNamespace) {
+    $found = $forbiddenUses('domain', fn (string $name): bool => $isIn($name, $applicationNamespace));
+
+    expect($found)->toBe([], implode("\n", $found));
+});
+
+it('keeps the domain layer free of the infrastructure layer', function () use ($forbiddenUses, $isIn, $infrastructureNamespace) {
+    $found = $forbiddenUses('domain', fn (string $name): bool => $isIn($name, $infrastructureNamespace));
+
+    expect($found)->toBe([], implode("\n", $found));
+});
+
+it('keeps the application layer free of the infrastructure layer', function () use ($forbiddenUses, $isIn, $infrastructureNamespace, $applicationMayImport) {
+    $found = $forbiddenUses('application', function (string $name) use ($isIn, $infrastructureNamespace, $applicationMayImport): bool {
+        foreach ($applicationMayImport as $allowed) {
+            if ($isIn($name, $allowed)) {
+                return false;
+            }
+        }
+
+        return $isIn($name, $infrastructureNamespace);
+    });
+
+    expect($found)->toBe([], implode("\n", $found));
+});
+
+it('keeps observers out of the domain layer', function () {
+    // An observer reacts to framework events and is registered in a service
+    // provider: the model of the domain must not know who observes it.
+    $found = array_values(array_filter(
+        cleanArchClassesIn('domain'),
+        fn (string $class): bool => str_ends_with($class, 'Observer'),
+    ));
+
+    expect($found)->toBe([], implode("\n", $found));
+});
+
+it('keeps queued jobs out of the infrastructure layer', function () {
+    // A queued job orchestrates a use case, so it belongs to the application
+    // layer. Queued mail and notifications implement ShouldQueue too, and
+    // they do belong here.
+    $found = array_values(array_filter(
+        cleanArchClassesIn('infrastructure'),
+        fn (string $class): bool => class_exists($class)
+            && is_subclass_of($class, ShouldQueue::class)
+            && ! is_subclass_of($class, Mailable::class)
+            && ! is_subclass_of($class, Notification::class),
+    ));
+
+    expect($found)->toBe([], implode("\n", $found));
+});
