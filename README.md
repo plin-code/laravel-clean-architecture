@@ -36,10 +36,11 @@ composer require plin-code/laravel-clean-architecture
 
 ## 📚 Documentation
 
-This README covers installation, the commands and the structure they generate. Three guides go deeper:
+This README covers installation, the commands and the structure they generate. Four guides go deeper:
 
 - [Moving an existing app into the layers](docs/migrating-an-existing-app.md): `--user-in-domain`, `--migrate-app`, and what to check on an app already in production.
 - [Architecture validation](docs/architecture-validation.md): the phparkitect rules, the autoload guard and the baseline.
+- [Architecture tests](docs/architecture-tests.md): Pest tests to copy for what the import rules cannot see, such as the shape of actions and listeners.
 - [Configuration](docs/configuration.md): every key of `config/clean-architecture.php`.
 
 ## 🎯 Usage
