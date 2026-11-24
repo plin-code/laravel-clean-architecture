@@ -14,10 +14,10 @@ describe('MakeArchTestsCommand', function () {
         File::delete(base_path('phpunit.xml'));
     });
 
-    it('writes the helper and the three tests as valid php', function () {
+    it('writes the helper and the four tests as valid php', function () {
         $this->artisan('clean-arch:make-arch-tests')->assertExitCode(0);
 
-        foreach (['Classes.php', 'ActionsTest.php', 'ListenersTest.php', 'RequestsTest.php'] as $file) {
+        foreach (['Classes.php', 'LayersTest.php', 'ActionsTest.php', 'ListenersTest.php', 'RequestsTest.php'] as $file) {
             $contents = File::get("{$this->directory}/{$file}");
 
             expect(token_get_all($contents, TOKEN_PARSE))->toBeArray()
@@ -34,6 +34,29 @@ describe('MakeArchTestsCommand', function () {
         expect(File::get("{$this->directory}/Classes.php"))
             ->toContain("'domain' => ['app/Domain', 'Shop\\Domain']")
             ->toContain("'application' => ['app/UseCases', 'Shop\\UseCases']");
+    });
+
+    it('writes no allowed infrastructure namespace by default', function () {
+        $this->artisan('clean-arch:make-arch-tests')->assertExitCode(0);
+
+        expect(File::get("{$this->directory}/LayersTest.php"))->toContain('$applicationMayImport = [];');
+    });
+
+    it('writes the allowed infrastructure namespaces into the layers test', function () {
+        config()->set('clean-architecture.validation.application_infrastructure_allowed', ['Mail', 'Notifications']);
+
+        $this->artisan('clean-arch:make-arch-tests')->assertExitCode(0);
+
+        expect(File::get("{$this->directory}/LayersTest.php"))
+            ->toContain("\$applicationMayImport = ['App\\\\Infrastructure\\\\Mail', 'App\\\\Infrastructure\\\\Notifications'];");
+    });
+
+    it('rejects an invalid infrastructure allowlist without writing the tests', function () {
+        config()->set('clean-architecture.validation.application_infrastructure_allowed', 'Mail');
+
+        $this->artisan('clean-arch:make-arch-tests')->assertExitCode(1);
+
+        expect(File::exists($this->directory))->toBeFalse();
     });
 
     it('skips an existing test without force and still writes the others', function () {

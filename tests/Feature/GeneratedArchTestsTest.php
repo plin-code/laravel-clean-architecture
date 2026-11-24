@@ -53,9 +53,35 @@ describe('Generated architecture tests', function () {
         File::deleteDirectory(archTestsFixture() . '/tests');
     });
 
-    it('fails on the four classes of the fixture that break a convention', function () {
+    it('fails on every rule the fixture breaks and on nothing else', function () {
         expect($this->result['exitCode'])->toBe(1)
-            ->and($this->result['output'])->toContain('4 failed, 6 passed');
+            ->and($this->result['output'])->toContain('9 failed, 6 passed');
+    });
+
+    it('reports a domain class that uses the other layers, through an alias or a full name', function () {
+        expect($this->result['output'])
+            ->toContain('Domain\Products\Catalog uses ArchTestsFixture\Application\Actions\Products\PublishProductAction')
+            ->toContain('Domain\Products\Catalog uses ArchTestsFixture\Infrastructure\Mail\ProductPublishedMail');
+    });
+
+    it('does not take a layer named in a comment or a string for a dependency', function () {
+        expect($this->result['output'])->not->toContain('Domain\Products\Product uses');
+    });
+
+    it('reports every infrastructure import of the application layer, grouped imports too', function () {
+        expect($this->result['output'])
+            ->toContain('ProductService uses ArchTestsFixture\Infrastructure\Http\Requests\StoreProductRequest')
+            ->toContain('ProductService uses ArchTestsFixture\Infrastructure\Mail\ProductPublishedMail');
+    });
+
+    it('reports an observer in the domain layer', function () {
+        expect($this->result['output'])->toContain("0 => 'ArchTestsFixture\Domain\Products\ProductObserver'");
+    });
+
+    it('reports a queued job in the infrastructure layer, not a queued mail', function () {
+        expect($this->result['output'])
+            ->toContain("0 => 'ArchTestsFixture\Infrastructure\Jobs\SyncProductsJob'")
+            ->not->toContain("=> 'ArchTestsFixture\Infrastructure\Mail\ProductPublishedMail'");
     });
 
     it('reports an action that is not named after a verb and a subject', function () {
@@ -84,7 +110,7 @@ describe('Generated architecture tests', function () {
     it('reports a form request without rules', function () {
         expect($this->result['output'])
             ->toContain('UpdateProductRequest has no rules(): it validates nothing')
-            ->not->toContain('StoreProductRequest');
+            ->not->toContain('StoreProductRequest has no rules()');
     });
 });
 
@@ -102,6 +128,20 @@ it('passes on a project that has no listeners yet', function () {
     }
 
     expect($result['output'])
-        ->toContain('3 failed, 5 passed')
+        ->toContain('8 failed, 5 passed')
         ->not->toContain('ListenersTest');
+});
+
+it('lets the application import an allowed infrastructure namespace', function () {
+    config()->set('clean-architecture.validation.application_infrastructure_allowed', ['Mail']);
+
+    try {
+        $result = runGeneratedArchTests();
+    } finally {
+        File::deleteDirectory(archTestsFixture() . '/tests');
+    }
+
+    expect($result['output'])
+        ->toContain('ProductService uses ArchTestsFixture\\Infrastructure\\Http\\Requests\\StoreProductRequest')
+        ->not->toContain('ProductService uses ArchTestsFixture\\Infrastructure\\Mail');
 });

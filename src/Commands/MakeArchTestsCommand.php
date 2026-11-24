@@ -4,30 +4,34 @@ namespace PlinCode\LaravelCleanArchitecture\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use PlinCode\LaravelCleanArchitecture\Concerns\BuildsArchRules;
 use PlinCode\LaravelCleanArchitecture\Concerns\RendersStubs;
 use PlinCode\LaravelCleanArchitecture\Concerns\ResolvesArchitectureDirectories;
 use PlinCode\LaravelCleanArchitecture\Concerns\WritesFiles;
 
 /**
- * Write Pest tests for the conventions the layer rules cannot see.
+ * Write the architecture rules as Pest tests.
  *
- * phparkitect checks what a class imports. It says nothing about the shape
+ * LayersTest checks the direction of the dependencies, as the rules of
+ * clean-arch:make-arch-rules do, for an application that would rather run
+ * one tool. The other tests check what an import rule cannot see, the shape
  * of a class that sits in the right layer: an action with five public
  * methods, a listener that holds a whole use case, a form request without
- * rules. These tests read the classes from disk and check that shape.
+ * rules.
  *
  * The package does not depend on Pest and does not run it: the files belong
  * to the application, which edits them as its conventions grow.
  */
 class MakeArchTestsCommand extends Command
 {
+    use BuildsArchRules;
     use RendersStubs;
     use ResolvesArchitectureDirectories;
     use WritesFiles;
 
     protected $signature = 'clean-arch:make-arch-tests {--force : Overwrite the existing tests}';
 
-    protected $description = 'Generate Pest tests for the conventions of actions, listeners and form requests';
+    protected $description = 'Generate Pest tests for the layer rules and the conventions of actions, listeners and form requests';
 
     /**
      * File written under tests/Arch, and the stub it comes from.
@@ -36,6 +40,7 @@ class MakeArchTestsCommand extends Command
      */
     protected array $tests = [
         'Classes.php'       => 'arch-tests-classes',
+        'LayersTest.php'    => 'arch-tests-layers',
         'ActionsTest.php'   => 'arch-tests-actions',
         'ListenersTest.php' => 'arch-tests-listeners',
         'RequestsTest.php'  => 'arch-tests-requests',
@@ -53,6 +58,12 @@ class MakeArchTestsCommand extends Command
     {
         $this->resolveForce();
 
+        if (($error = $this->allowlistError()) !== null) {
+            $this->error($error);
+
+            return self::FAILURE;
+        }
+
         $this->files->ensureDirectoryExists(base_path('tests/Arch'));
 
         foreach ($this->tests as $file => $stub) {
@@ -67,17 +78,22 @@ class MakeArchTestsCommand extends Command
     }
 
     /**
-     * Fill the layer directories. The layer namespaces are filled by
+     * Fill the layer directories and the infrastructure namespaces the
+     * application layer may import. The layer namespaces are filled by
      * getStub() as in every other stub.
      */
     protected function renderTest(string $stub): string
     {
         return str_replace(
-            ['{{DomainDirectory}}', '{{ApplicationDirectory}}', '{{InfrastructureDirectory}}'],
+            ['{{DomainDirectory}}', '{{ApplicationDirectory}}', '{{InfrastructureDirectory}}', '{{ApplicationInfrastructureAllowed}}'],
             [
                 $this->layerDirectory('domain'),
                 $this->layerDirectory('application'),
                 $this->layerDirectory('infrastructure'),
+                implode(', ', array_map(
+                    $this->archLiteral(...),
+                    $this->allowedInfrastructureNamespaces($this->archNamespace('infrastructure'))
+                )),
             ],
             $this->getStub($stub)
         );
